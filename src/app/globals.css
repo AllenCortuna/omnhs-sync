@@ -1,0 +1,135 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Martian+Mono:wght@200;400;500;600;700&display=swap");
+/* @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap&display=swap');
+@font-face {
+  font-family: 'Bernard MT';
+  src: url('/font/bernardMT.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+} */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+.martian-mono {
+    font-family: "Martian Mono", monospace;
+}
+
+.roboto-mono {
+    font-family: "Roboto Mono", monospace;
+}
+
+.courier-prime {
+    font-family: "Courier Prime", monospace;
+}
+
+.bernard-mt {
+    font-family: "Bernard MT", serif;
+}
+
+@layer utilities {
+    .h1 {
+        @apply text-2xl font-bold text-primary;
+    }
+    .h2 {
+        @apply text-xl font-bold text-primary;
+    }
+    .h3 {
+        @apply text-lg font-bold text-primary;
+    }
+    .h4 {
+        @apply text-sm font-bold text-primary;
+    }
+    .p-xs {
+        @apply text-xs font-medium text-zinc-500;
+    }
+    .p-xxs {
+        @apply text-[11px] font-medium text-zinc-500;
+    }
+    .custom-input {
+        @apply input input-sm text-xs text-zinc-700 input-bordered bg-zinc-50 focus:outline-primary focus:border-zinc-100;
+    }
+    .custom-textarea {
+        @apply textarea textarea-bordered w-auto resize-none text-xs bg-zinc-50 focus:outline-primary focus:border-primary;
+    }
+    .primary-text {
+        @apply text-xs text-zinc-500;
+    }
+    .highligth-text {
+        @apply text-xs text-zinc-600 font-semibold;
+    }
+    .check-label {
+        @apply flex items-center gap-2 text-xs text-zinc-600 rounded-md p-2 border border-zinc-300;
+    }
+    .nav-btn {
+        @apply relative text-zinc-600 text-xs leading-6 py-1 px-2 bg-transparent hover:bg-transparent cursor-pointer font-normal hover:bg-neutral hover:text-white;
+    }
+    .nav-btn-active {
+        @apply relative text-xs leading-6 py-1 px-2 bg-transparent bg-[#f97316] cursor-pointer font-normal text-white;
+    }
+}
+
+body {
+    --sb-track-color: #cccccc;
+    --sb-thumb-color: #5e776a;
+    --sb-size: 5px;
+}
+
+body::-webkit-scrollbar {
+    width: var(--sb-size);
+}
+
+body::-webkit-scrollbar-track {
+    background: var(--sb-track-color);
+    border-radius: 3px;
+}
+
+body::-webkit-scrollbar-thumb {
+    background: var(--sb-thumb-color);
+    border-radius: 3px;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+    body {
+        scrollbar-color: var(--sb-thumb-color) var(--sb-track-color);
+    }
+}
+
+::selection {
+    background: #414a5b; /* Background color */
+    color: rgb(255, 255, 255); /* Text color */
+}
+
+/* Hide the spin buttons in Chrome, Safari, Edge, and Opera */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Hide the spin buttons in Firefox */
+input[type="number"] {
+    appearance: textfield;
+}
+
+/* Brutalist border utility */
+.brutal-border {
+    border: 4px solid #343a40 !important;
+    box-shadow: 4px 4px 0 #73946b, 0 0 0 2px #343a40;
+}
+
+/* Brutalist list item utility */
+.brutal-list {
+    border-left: 4px solid #537d5d;
+    padding-left: 0.75rem;
+    background: #f3f4f6;
+    margin-left: -1.5rem;
+    font-family: monospace;
+}
