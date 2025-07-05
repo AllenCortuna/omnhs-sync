@@ -264,7 +264,7 @@ const CreateStudent: React.FC = () => {
 
     // JSX Rendering
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 text-zinc-700">
+        <div className="min-h-screen overflow-scroll flex items-center justify-center p-4 text-zinc-700">
             <div className="card w-full max-w-2xl bg-base-100 shadow-xl">
                 <div className="card-body border">
                     {/* Card Header: Icon and Title */}
@@ -548,14 +548,7 @@ const CreateStudent: React.FC = () => {
                             <CreateButton loading={loading} />
                         </div>
                     </form>
-                    {/* Card Footer */}
-                    <div className="divider mt-4 mb-2"></div>
-                    <div className="text-center">
-                        <p className="text-[10px] text-base-content/60">
-                            Admin Panel - Account Management
-                        </p>
                     </div>
-                </div>
             </div>
         </div>
     );
