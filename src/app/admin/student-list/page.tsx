@@ -1,6 +1,7 @@
 "use client";
 // React and Firebase imports
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
     collection,
     getDocs,
@@ -10,7 +11,7 @@ import {
 import { db } from "../../../../firebase";
 
 // Component imports
-import { LoadingOverlay } from "../../../components/common";
+import { LoadingOverlay} from "../../../components/common";
 
 // Icon imports from react-icons
 import {
@@ -18,13 +19,12 @@ import {
     MdPerson,
     MdEmail,
     MdSchool,
-    MdCalendarToday,
-    MdLocationOn,
     MdRefresh,
 } from "react-icons/md";
 
 // Toast imports
 import { errorToast } from "../../../../config/toast";
+import { Student } from "@/interface/user";
 
 /**
  * @file StudentList.tsx - Admin page for displaying list of students
@@ -45,20 +45,6 @@ import { errorToast } from "../../../../config/toast";
  * @requires ../../../../firebase
  */
 
-interface Student {
-    uid: string;
-    email: string;
-    studentID: string;
-    firstName: string;
-    lastName: string;
-    middleName: string;
-    suffix?: string;
-    gender: string;
-    birthDate: string;
-    address: string;
-    createdAt: string;
-    role: string;
-}
 
 /**
  * StudentList Component
@@ -66,6 +52,7 @@ interface Student {
  * @returns {JSX.Element} The rendered StudentList component
  */
 const StudentList: React.FC = () => {
+    const router = useRouter();
     // State for students data
     const [students, setStudents] = useState<Student[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -87,7 +74,7 @@ const StudentList: React.FC = () => {
             
             const studentsData: Student[] = [];
             querySnapshot.forEach((doc) => {
-                studentsData.push({ uid: doc.id, ...doc.data() } as Student);
+                studentsData.push({ ...doc.data() } as Student);
             });
             
             setStudents(studentsData);
@@ -114,11 +101,11 @@ const StudentList: React.FC = () => {
         const filtered = students.filter((student) => {
             const searchLower = searchTerm.toLowerCase();
             return (
-                student.firstName.toLowerCase().includes(searchLower) ||
-                student.lastName.toLowerCase().includes(searchLower) ||
-                student.middleName.toLowerCase().includes(searchLower) ||
-                student.email.toLowerCase().includes(searchLower) ||
-                student.studentID.toLowerCase().includes(searchLower)
+                student.firstName?.toLowerCase().includes(searchLower) ||
+                student.lastName?.toLowerCase().includes(searchLower) ||
+                student.middleName?.toLowerCase().includes(searchLower) ||
+                student.email?.toLowerCase().includes(searchLower) ||
+                student.studentId.toLowerCase().includes(searchLower)
             );
         });
 
@@ -167,9 +154,8 @@ const StudentList: React.FC = () => {
     const getFullName = (student: Student): string => {
         const parts = [
             student.firstName,
-            student.middleName,
+            student.middleName?.charAt(0) + ".",
             student.lastName,
-            student.suffix,
         ].filter(Boolean);
         return parts.join(" ");
     };
@@ -196,85 +182,81 @@ const StudentList: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen p-4 text-zinc-700">
+        <div className="min-h-screen p-2 text-zinc-700">
             <div className="max-w-7xl mx-auto">
+                    <button
+                        onClick={() => router.push("/admin/create-student")}
+                        className="btn btn-primary shadow-lg text-white fixed bottom-10 right-10"
+                    >
+                        Create Student
+                    </button>
                 {/* Header */}
-                <div className="mb-6">
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div className="flex items-center gap-3">
+                <div className="mb-4">
+                    <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
                             <div className="avatar placeholder">
-                                <div className="bg-primary text-primary-content rounded-full w-10 h-10 flex items-center justify-center">
-                                    <MdSchool className="text-xl" />
+                                <div className="bg-primary text-primary-content rounded-lg w-8 h-8 flex items-center justify-center">
+                                    <MdSchool className="text-lg" />
                                 </div>
                             </div>
                             <div>
-                                <h1 className="text-2xl font-bold">Student List</h1>
-                                <p className="text-sm text-base-content/60">
-                                    Manage and view all student accounts
-                                </p>
+                                <h1 className="text-lg font-bold">Student List</h1>
+                                <p className="text-xs text-base-content/60">Manage student accounts</p>
                             </div>
                         </div>
                         
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={fetchStudents}
-                                className="btn btn-outline btn-sm"
-                                disabled={loading}
-                            >
-                                <MdRefresh className="text-lg" />
-                                Refresh
-                            </button>
-                        </div>
+                        <button
+                            onClick={fetchStudents}
+                            className="btn btn-outline btn-xs"
+                            disabled={loading}
+                        >
+                            <MdRefresh className="text-sm" />
+                            Refresh
+                        </button>
                     </div>
                 </div>
 
                 {/* Search and Stats */}
-                <div className="card bg-base-100 shadow-sm mb-6">
-                    <div className="card-body">
-                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-                            {/* Search Form */}
-                            <form onSubmit={handleSearchSubmit} className="flex-1 max-w-md">
-                                <div className="join w-full">
-                                    <div className="join-item flex-1">
-                                        <input
-                                            type="text"
-                                            placeholder="Search by name, email, or student ID..."
-                                            className="input input-bordered join-item w-full"
-                                            value={searchTerm}
-                                            onChange={handleSearchChange}
-                                        />
-                                    </div>
+                <div className="card bg-base-100 shadow-sm mb-4 p-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                        {/* Search Form */}
+                        <form onSubmit={handleSearchSubmit} className="flex-1">
+                            <div className="join w-full">
+                                <input
+                                    type="text"
+                                    placeholder="Search students..."
+                                    className="input input-sm input-bordered join-item w-full"
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                />
+                                <button
+                                    type="submit"
+                                    className="btn btn-primary btn-sm join-item"
+                                    disabled={loading}
+                                >
+                                    <MdSearch className="text-sm" />
+                                </button>
+                                {searchTerm && (
                                     <button
-                                        type="submit"
-                                        className="btn btn-primary join-item"
-                                        disabled={loading}
+                                        type="button"
+                                        onClick={clearSearch}
+                                        className="btn btn-outline btn-sm join-item"
                                     >
-                                        <MdSearch className="text-lg" />
+                                        Clear
                                     </button>
-                                    {searchTerm && (
-                                        <button
-                                            type="button"
-                                            onClick={clearSearch}
-                                            className="btn btn-outline join-item"
-                                        >
-                                            Clear
-                                        </button>
-                                    )}
-                                </div>
-                            </form>
+                                )}
+                            </div>
+                        </form>
 
-                            {/* Stats */}
-                            <div className="stats stats-horizontal shadow">
-                                <div className="stat">
-                                    <div className="stat-title text-xs">Total Students</div>
-                                    <div className="stat-value text-lg">{totalStudents}</div>
-                                </div>
-                                <div className="stat">
-                                    <div className="stat-title text-xs">Showing</div>
-                                    <div className="stat-value text-lg">
-                                        {filteredStudents.length}
-                                    </div>
-                                </div>
+                        {/* Stats */}
+                        <div className="stats stats-horizontal shadow-sm text-xs">
+                            <div className="stat py-1 px-2">
+                                <div className="stat-title text-xs">Total</div>
+                                <div className="stat-value text-sm">{totalStudents}</div>
+                            </div>
+                            <div className="stat py-1 px-2">
+                                <div className="stat-title text-xs">Showing</div>
+                                <div className="stat-value text-sm">{filteredStudents.length}</div>
                             </div>
                         </div>
                     </div>
@@ -284,78 +266,65 @@ const StudentList: React.FC = () => {
                 <div className="card bg-base-100 shadow-sm">
                     <div className="card-body p-0">
                         {currentStudents.length === 0 ? (
-                            <div className="p-8 text-center">
-                                <MdPerson className="text-6xl text-base-content/20 mx-auto mb-4" />
-                                <h3 className="text-lg font-semibold mb-2">
+                            <div className="p-4 text-center">
+                                <MdPerson className="text-4xl text-base-content/20 mx-auto mb-2" />
+                                <h3 className="text-sm font-semibold mb-1">
                                     {searchTerm ? "No students found" : "No students yet"}
                                 </h3>
-                                <p className="text-base-content/60">
-                                    {searchTerm
-                                        ? "Try adjusting your search terms"
-                                        : "Students will appear here once they are created"}
+                                <p className="text-xs text-base-content/60">
+                                    {searchTerm ? "Try adjusting your search" : "Students will appear here"}
                                 </p>
                             </div>
                         ) : (
                             <>
                                 <div className="overflow-x-auto">
-                                    <table className="table table-zebra w-full">
+                                    <table className="table table-zebra table-sm w-full">
                                         <thead>
                                             <tr>
-                                                <th className="bg-base-200">Student</th>
-                                                <th className="bg-base-200">Contact</th>
-                                                <th className="bg-base-200">Details</th>
-                                                <th className="bg-base-200">Created</th>
+                                                <th className="bg-base-200 text-xs">Student</th>
+                                                <th className="bg-base-200 text-xs">Contact</th>
+                                                <th className="bg-base-200 text-xs">Details</th>
+                                                <th className="bg-base-200 text-xs">Created</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
+                                        <tbody className="text-xs">
                                             {currentStudents.map((student) => (
-                                                <tr key={student.uid} className="hover">
+                                                <tr key={student.studentId} className="hover">
                                                     <td>
-                                                        <div className="flex items-center gap-3">
+                                                        <div className="flex items-center gap-2">
                                                             <div className="avatar placeholder">
-                                                                <div className="bg-primary text-primary-content rounded-full w-10 h-10">
-                                                                    <span className="text-sm font-semibold">
-                                                                        {student.firstName.charAt(0)}
-                                                                        {student.lastName.charAt(0)}
+                                                                <div className="bg-primary text-primary-content rounded-lg w-7 h-7">
+                                                                    <span className="text-xs">
+                                                                        {student.firstName?.charAt(0)}
+                                                                        {student.lastName?.charAt(0)}
                                                                     </span>
                                                                 </div>
                                                             </div>
                                                             <div>
-                                                                <div className="font-semibold">
-                                                                    {getFullName(student)}
-                                                                </div>
-                                                                <div className="text-sm text-base-content/60">
-                                                                    ID: {student.studentID}
+                                                                <div className="font-medium">{getFullName(student)}</div>
+                                                                <div className="text-xs text-base-content/60">
+                                                                    ID: {student.studentId}
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div className="flex items-center gap-2 text-sm">
-                                                            <MdEmail className="text-base-content/60" />
-                                                            <span className="font-mono">
-                                                                {student.email}
-                                                            </span>
+                                                        <div className="flex items-center gap-1">
+                                                            <MdEmail className="text-base-content/60 text-xs" />
+                                                            <span className="text-xs">{student.email}</span>
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div className="space-y-1 text-sm">
-                                                            <div className="flex items-center gap-2">
-                                                                <MdCalendarToday className="text-base-content/60" />
-                                                                <span>
-                                                                    {formatDate(student.birthDate)} • {student.gender}
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex items-center gap-2">
-                                                                <MdLocationOn className="text-base-content/60" />
-                                                                <span className="truncate max-w-xs">
-                                                                    {student.address}
+                                                        <div className="space-y-0.5">
+                                                            <div className="flex items-center gap-1">
+                                                                <span className="text-xs">
+                                                                {student.sex}
                                                                 </span>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div className="text-sm text-base-content/60">
+                                                        <div className="text-xs text-base-content/60">
                                                             {formatDate(student.createdAt)}
                                                         </div>
                                                     </td>
@@ -367,10 +336,10 @@ const StudentList: React.FC = () => {
 
                                 {/* Pagination */}
                                 {totalPages > 1 && (
-                                    <div className="flex justify-center p-4 border-t">
+                                    <div className="flex justify-center p-2 border-t">
                                         <div className="join">
                                             <button
-                                                className="join-item btn btn-sm"
+                                                className="join-item btn btn-xs"
                                                 onClick={() => setCurrentPage(currentPage - 1)}
                                                 disabled={currentPage === 1}
                                             >
@@ -379,7 +348,7 @@ const StudentList: React.FC = () => {
                                             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                                                 <button
                                                     key={page}
-                                                    className={`join-item btn btn-sm ${
+                                                    className={`join-item btn btn-xs ${
                                                         currentPage === page ? "btn-active" : ""
                                                     }`}
                                                     onClick={() => setCurrentPage(page)}
@@ -388,7 +357,7 @@ const StudentList: React.FC = () => {
                                                 </button>
                                             ))}
                                             <button
-                                                className="join-item btn btn-sm"
+                                                className="join-item btn btn-xs"
                                                 onClick={() => setCurrentPage(currentPage + 1)}
                                                 disabled={currentPage === totalPages}
                                             >

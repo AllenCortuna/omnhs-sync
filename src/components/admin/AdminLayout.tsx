@@ -143,16 +143,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <div className="p-4 border-t border-primary-content/20 space-y-4">
           <button
             onClick={handleLogout}
-            className="flex items-center gap-4 p-4 rounded-xl text-white hover:bg-white/20 transition-all duration-200 group w-full"
+            className="flex w-full items-center gap-4 p-4 rounded-xl transition-all duration-200 group relative text-primary hover:bg-primary hover:text-white"
           >
-            <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-colors">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors group-hover:text-white bg-primary/20 group-hover:bg-primary-dark">
               <HiLogout className="w-5 h-5" />
             </div>
-            <span className="truncate font-medium">Logout</span>
+            <span className="truncate font-normal text-primary group-hover:text-white">Logout</span>
           </button>
-          <div className="text-center text-primary-content/60 text-sm">
-            Secure Admin Access
-          </div>
         </div>
       </div>
 

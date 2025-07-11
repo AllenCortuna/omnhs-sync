@@ -20,10 +20,10 @@ export interface Teacher {
 
 export interface Student {
     studentId: string;
-    email: string;
+    email?: string;
     createdAt: string;
-    lastLoginAt: string;
-    profileRef: string; // reference to the student's profile in storage
+    lastLoginAt?: string;
+    profileRef?: string; // reference to the student's profile in storage
     contactNumber?: string;
     address?: string;
     firstName?: string;
