@@ -86,14 +86,14 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
           onClick={() => setIsMobileMenuOpen(false)}
           className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-200 group relative
             ${isActive
-              ? 'bg-accent text-white shadow font-semibold'
-              : 'text-accent hover:bg-accent/10 hover:text-accent-dark'
+              ? 'bg-primary text-white shadow font-semibold'
+              : 'text-primary hover:bg-primary/10 hover:text-primary-dark'
             }`}
         >
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors relative
             ${isActive
               ? 'bg-white/20 text-white'
-              : 'text-accent bg-accent/20 group-hover:text-accent-dark'
+              : 'text-primary bg-primary/20 group-hover:text-primary-dark'
             }`}
           >
             <Icon className="w-5 h-5" />
@@ -104,7 +104,7 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
               </div>
             )}
           </div>
-          <span className={`truncate font-normal ${isActive ? 'text-white martian-mono' : 'text-accent group-hover:text-accent-dark'}`}>{label}</span>
+          <span className={`truncate font-normal ${isActive ? 'text-white martian-mono' : 'text-primary group-hover:text-primary-dark'}`}>{label}</span>
         </Link>
       </li>
     );
@@ -115,7 +115,7 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
       {/* Mobile Menu Button */}
       <button 
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-lg bg-accent text-white"
+        className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-lg bg-primary text-white"
         aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
         aria-expanded={isMobileMenuOpen}
       >
@@ -129,14 +129,14 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
         }`}
       >
         {/* Header Section */}
-        <div className="p-6 border-b border-accent-content/20">
+        <div className="p-6 border-b border-primary-content/20">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-accent/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-              <HiAcademicCap className="w-6 h-6 text-accent" />
+            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <HiAcademicCap className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-accent martian-mono">OMNHS SYNC</h2>
-              <p className="text-accent text-sm">Teacher Portal</p>
+              <h2 className="text-xl font-bold text-primary martian-mono">OMNHS SYNC</h2>
+              <p className="text-primary text-sm">Teacher Portal</p>
             </div>
           </div>
         </div>
@@ -151,15 +151,15 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
         </div>
 
         {/* Footer Section with Logout */}
-        <div className="p-4 border-t border-accent-content/20 space-y-4">
+        <div className="p-4 border-t border-primary-content/20 space-y-4">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-4 p-4 rounded-xl transition-all duration-200 group relative text-accent hover:bg-accent hover:text-white"
+            className="flex w-full items-center gap-4 p-4 rounded-xl transition-all duration-200 group relative text-primary hover:bg-primary hover:text-white"
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors group-hover:text-white bg-accent/20 group-hover:bg-accent-dark">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors group-hover:text-white bg-primary/20 group-hover:bg-primary-dark">
               <HiLogout className="w-5 h-5" />
             </div>
-            <span className="truncate font-normal text-accent group-hover:text-white">Logout</span>
+            <span className="truncate font-normal text-primary group-hover:text-white">Logout</span>
           </button>
         </div>
       </div>

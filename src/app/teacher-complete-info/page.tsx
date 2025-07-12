@@ -40,7 +40,7 @@ const CompleteInfo = () => {
     const router = useRouter();
     const [formData, setFormData] = useState({
         employeeId: "",
-        contactNumber: "",
+        firstName: "",
     });
     const [loading, setLoading] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);
@@ -58,7 +58,7 @@ const CompleteInfo = () => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        if (formData.employeeId === "" || formData.contactNumber === "") {
+        if (formData.employeeId === "" || formData.firstName === "") {
             errorToast("Please fill all the fields");
             return;
         }
@@ -68,7 +68,7 @@ const CompleteInfo = () => {
             const q = query(
                 teacherRef,
                 where("employeeId", "==", formData.employeeId.toUpperCase()),
-                where("contactNumber", "==", formData.contactNumber)
+                where("firstName", "==", formData.firstName)
             );
             const querySnapshot = await getDocs(q);
 
@@ -119,7 +119,7 @@ const CompleteInfo = () => {
                     "==",
                     foundTeacherData.employeeId.toUpperCase()
                 ),
-                where("contactNumber", "==", foundTeacherData.contactNumber)
+                where("firstName", "==", foundTeacherData.firstName)
             );
             const querySnapshot = await getDocs(q);
 
@@ -136,7 +136,7 @@ const CompleteInfo = () => {
             successToast("Profile completed successfully!");
             // Reset form and found data
             router.push("/teachers/dashboard");
-            setFormData({ employeeId: "", contactNumber: "" });
+            setFormData({ employeeId: "", firstName: "" });
             setFoundTeacherData(null);
         } catch (error) {
             console.error("Error updating teacher profile:", error);
@@ -147,7 +147,7 @@ const CompleteInfo = () => {
     };
 
     const handleReset = () => {
-        setFormData({ employeeId: "", contactNumber: "" });
+        setFormData({ employeeId: "", firstName: "" });
         setFoundTeacherData(null);
     };
 
@@ -161,7 +161,7 @@ const CompleteInfo = () => {
                                 Complete Your Profile
                             </h1>
                             <p className="text-base-content/60 text-sm mt-2">
-                                Enter your employee ID and contact number to link
+                                Enter your employee ID and first name to link
                                 your account
                             </p>
                         </div>
@@ -197,22 +197,22 @@ const CompleteInfo = () => {
                                 <div className="form-control">
                                     <label
                                         className="label"
-                                        htmlFor="contactNumber"
+                                        htmlFor="firstName"
                                     >
                                         <span className="label-text font-medium">
-                                            Contact Number
+                                            First Name
                                         </span>
                                     </label>
                                     <FormInput
-                                        id="contactNumber"
-                                        name="contactNumber"
+                                        id="firstName"
+                                        name="firstName"
                                         type="text"
-                                        placeholder="Enter your contact number"
-                                        value={formData.contactNumber}
+                                        placeholder="Enter your first name"
+                                        value={formData.firstName}
                                         onChange={(e) =>
                                             setFormData({
                                                 ...formData,
-                                                contactNumber: e.target.value,
+                                                firstName: e.target.value,
                                             })
                                         }
                                         disabled={loading}

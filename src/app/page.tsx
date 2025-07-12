@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { signInWithEmailAndPassword, AuthError } from "firebase/auth";
-import { collection, query, where, getDocs, limit } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import {
     HiUser,
@@ -10,10 +9,8 @@ import {
     HiEyeOff,
     HiShieldCheck,
 } from "react-icons/hi";
-import { Admin } from "@/interface/user";
-import { auth, db } from "../../firebase";
+import { auth } from "../../firebase";
 import { successToast, errorToast } from "../config/toast";
-import { useUserDataStore, UserType } from "@/store/userDataStore";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -80,7 +77,6 @@ const LoginAdmin: React.FC = () => {
     // ========================================================================
 
     const router = useRouter();
-    const { setUserData } = useUserDataStore();
 
     // ========================================================================
     // EFFECTS
@@ -163,40 +159,41 @@ const LoginAdmin: React.FC = () => {
                 formData.password
             );
 
-            
-            // Step 2: Find user by email in Firestore
-            const accountsRef = collection(db, role);
-            const q = query(
-                accountsRef,
-                where("email", "==", formData.email),
-                limit(1)
-            );
-            console.log("query ===>", q);
+            // const { setUserData } = useUserDataStore();
 
-            let querySnapshot;
-            try {
-                querySnapshot = await getDocs(q);
-            } catch (firestoreError) {
-                console.error("Firestore connection error:", firestoreError);
-                errorToast(
-                    "Database connection error. Please check your internet connection and try again."
-                );
-                return;
-            }
+            // // Step 2: Find user by email in Firestore
+            // const accountsRef = collection(db, role);
+            // const q = query(
+            //     accountsRef,
+            //     where("email", "==", formData.email),
+            //     limit(1)
+            // );
+            // console.log("query ===>", q);
 
-            // Check if user exists
-            if (querySnapshot.empty) {
-                throw new Error("Account not found");
-            }
+            // let querySnapshot;
+            // try {
+            //     querySnapshot = await getDocs(q);
+            // } catch (firestoreError) {
+            //     console.error("Firestore connection error:", firestoreError);
+            //     errorToast(
+            //         "Database connection error. Please check your internet connection and try again."
+            //     );
+            //     return;
+            // }
 
-            // Step 3: Extract user data and validate email
-            const accountData = querySnapshot.docs[0].data() as Admin;
-            if (!accountData.email) {
-                throw new Error("Account not found");
-            }
+            // // Check if user exists
+            // if (querySnapshot.empty) {
+            //     throw new Error("Account not found");
+            // }
 
-            // Step 4: Save user data to global store and redirect based on role
-            setUserData(accountData, role as UserType);
+            // // Step 3: Extract user data and validate email
+            // const accountData = querySnapshot.docs[0].data() as Admin;
+            // if (!accountData.email) {
+            //     throw new Error("Account not found");
+            // }
+
+            // // Step 4: Save user data to global store and redirect based on role
+            // setUserData(accountData, role as UserType);
             successToast("Login successful! Redirecting...");
             router.push(`/${role}/dashboard`);
         } catch (err) {

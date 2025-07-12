@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useUserDataStore } from "@/store/userDataStore";
 import type { UserType } from "@/store/userDataStore";
 import LoadingOverlay from "./LoadingOverlay";
+import useSaveUserData from "@/hooks/useSaveUserData";
 
 interface RouteGuardProps {
   role: UserType | UserType[];
@@ -14,15 +15,25 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ role, children }) => {
   const router = useRouter();
   const pathname = usePathname();
   const { currentUserType } = useUserDataStore();
+  const { isLoading, error } = useSaveUserData();
 
   // Add loading state: if currentUserType is undefined (not null), show spinner
-  const isLoading = typeof currentUserType === 'undefined';
+  const isUserLoading = typeof currentUserType === 'undefined';
+  const isDataLoading = isLoading;
 
   // Normalize allowed roles to array
   const allowedRoles = useMemo(() => Array.isArray(role) ? role : [role], [role]);
 
   useEffect(() => {
-    if (isLoading) return;
+    if (isDataLoading || isUserLoading) return;
+    
+    // Handle errors
+    if (error) {
+      console.error('RouteGuard error:', error);
+      router.replace("/");
+      return;
+    }
+    
     // Not logged in
     if (!currentUserType) {
       if (pathname !== "/") {
@@ -34,9 +45,9 @@ const RouteGuard: React.FC<RouteGuardProps> = ({ role, children }) => {
     if (!allowedRoles.includes(currentUserType)) {
       router.replace(`/${currentUserType}/dashboard`);
     }
-  }, [currentUserType, allowedRoles, router, pathname, isLoading]);
+  }, [currentUserType, allowedRoles, router, pathname, isDataLoading, isUserLoading, error]);
 
-  if (isLoading) {
+  if (isDataLoading || isUserLoading) {
     return <LoadingOverlay />;
   }
 
