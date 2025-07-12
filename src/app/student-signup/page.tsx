@@ -155,7 +155,7 @@ const StudentSignup: React.FC = () => {
             successToast("Account created successfully! Please complete your profile.");
 
             // Redirect to complete-info page
-            router.push("/complete-info");
+            router.push("/student-complete-info");
         } catch (error) {
             console.error("Error creating account:", error);
 

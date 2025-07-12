@@ -13,14 +13,14 @@ const IncompleteRouteGuard: React.FC<IncompleteRouteGuardProps> = ({ children })
   const router = useRouter();
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
-  const [isStudent, setIsStudent] = useState(false);
+  const [isLogin, setIsLogin] = useState(false);
 
   useEffect(() => {
     setIsLoading(true);
     const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
       if (!user) {
         // Not logged in
-        setIsStudent(false);
+        setIsLogin(false);
         setIsLoading(false);
         if (pathname !== "/") router.replace("/");
         return;
@@ -37,7 +37,7 @@ const IncompleteRouteGuard: React.FC<IncompleteRouteGuardProps> = ({ children })
     return <LoadingOverlay />;
   }
 
-  if (!isStudent) {
+  if (!isLogin) {
     return null;
   }
 

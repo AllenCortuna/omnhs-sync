@@ -356,7 +356,7 @@ const LoginAdmin: React.FC = () => {
                                     onChange={(e) => setRole(e.target.value)}
                                 >
                                     <option value="admin">Admin</option>
-                                    <option value="teacher">Teacher</option>
+                                    <option value="teachers">Teacher</option>
                                     <option value="students">Student</option>
                                 </select>
                             </div>

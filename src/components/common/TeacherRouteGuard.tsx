@@ -37,7 +37,7 @@ const TeacherRouteGuard: React.FC<TeacherRouteGuardProps> = ({ children }) => {
       } else {
         setIsTeacher(false);
         // If not teacher, redirect to home
-        router.replace("/");
+        router.replace("/teacher-complete-info");
       }
       setIsLoading(false);
     });
