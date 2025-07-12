@@ -18,24 +18,24 @@ import {
     MdSearch,
     MdPerson,
     MdEmail,
-    MdSchool,
     MdRefresh,
+    MdWork,
 } from "react-icons/md";
 
 // Toast imports
 import { errorToast } from "../../../config/toast";
-import { Student } from "@/interface/user";
+import { Teacher } from "@/interface/user";
 
 /**
- * @file StudentList.tsx - Admin page for displaying list of students
- * @module StudentList
+ * @file TeacherList.tsx - Admin page for displaying list of teachers
+ * @module TeacherList
  * 
  * @description
- * This component provides a comprehensive view of all students in the system.
+ * This component provides a comprehensive view of all teachers in the system.
  * It handles:
- * 1. Fetching student data from Firestore
- * 2. Displaying students in a paginated table
- * 3. Search functionality by name, email, or student ID
+ * 1. Fetching teacher data from Firestore
+ * 2. Displaying teachers in a paginated table
+ * 3. Search functionality by name, email, or employee ID
  * 4. Sorting and filtering options
  * 5. Loading states and error handling
  *
@@ -47,69 +47,69 @@ import { Student } from "@/interface/user";
 
 
 /**
- * StudentList Component
- * Renders a table displaying all students with search and pagination
- * @returns {JSX.Element} The rendered StudentList component
+ * TeacherList Component
+ * Renders a table displaying all teachers with search and pagination
+ * @returns {JSX.Element} The rendered TeacherList component
  */
-const StudentList: React.FC = () => {
+const TeacherList: React.FC = () => {
     const router = useRouter();
-    // State for students data
-    const [students, setStudents] = useState<Student[]>([]);
+    // State for teachers data
+    const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>("");
-    const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
+    const [filteredTeachers, setFilteredTeachers] = useState<Teacher[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [studentsPerPage] = useState<number>(10);
-    const [totalStudents, setTotalStudents] = useState<number>(0);
+    const [teachersPerPage] = useState<number>(10);
+    const [totalTeachers, setTotalTeachers] = useState<number>(0);
 
     /**
-     * Fetches all students from Firestore
+     * Fetches all teachers from Firestore
      */
-    const fetchStudents = async (): Promise<void> => {
+    const fetchTeachers = async (): Promise<void> => {
         try {
             setLoading(true);
-            const studentsRef = collection(db, "students");
-            const q = query(studentsRef, orderBy("createdAt", "desc"));
+            const teachersRef = collection(db, "teachers");
+            const q = query(teachersRef, orderBy("createdAt", "desc"));
             const querySnapshot = await getDocs(q);
             
-            const studentsData: Student[] = [];
+            const teachersData: Teacher[] = [];
             querySnapshot.forEach((doc) => {
-                studentsData.push({ ...doc.data() } as Student);
+                teachersData.push({ ...doc.data() } as Teacher);
             });
             
-            setStudents(studentsData);
-            setFilteredStudents(studentsData);
-            setTotalStudents(studentsData.length);
+            setTeachers(teachersData);
+            setFilteredTeachers(teachersData);
+            setTotalTeachers(teachersData.length);
         } catch (error) {
-            console.error("Error fetching students:", error);
-            errorToast("Failed to load students. Please try again.");
+            console.error("Error fetching teachers:", error);
+            errorToast("Failed to load teachers. Please try again.");
         } finally {
             setLoading(false);
         }
     };
 
     /**
-     * Filters students based on search term
+     * Filters teachers based on search term
      */
-    const filterStudents = (): void => {
+    const filterTeachers = (): void => {
         if (!searchTerm.trim()) {
-            setFilteredStudents(students);
+            setFilteredTeachers(teachers);
             setCurrentPage(1);
             return;
         }
 
-        const filtered = students.filter((student) => {
+        const filtered = teachers.filter((teacher) => {
             const searchLower = searchTerm.toLowerCase();
             return (
-                student.firstName?.toLowerCase().includes(searchLower) ||
-                student.lastName?.toLowerCase().includes(searchLower) ||
-                student.middleName?.toLowerCase().includes(searchLower) ||
-                student.email?.toLowerCase().includes(searchLower) ||
-                student.studentId.toLowerCase().includes(searchLower)
+                teacher.firstName?.toLowerCase().includes(searchLower) ||
+                teacher.lastName?.toLowerCase().includes(searchLower) ||
+                teacher.middleName?.toLowerCase().includes(searchLower) ||
+                teacher.email?.toLowerCase().includes(searchLower) ||
+                teacher.employeeId.toLowerCase().includes(searchLower)
             );
         });
 
-        setFilteredStudents(filtered);
+        setFilteredTeachers(filtered);
         setCurrentPage(1);
     };
 
@@ -125,15 +125,15 @@ const StudentList: React.FC = () => {
      */
     const handleSearchSubmit = (e: React.FormEvent): void => {
         e.preventDefault();
-        filterStudents();
+        filterTeachers();
     };
 
     /**
-     * Clears search and resets to show all students
+     * Clears search and resets to show all teachers
      */
     const clearSearch = (): void => {
         setSearchTerm("");
-        setFilteredStudents(students);
+        setFilteredTeachers(teachers);
         setCurrentPage(1);
     };
 
@@ -149,33 +149,33 @@ const StudentList: React.FC = () => {
     };
 
     /**
-     * Gets full name of student
+     * Gets full name of teacher
      */
-    const getFullName = (student: Student): string => {
+    const getFullName = (teacher: Teacher): string => {
         const parts = [
-            student.firstName,
-            student.middleName?.charAt(0) + ".",
-            student.lastName,
+            teacher.firstName,
+            teacher.middleName?.charAt(0) + ".",
+            teacher.lastName,
         ].filter(Boolean);
         return parts.join(" ");
     };
 
     // Calculate pagination
-    const indexOfLastStudent = currentPage * studentsPerPage;
-    const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
-    const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
-    const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
+    const indexOfLastTeacher = currentPage * teachersPerPage;
+    const indexOfFirstTeacher = indexOfLastTeacher - teachersPerPage;
+    const currentTeachers = filteredTeachers.slice(indexOfFirstTeacher, indexOfLastTeacher);
+    const totalPages = Math.ceil(filteredTeachers.length / teachersPerPage);
 
-    // Fetch students on component mount
+    // Fetch teachers on component mount
     useEffect(() => {
-        fetchStudents();
+        fetchTeachers();
     }, []);
 
-    // Filter students when search term changes
+    // Filter teachers when search term changes
     useEffect(() => {
-        filterStudents();
+        filterTeachers();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchTerm, students]);
+    }, [searchTerm, teachers]);
 
     if (loading) {
         return <LoadingOverlay />;
@@ -184,29 +184,29 @@ const StudentList: React.FC = () => {
     return (
         <div className="min-h-screen p-2 text-zinc-700">
             <div className="max-w-7xl mx-auto">
-                    <button
-                        onClick={() => router.push("/admin/create-student")}
-                        className="btn btn-primary shadow-lg text-white fixed bottom-10 right-10"
-                    >
-                        Create Student
-                    </button>
+                <button
+                    onClick={() => router.push("/admin/create-teacher")}
+                    className="btn btn-accent shadow-lg text-white fixed bottom-10 right-10"
+                >
+                    Create Teacher
+                </button>
                 {/* Header */}
                 <div className="mb-4">
                     <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                             <div className="avatar placeholder">
-                                <div className="bg-primary text-primary-content rounded-lg w-8 h-8 flex items-center justify-center">
-                                    <MdSchool className="text-lg" />
+                                <div className="bg-accent text-accent-content rounded-lg w-8 h-8 flex items-center justify-center">
+                                    <MdWork className="text-lg" />
                                 </div>
                             </div>
                             <div>
-                                <h1 className="text-lg font-bold">Student List</h1>
-                                <p className="text-xs text-base-content/60">Manage student accounts</p>
+                                <h1 className="text-lg font-bold">Teacher List</h1>
+                                <p className="text-xs text-base-content/60">Manage teacher accounts</p>
                             </div>
                         </div>
                         
                         <button
-                            onClick={fetchStudents}
+                            onClick={fetchTeachers}
                             className="btn btn-outline btn-xs"
                             disabled={loading}
                         >
@@ -224,14 +224,14 @@ const StudentList: React.FC = () => {
                             <div className="join w-full">
                                 <input
                                     type="text"
-                                    placeholder="Search students..."
+                                    placeholder="Search teachers..."
                                     className="input input-sm input-bordered join-item w-full"
                                     value={searchTerm}
                                     onChange={handleSearchChange}
                                 />
                                 <button
                                     type="submit"
-                                    className="btn btn-primary btn-sm join-item"
+                                    className="btn btn-accent btn-sm join-item"
                                     disabled={loading}
                                 >
                                     <MdSearch className="text-sm" />
@@ -252,27 +252,27 @@ const StudentList: React.FC = () => {
                         <div className="stats stats-horizontal shadow-sm text-xs">
                             <div className="stat py-1 px-2">
                                 <div className="stat-title text-xs">Total</div>
-                                <div className="stat-value text-sm">{totalStudents}</div>
+                                <div className="stat-value text-sm">{totalTeachers}</div>
                             </div>
                             <div className="stat py-1 px-2">
                                 <div className="stat-title text-xs">Showing</div>
-                                <div className="stat-value text-sm">{filteredStudents.length}</div>
+                                <div className="stat-value text-sm">{filteredTeachers.length}</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Students Table */}
+                {/* Teachers Table */}
                 <div className="card bg-base-100 shadow-sm">
                     <div className="card-body p-0">
-                        {currentStudents.length === 0 ? (
+                        {currentTeachers.length === 0 ? (
                             <div className="p-4 text-center">
                                 <MdPerson className="text-4xl text-base-content/20 mx-auto mb-2" />
                                 <h3 className="text-sm font-semibold mb-1">
-                                    {searchTerm ? "No students found" : "No students yet"}
+                                    {searchTerm ? "No teachers found" : "No teachers yet"}
                                 </h3>
                                 <p className="text-xs text-base-content/60">
-                                    {searchTerm ? "Try adjusting your search" : "Students will appear here"}
+                                    {searchTerm ? "Try adjusting your search" : "Teachers will appear here"}
                                 </p>
                             </div>
                         ) : (
@@ -281,29 +281,29 @@ const StudentList: React.FC = () => {
                                     <table className="table table-zebra table-sm w-full">
                                         <thead>
                                             <tr>
-                                                <th className="bg-base-200 text-xs">Student</th>
+                                                <th className="bg-base-200 text-xs">Teacher</th>
                                                 <th className="bg-base-200 text-xs">Contact</th>
-                                                <th className="bg-base-200 text-xs">Details</th>
+                                                <th className="bg-base-200 text-xs">Position</th>
                                                 <th className="bg-base-200 text-xs">Created</th>
                                             </tr>
                                         </thead>
                                         <tbody className="text-xs">
-                                            {currentStudents.map((student) => (
-                                                <tr key={student.studentId} className="hover">
+                                            {currentTeachers.map((teacher) => (
+                                                <tr key={teacher.employeeId} className="hover">
                                                     <td>
                                                         <div className="flex items-center gap-2">
                                                             <div className="avatar placeholder">
-                                                                <div className="bg-primary text-primary-content rounded-lg w-7 h-7">
+                                                                <div className="bg-accent text-accent-content rounded-lg w-7 h-7">
                                                                     <span className="text-xs">
-                                                                        {student.firstName?.charAt(0)}
-                                                                        {student.lastName?.charAt(0)}
+                                                                        {teacher.firstName?.charAt(0)}
+                                                                        {teacher.lastName?.charAt(0)}
                                                                     </span>
                                                                 </div>
                                                             </div>
                                                             <div>
-                                                                <div className="font-medium">{getFullName(student)}</div>
+                                                                <div className="font-medium">{getFullName(teacher)}</div>
                                                                 <div className="text-xs text-base-content/60">
-                                                                    ID: {student.studentId}
+                                                                    ID: {teacher.employeeId}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -311,21 +311,12 @@ const StudentList: React.FC = () => {
                                                     <td>
                                                         <div className="flex items-center gap-1">
                                                             <MdEmail className="text-base-content/60 text-xs" />
-                                                            <span className="text-xs">{student.email}</span>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div className="space-y-0.5">
-                                                            <div className="flex items-center gap-1">
-                                                                <span className="text-xs">
-                                                                {student.sex}
-                                                                </span>
-                                                            </div>
+                                                            <span className="text-xs">{teacher.email}</span>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div className="text-xs text-base-content/60">
-                                                            {formatDate(student.createdAt)}
+                                                            {formatDate(teacher.createdAt)}
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -375,4 +366,4 @@ const StudentList: React.FC = () => {
     );
 };
 
-export default StudentList; 
+export default TeacherList; 

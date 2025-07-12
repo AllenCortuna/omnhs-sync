@@ -1,9 +1,9 @@
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
-import { Poppins } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 
-const font = Poppins({
+const font = Montserrat({
   subsets: ["latin"],
   weight: ["200", "400", "500", "600", "700"],
 });

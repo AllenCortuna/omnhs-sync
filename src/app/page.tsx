@@ -12,7 +12,7 @@ import {
 } from "react-icons/hi";
 import { Admin } from "@/interface/user";
 import { auth, db } from "../../firebase";
-import { successToast, errorToast } from "../../config/toast";
+import { successToast, errorToast } from "../config/toast";
 import { useUserDataStore, UserType } from "@/store/userDataStore";
 
 // ============================================================================

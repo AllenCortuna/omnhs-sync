@@ -10,12 +10,14 @@ export interface Admin {
 export interface Teacher {
     employeeId: string;
     email: string;
+    firstName: string;
+    lastName: string;
+    middleName?: string;
     createdAt: string;
     lastLoginAt: string;
     profileRef: string; // reference to the teacher's profile in storage
     contactNumber?: string;
     address?: string;
-    position?: string;
 }
 
 export interface Student {
@@ -46,4 +48,6 @@ export interface Student {
     guardianName?: string;
     guardianOccupation?: string;
     guardianContactNumber?: string;
+    profileComplete?: boolean;
+    updatedAt?: string;
 }

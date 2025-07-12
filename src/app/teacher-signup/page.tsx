@@ -14,19 +14,19 @@ import { successToast, errorToast } from "@/config/toast";
 
 // Icon imports from react-icons
 import {
-    MdPerson,
     MdEmail,
     MdLock,
     MdVisibility,
     MdVisibilityOff,
+    MdSchool,
 } from "react-icons/md";
 
 /**
- * @file StudentSignup.tsx - Student account creation page
- * @module StudentSignup
+ * @file TeacherSignup.tsx - Teacher account creation page
+ * @module TeacherSignup
  * 
  * @description
- * This component provides a form for students to create their accounts.
+ * This component provides a form for teachers to create their accounts.
  * It handles:
  * 1. Email and password validation
  * 2. Firebase Authentication account creation
@@ -41,22 +41,22 @@ import {
  * @requires ../../firebase
  */
 
-interface StudentSignupFormData {
+interface TeacherSignupFormData {
     email: string;
     password: string;
     confirmPassword: string;
 }
 
 /**
- * StudentSignup Component
- * Renders a form for students to create their accounts
- * @returns {JSX.Element} The rendered StudentSignup component
+ * TeacherSignup Component
+ * Renders a form for teachers to create their accounts
+ * @returns {JSX.Element} The rendered TeacherSignup component
  */
-const StudentSignup: React.FC = () => {
+const TeacherSignup: React.FC = () => {
     const router = useRouter();
     
     // Form data state
-    const [formData, setFormData] = useState<StudentSignupFormData>({
+    const [formData, setFormData] = useState<TeacherSignupFormData>({
         email: "",
         password: "",
         confirmPassword: "",
@@ -116,7 +116,7 @@ const StudentSignup: React.FC = () => {
     };
 
     /**
-     * Handles form submission to create student account
+     * Handles form submission to create teacher account
      * @param {React.FormEvent<HTMLFormElement>} e - Form submission event
      */
     const handleSubmit = async (
@@ -141,11 +141,11 @@ const StudentSignup: React.FC = () => {
             const newUser = userCredential.user;
 
             // Store basic user data in Firestore
-            await setDoc(doc(db, "students", newUser.uid), {
+            await setDoc(doc(db, "teachers", newUser.uid), {
                 email: formData.email,
                 uid: newUser.uid,
                 createdAt: new Date().toISOString(),
-                role: "student",
+                role: "teacher",
                 profileComplete: false, // Flag to indicate profile needs completion
             });
 
@@ -155,7 +155,7 @@ const StudentSignup: React.FC = () => {
             successToast("Account created successfully! Please complete your profile.");
 
             // Redirect to complete-info page
-            router.push("/complete-info");
+            router.push("/teacher-complete-info");
         } catch (error) {
             console.error("Error creating account:", error);
 
@@ -179,19 +179,19 @@ const StudentSignup: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-accent/5 to-primary/5">
             <div className="card w-full max-w-md bg-base-100 shadow-xl">
                 <div className="card-body">
                     {/* Header */}
                     <div className="text-center mb-6">
                         <div className="avatar placeholder mb-4">
-                            <div className="bg-primary text-primary-content rounded-full w-16 h-16 flex items-center justify-center">
-                                <MdPerson className="text-2xl" />
+                            <div className="bg-accent text-accent-content rounded-full w-16 h-16 flex items-center justify-center">
+                                <MdSchool className="text-2xl" />
                             </div>
                         </div>
-                        <h1 className="text-2xl font-bold text-base-content">Student Signup</h1>
+                        <h1 className="text-2xl font-bold text-base-content">Teacher Signup</h1>
                         <p className="text-base-content/60 text-sm mt-2">
-                            Create your student account to get started
+                            Create your teacher account to get started
                         </p>
                     </div>
 
@@ -308,7 +308,7 @@ const StudentSignup: React.FC = () => {
                     <div className="text-center">
                         <p className="text-xs text-base-content/60">
                             Already have an account?{" "}
-                            <a href="/login" className="text-primary hover:underline">
+                            <a href="/login" className="text-accent hover:underline">
                                 Sign in here
                             </a>
                         </p>
@@ -319,4 +319,4 @@ const StudentSignup: React.FC = () => {
     );
 };
 
-export default StudentSignup;
+export default TeacherSignup; 
