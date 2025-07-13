@@ -8,3 +8,4 @@ export { default as StudentRouteGuard } from './StudentRouteGuard';
 export { default as TeacherRouteGuard } from './TeacherRouteGuard';
 export { default as ConfirmDeleteModal } from './ConfirmDeleteModal';
 export { default as Pagination } from './Pagination';
+export { default as BackButton } from './BackButton';

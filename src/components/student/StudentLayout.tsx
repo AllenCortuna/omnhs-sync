@@ -3,7 +3,7 @@ import React, { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
-import { HiHome, HiAcademicCap, HiUser, HiDocumentText, HiLogout, HiMenu, HiX } from 'react-icons/hi';
+import { HiHome, HiAcademicCap, HiDocumentText, HiLogout, HiMenu, HiX, HiCalendar, HiCog } from 'react-icons/hi';
 import { auth } from '../../../firebase';
 
 // Types and Interfaces
@@ -37,9 +37,10 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const primaryNavItems: NavigationItemProps[] = [
     { href: '/students/dashboard', icon: HiHome, label: 'Dashboard' },
-    { href: '/students/profile', icon: HiUser, label: 'Profile' },
-    { href: '/students/academic-records', icon: HiAcademicCap, label: 'Academic Records' },
-    { href: '/students/documents', icon: HiDocumentText, label: 'Documents' },
+    { href: '/students/enrollment', icon: HiAcademicCap, label: 'Enrollment' },
+    { href: '/students/grades', icon: HiDocumentText, label: 'Grades' },
+    { href: '/students/calendar', icon: HiCalendar, label: 'Calendar' },
+    { href: '/students/settings', icon: HiCog, label: 'Settings' },
   ];
 
   // Close mobile menu when screen size changes to desktop
@@ -85,14 +86,14 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
           onClick={() => setIsMobileMenuOpen(false)}
           className={`flex items-center gap-4 p-4 rounded-xl transition-all duration-200 group relative
             ${isActive
-              ? 'bg-secondary text-white shadow font-semibold'
-              : 'text-secondary hover:bg-secondary/10 hover:text-secondary-dark'
+              ? 'bg-primary text-white shadow font-semibold'
+              : 'text-primary hover:bg-primary/10 hover:text-primary-dark'
             }`}
         >
           <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors relative
             ${isActive
               ? 'bg-white/20 text-white'
-              : 'text-secondary bg-secondary/20 group-hover:text-secondary-dark'
+              : 'text-primary bg-primary/20 group-hover:text-primary-dark'
             }`}
           >
             <Icon className="w-5 h-5" />
@@ -103,7 +104,7 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
               </div>
             )}
           </div>
-          <span className={`truncate font-normal ${isActive ? 'text-white martian-mono' : 'text-secondary group-hover:text-secondary-dark'}`}>{label}</span>
+          <span className={`truncate font-normal ${isActive ? 'text-white martian-mono' : 'text-primary group-hover:text-primary-dark'}`}>{label}</span>
         </Link>
       </li>
     );
@@ -114,7 +115,7 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
       {/* Mobile Menu Button */}
       <button 
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-        className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-lg bg-secondary text-white"
+        className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-lg bg-primary text-white"
         aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
         aria-expanded={isMobileMenuOpen}
       >
@@ -128,14 +129,14 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
         }`}
       >
         {/* Header Section */}
-        <div className="p-6 border-b border-secondary-content/20">
+        <div className="p-6 border-b border-primary-content/20">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-secondary/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
-              <HiAcademicCap className="w-6 h-6 text-secondary" />
+            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
+              <HiAcademicCap className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-secondary martian-mono">OMNHS SYNC</h2>
-              <p className="text-secondary text-sm">Student Portal</p>
+              <h2 className="text-xl font-bold text-primary martian-mono">OMNHS SYNC</h2>
+              <p className="text-primary text-sm">Student Portal</p>
             </div>
           </div>
         </div>
@@ -150,15 +151,15 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
         </div>
 
         {/* Footer Section with Logout */}
-        <div className="p-4 border-t border-secondary-content/20 space-y-4">
+        <div className="p-4 border-t border-primary-content/20 space-y-4">
           <button
             onClick={handleLogout}
-            className="flex w-full items-center gap-4 p-4 rounded-xl transition-all duration-200 group relative text-secondary hover:bg-secondary hover:text-white"
+            className="flex w-full items-center gap-4 p-4 rounded-xl transition-all duration-200 group relative text-primary hover:bg-primary hover:text-white"
           >
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors group-hover:text-white bg-secondary/20 group-hover:bg-secondary-dark">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors group-hover:text-white bg-primary/20 group-hover:bg-primary-dark">
               <HiLogout className="w-5 h-5" />
             </div>
-            <span className="truncate font-normal text-secondary group-hover:text-white">Logout</span>
+            <span className="truncate font-normal text-primary group-hover:text-white">Logout</span>
           </button>
         </div>
       </div>

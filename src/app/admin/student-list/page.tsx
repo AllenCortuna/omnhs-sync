@@ -61,7 +61,7 @@ const StudentList: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [studentsPerPage] = useState<number>(1);
+    const [studentsPerPage] = useState<number>(10);
     const [totalStudents, setTotalStudents] = useState<number>(0);
     const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
     const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
@@ -79,7 +79,7 @@ const StudentList: React.FC = () => {
 
             const studentsData: Student[] = [];
             querySnapshot.forEach((doc) => {
-                studentsData.push({ ...doc.data() } as Student);
+                studentsData.push({ id: doc.id, ...doc.data() } as Student);
             });
 
             setStudents(studentsData);
@@ -397,7 +397,7 @@ const StudentList: React.FC = () => {
                                                                 variant="primary"
                                                                 onClick={() =>
                                                                     router.push(
-                                                                        `/admin/student-details/${student.studentId}`
+                                                                        `/admin/student-list/view-student?id=${student.id}`
                                                                     )
                                                                 }
                                                             >

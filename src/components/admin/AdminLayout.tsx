@@ -3,7 +3,7 @@ import React, { ReactNode, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
-import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX } from 'react-icons/hi';
+import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX, HiCog } from 'react-icons/hi';
 import { auth } from '../../../firebase';
 
 // Types and Interfaces
@@ -40,6 +40,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { href: '/admin/student-list', icon: HiAcademicCap, label: 'Student List' },
     { href: '/admin/teacher-list', icon: HiUserGroup, label: 'Teacher List' },
     { href: '/admin/enrollees', icon: HiUserAdd, label: 'Enrollee' },
+    { href: '/admin/settings', icon: HiCog, label: 'Settings' },
   ];
 
   // const [showSecondary, setShowSecondary] = useState(false);

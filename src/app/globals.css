@@ -133,3 +133,11 @@ input[type="number"] {
     margin-left: -1.5rem;
     font-family: monospace;
 }
+
+/* Line clamp utility */
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}

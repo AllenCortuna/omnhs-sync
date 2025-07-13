@@ -21,6 +21,7 @@ export interface Teacher {
 }
 
 export interface Student {
+    id?: string;
     studentId: string;
     email?: string;
     createdAt: string;
