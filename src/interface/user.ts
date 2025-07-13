@@ -18,6 +18,7 @@ export interface Teacher {
     profileRef: string; // reference to the teacher's profile in storage
     contactNumber?: string;
     address?: string;
+    designatedSectionId?: string; // reference to the teacher's designated section
 }
 
 export interface Student {

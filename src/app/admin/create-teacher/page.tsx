@@ -1,6 +1,6 @@
 "use client";
 // React and Firebase imports
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     collection,
     getDocs,
@@ -13,6 +13,7 @@ import { db } from "../../../../firebase";
 // Component imports
 import {
     FormInput,
+    FormSelect,
     CreateButton,
 } from "../../../components/common";
 
@@ -22,6 +23,9 @@ import { successToast, errorToast } from "../../../config/toast";
 // Icon imports from react-icons
 import { MdAdd } from "react-icons/md";
 
+// Service imports
+import { sectionService } from "../../../services/sectionService";
+import { Section } from "../../../interface/info";
 
 interface TeacherFormData {
     employeeId: string;
@@ -30,6 +34,7 @@ interface TeacherFormData {
     middleName: string;
     contactNumber: string;
     address: string;
+    designatedSectionId: string;
 }
 
 /**
@@ -69,10 +74,28 @@ const CreateTeacher: React.FC = () => {
         middleName: "",
         contactNumber: "",
         address: "",
+        designatedSectionId: "",
     });
 
     // Loading state for async operations
     const [loading, setLoading] = useState<boolean>(false);
+
+    // State for sections
+    const [sections, setSections] = useState<Section[]>([]);
+
+    useEffect(() => {
+        const fetchSections = async () => {
+            try {
+                const fetchedSections = await sectionService.getAllSections();
+                setSections(fetchedSections);
+            } catch (error) {
+                console.error("Error fetching sections:", error);
+                errorToast("Failed to fetch sections. Please try again.");
+            }
+        };
+
+        fetchSections();
+    }, []);
 
     /**
      * Updates form data state when input fields change
@@ -164,6 +187,7 @@ const CreateTeacher: React.FC = () => {
                 middleName: formData.middleName || "",
                 contactNumber: formData.contactNumber,
                 address: formData.address,
+                designatedSectionId: formData.designatedSectionId || "",
                 createdAt: new Date().toISOString(),
                 lastLoginAt: "",
                 profileRef: "",
@@ -179,6 +203,7 @@ const CreateTeacher: React.FC = () => {
                 middleName: "",
                 contactNumber: "",
                 address: "",
+                designatedSectionId: "",
             });
         } catch (error) {
             console.error("Error creating teacher account:", error);
@@ -336,6 +361,30 @@ const CreateTeacher: React.FC = () => {
                                 onChange={handleChange}
                                 placeholder="Enter complete address"
                                 required
+                                disabled={loading}
+                            />
+                        </div>
+
+                        {/* Section Selection Field */}
+                        <div className="form-control">
+                            <label className="label" htmlFor="section-select">
+                                <span className="text-xs text-zinc-700">
+                                    Designated Section (Optional)
+                                </span>
+                            </label>
+                            <FormSelect
+                                id="section-select"
+                                name="designatedSectionId"
+                                value={formData.designatedSectionId}
+                                onChange={handleChange}
+                                options={[
+                                    { value: "", label: "Select a section (optional)" },
+                                    ...sections.map((section) => ({
+                                        value: section.id,
+                                        label: section.sectionName
+                                    }))
+                                ]}
+                                placeholder="Select a section (optional)"
                                 disabled={loading}
                             />
                         </div>

@@ -29,6 +29,24 @@ export interface UpdateSectionData {
 
 export const sectionService = {
   /**
+   * Get all sections ordered by name
+   */
+  async getAllSections(): Promise<Section[]> {
+    try {
+      const q = query(collection(db, COLLECTION_NAME), orderBy('sectionName'));
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as Section[];
+    } catch (error) {
+      console.error('Error fetching sections:', error);
+      throw new Error('Failed to fetch sections');
+    }
+  },
+
+  /**
    * Get all sections for a specific strand
    */
   async getSectionsByStrandId(strandId: string): Promise<Section[]> {
