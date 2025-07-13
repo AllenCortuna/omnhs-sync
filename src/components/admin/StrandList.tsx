@@ -1,6 +1,6 @@
 "use client"
-import React, { useState } from 'react';
-import { HiAcademicCap, HiPencil, HiPlus, HiChevronDown, HiChevronRight } from 'react-icons/hi';
+import React, { useState, useEffect } from 'react';
+import { HiAcademicCap, HiPencil, HiPlus } from 'react-icons/hi';
 import { Strand, Section } from '../../interface/info';
 import { sectionService, CreateSectionData, UpdateSectionData } from '../../services/sectionService';
 import SectionList from './SectionList';
@@ -15,28 +15,22 @@ const StrandList: React.FC<StrandListProps> = ({
   strands,
   onEditStrand
 }) => {
-  const [expandedStrands, setExpandedStrands] = useState<Set<string>>(new Set());
   const [sections, setSections] = useState<{ [strandId: string]: Section[] }>({});
   const [loadingSections, setLoadingSections] = useState<Set<string>>(new Set());
   const [showSectionForm, setShowSectionForm] = useState<string | null>(null);
   const [editingSection, setEditingSection] = useState<Section | null>(null);
   const [formLoading, setFormLoading] = useState(false);
 
-  const toggleStrandExpansion = async (strandId: string) => {
-    if (expandedStrands.has(strandId)) {
-      setExpandedStrands(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(strandId);
-        return newSet;
-      });
-    } else {
-      setExpandedStrands(prev => new Set(prev).add(strandId));
-      await loadSections(strandId);
-    }
-  };
+  // Load sections for all strands on component mount
+  useEffect(() => {
+    strands.forEach(strand => {
+      loadSections(strand.id);
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [strands]);
 
-  const loadSections = async (strandId: string) => {
-    if (sections[strandId]) return; // Already loaded
+  const loadSections = async (strandId: string, forceRefresh = false) => {
+    if (sections[strandId] && !forceRefresh) return; // Already loaded, unless forcing refresh
     
     try {
       setLoadingSections(prev => new Set(prev).add(strandId));
@@ -59,10 +53,12 @@ const StrandList: React.FC<StrandListProps> = ({
       await sectionService.createSection(data);
       setShowSectionForm(null);
       setEditingSection(null);
-      // Reload sections for this strand
-      await loadSections(data.strandId);
+      // Reload sections for this strand with force refresh
+      await loadSections(data.strandId, true);
     } catch (error) {
       console.error('Error creating section:', error);
+      // Re-throw the error so the form can handle it
+      throw error;
     } finally {
       setFormLoading(false);
     }
@@ -76,10 +72,12 @@ const StrandList: React.FC<StrandListProps> = ({
       await sectionService.updateSection(editingSection.id, data);
       setShowSectionForm(null);
       setEditingSection(null);
-      // Reload sections for this strand
-      await loadSections(editingSection.strandId);
+      // Reload sections for this strand with force refresh
+      await loadSections(editingSection.strandId, true);
     } catch (error) {
       console.error('Error updating section:', error);
+      // Re-throw the error so the form can handle it
+      throw error;
     } finally {
       setFormLoading(false);
     }
@@ -168,17 +166,6 @@ const StrandList: React.FC<StrandListProps> = ({
                 >
                   <HiPencil className="w-4 h-4" />
                 </button>
-                <button
-                  onClick={() => toggleStrandExpansion(strand.id)}
-                  className="btn btn-ghost btn-xs text-secondary hover:bg-secondary/10"
-                  title="Manage sections"
-                >
-                  {expandedStrands.has(strand.id) ? (
-                    <HiChevronDown className="w-4 h-4" />
-                  ) : (
-                    <HiChevronRight className="w-4 h-4" />
-                  )}
-                </button>
               </div>
             </div>
 
@@ -188,23 +175,21 @@ const StrandList: React.FC<StrandListProps> = ({
             </p>
 
             {/* Sections Section */}
-            {expandedStrands.has(strand.id) && (
-              <div className="border-t border-base-200 pt-4">
-                <div className="space-y-3">
-                  {loadingSections.has(strand.id) ? (
-                    <div className="flex items-center justify-center py-4">
-                      <span className="loading loading-spinner loading-sm text-secondary"></span>
-                      <span className="ml-2 text-xs text-base-content/60">Loading sections...</span>
-                    </div>
-                  ) : (
-                    <SectionList
-                      sections={sections[strand.id] || []}
-                      onEditSection={(section) => handleEditSection(section, strand.id)}
-                    />
-                  )}
-                </div>
+            <div className="border-t border-base-200 pt-4">
+              <div className="space-y-3">
+                {loadingSections.has(strand.id) ? (
+                  <div className="flex items-center justify-center py-4">
+                    <span className="loading loading-spinner loading-sm text-secondary"></span>
+                    <span className="ml-2 text-xs text-base-content/60">Loading sections...</span>
+                  </div>
+                ) : (
+                  <SectionList
+                    sections={sections[strand.id] || []}
+                    onEditSection={(section) => handleEditSection(section, strand.id)}
+                  />
+                )}
               </div>
-            )}
+            </div>
           </div>
         ))}
       </div>
@@ -216,6 +201,8 @@ const StrandList: React.FC<StrandListProps> = ({
             <SectionForm
               section={editingSection || undefined}
               strandId={showSectionForm}
+              strandName={strands.find(strand => strand.id === showSectionForm)?.strandName || ''}
+              existingSections={sections[showSectionForm] || []}
               onSubmit={async (data) => {
                 if (editingSection?.id) {
                   await handleUpdateSection(data as UpdateSectionData);

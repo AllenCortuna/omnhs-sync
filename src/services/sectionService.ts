@@ -69,10 +69,41 @@ export const sectionService = {
   },
 
   /**
+   * Check if section name already exists for a strand
+   */
+  async checkSectionNameExists(strandId: string, sectionName: string, excludeId?: string): Promise<boolean> {
+    try {
+      const q = query(
+        collection(db, COLLECTION_NAME),
+        where('strandId', '==', strandId),
+        where('sectionName', '==', sectionName.trim())
+      );
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.some(doc => {
+        // Exclude the current section when editing
+        if (excludeId && doc.id === excludeId) {
+          return false;
+        }
+        return true;
+      });
+    } catch (error) {
+      console.error('Error checking section name:', error);
+      throw new Error('Failed to check section name');
+    }
+  },
+
+  /**
    * Create a new section
    */
   async createSection(data: CreateSectionData): Promise<Section> {
     try {
+      // Check if section name already exists
+      const nameExists = await this.checkSectionNameExists(data.strandId, data.sectionName);
+      if (nameExists) {
+        throw new Error('A section with this name already exists in this strand');
+      }
+
       const docRef = await addDoc(collection(db, COLLECTION_NAME), {
         ...data,
         createdAt: serverTimestamp(),
@@ -87,7 +118,7 @@ export const sectionService = {
       } as Section;
     } catch (error) {
       console.error('Error creating section:', error);
-      throw new Error('Failed to create section');
+      throw error; // Re-throw to preserve the original error message
     }
   },
 
@@ -96,6 +127,22 @@ export const sectionService = {
    */
   async updateSection(id: string, data: UpdateSectionData): Promise<void> {
     try {
+      // If section name is being updated, check for duplicates
+      if (data.sectionName) {
+        // Get the current section to get the strandId
+        const currentSection = await this.getSectionById(id);
+        if (currentSection) {
+          const nameExists = await this.checkSectionNameExists(
+            currentSection.strandId, 
+            data.sectionName, 
+            id // Exclude current section
+          );
+          if (nameExists) {
+            throw new Error('A section with this name already exists in this strand');
+          }
+        }
+      }
+
       const docRef = doc(db, COLLECTION_NAME, id);
       await updateDoc(docRef, {
         ...data,
@@ -103,7 +150,7 @@ export const sectionService = {
       });
     } catch (error) {
       console.error('Error updating section:', error);
-      throw new Error('Failed to update section');
+      throw error; // Re-throw to preserve the original error message
     }
   },
 
