@@ -5,6 +5,7 @@ import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import LoadingOverlay from "../common/LoadingOverlay";
 import { auth, db } from "@/../firebase";
+import { errorToast } from "@/config/toast";
 
 interface TeacherRouteGuardProps {
   children: React.ReactNode;
@@ -37,6 +38,7 @@ const TeacherRouteGuard: React.FC<TeacherRouteGuardProps> = ({ children }) => {
       } else {
         setIsTeacher(false);
         // If not teacher, redirect to home
+        errorToast("You are not authorized to access this page. Please complete your profile to continue.");
         router.replace("/teacher-complete-info");
       }
       setIsLoading(false);

@@ -1,13 +1,7 @@
 "use client";
 // React and Firebase imports
 import React, { useState } from "react";
-import {
-    collection,
-    getDocs,
-    query,
-    addDoc,
-    where,
-} from "firebase/firestore";
+import { collection, getDocs, query, addDoc, where } from "firebase/firestore";
 import { db } from "../../../../firebase";
 
 // Component imports
@@ -100,7 +94,6 @@ const CreateStudent: React.FC = () => {
             return false;
         }
 
-
         if (
             !formData.studentId ||
             !formData.firstName ||
@@ -134,39 +127,25 @@ const CreateStudent: React.FC = () => {
         e.preventDefault();
         setLoading(true);
 
-        //check if studentID is already in the database
-        const studentIDRef = query(
-            collection(db, "students"),
-            where("studentId", "==", formData.studentId)
-        );
-        const studentIDDoc = await getDocs(studentIDRef);
-        console.log("studentIDDoc ===>", studentIDDoc.docs.length > 0);
-        if (studentIDDoc.docs.length > 0) {
-            errorToast("Student ID already exists");
-            setLoading(false);
-            return;
-        }
-
-        // Validate form data
+        // Validate form data first
         if (!validateForm()) {
             setLoading(false);
             return;
         }
 
         try {
-            //check if studentId is already in the database
+            // Check if studentId already exists (case insensitive)
             const studentIdRef = query(
                 collection(db, "students"),
-                where("studentId", "==", formData.studentId)
+                where("studentId", "==", formData.studentId.toUpperCase())
             );
             const studentIdDoc = await getDocs(studentIdRef);
+            
             if (studentIdDoc.docs.length > 0) {
                 errorToast("Student ID already exists");
                 setLoading(false);
                 return;
             }
-
-
 
             // Store student profile in Firestore
             await addDoc(collection(db, "students"), {
@@ -205,7 +184,7 @@ const CreateStudent: React.FC = () => {
 
     // JSX Rendering
     return (
-        <div className="overflow-scroll font-medium flex items-center justify-center text-zinc-700">
+        <div className="overflow-scroll p-5 font-medium flex items-center justify-center text-zinc-700">
             <div className="card w-full max-w-2xl bg-base-100 shadow-xl">
                 <div className="card-body border">
                     {/* Card Header: Icon and Title */}

@@ -5,6 +5,7 @@ import { onAuthStateChanged, User as FirebaseUser } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import LoadingOverlay from "./LoadingOverlay";
 import { auth, db } from "@/../firebase";
+import { errorToast } from "@/config/toast";
 
 interface AdminRouteGuardProps {
   children: React.ReactNode;
@@ -33,6 +34,7 @@ const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children }) => {
         setIsAdmin(true);
       } else {
         setIsAdmin(false);
+        errorToast("You are not an Admin. You are not authorized to access this page");
         // If not admin, redirect to their dashboard if possible
         router.replace("/");
       }

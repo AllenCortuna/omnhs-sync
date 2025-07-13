@@ -6,3 +6,5 @@ export { default as RouteGuard } from './RouteGuard';
 export { default as IncompleteRouteGuard } from './IncompleteRouteGuard';
 export { default as StudentRouteGuard } from './StudentRouteGuard';
 export { default as TeacherRouteGuard } from './TeacherRouteGuard';
+export { default as ConfirmDeleteModal } from './ConfirmDeleteModal';
+export { default as Pagination } from './Pagination';

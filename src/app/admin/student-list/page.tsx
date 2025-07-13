@@ -7,11 +7,13 @@ import {
     getDocs,
     query,
     orderBy,
+    deleteDoc,
+    where,
 } from "firebase/firestore";
 import { db } from "../../../../firebase";
 
 // Component imports
-import { LoadingOverlay} from "../../../components/common";
+import { LoadingOverlay, ConfirmDeleteModal, Pagination } from "../../../components/common";
 
 // Icon imports from react-icons
 import {
@@ -25,11 +27,12 @@ import {
 // Toast imports
 import { errorToast } from "../../../config/toast";
 import { Student } from "@/interface/user";
+import { ButtonXs } from "@/components/common/ButtonXs";
 
 /**
  * @file StudentList.tsx - Admin page for displaying list of students
  * @module StudentList
- * 
+ *
  * @description
  * This component provides a comprehensive view of all students in the system.
  * It handles:
@@ -45,7 +48,6 @@ import { Student } from "@/interface/user";
  * @requires ../../../../firebase
  */
 
-
 /**
  * StudentList Component
  * Renders a table displaying all students with search and pagination
@@ -59,8 +61,11 @@ const StudentList: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [studentsPerPage] = useState<number>(10);
+    const [studentsPerPage] = useState<number>(1);
     const [totalStudents, setTotalStudents] = useState<number>(0);
+    const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+    const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
+    const [isDeleting, setIsDeleting] = useState<boolean>(false);
 
     /**
      * Fetches all students from Firestore
@@ -71,12 +76,12 @@ const StudentList: React.FC = () => {
             const studentsRef = collection(db, "students");
             const q = query(studentsRef, orderBy("createdAt", "desc"));
             const querySnapshot = await getDocs(q);
-            
+
             const studentsData: Student[] = [];
             querySnapshot.forEach((doc) => {
                 studentsData.push({ ...doc.data() } as Student);
             });
-            
+
             setStudents(studentsData);
             setFilteredStudents(studentsData);
             setTotalStudents(studentsData.length);
@@ -116,7 +121,9 @@ const StudentList: React.FC = () => {
     /**
      * Handles search input changes
      */
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const handleSearchChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ): void => {
         setSearchTerm(e.target.value);
     };
 
@@ -138,17 +145,6 @@ const StudentList: React.FC = () => {
     };
 
     /**
-     * Formats date for display
-     */
-    const formatDate = (dateString: string): string => {
-        return new Date(dateString).toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-        });
-    };
-
-    /**
      * Gets full name of student
      */
     const getFullName = (student: Student): string => {
@@ -160,10 +156,52 @@ const StudentList: React.FC = () => {
         return parts.join(" ");
     };
 
+    const handleDeleteClick = (student: Student): void => {
+        setStudentToDelete(student);
+        setDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = async (): Promise<void> => {
+        if (!studentToDelete) return;
+
+        try {
+            setIsDeleting(true);
+            const studentQuery = query(
+                collection(db, "students"),
+                where("studentId", "==", studentToDelete.studentId)
+            );
+            const querySnapshot = await getDocs(studentQuery);
+            if (!querySnapshot.empty) {
+                await deleteDoc(querySnapshot.docs[0].ref);
+            }
+            
+            // Remove from local state
+            setStudents(students.filter(s => s.studentId !== studentToDelete.studentId));
+            setFilteredStudents(filteredStudents.filter(s => s.studentId !== studentToDelete.studentId));
+            setTotalStudents(prev => prev - 1);
+            
+            setDeleteModalOpen(false);
+            setStudentToDelete(null);
+        } catch (error) {
+            console.error("Error deleting student:", error);
+            errorToast("Failed to delete student. Please try again.");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleDeleteCancel = (): void => {
+        setDeleteModalOpen(false);
+        setStudentToDelete(null);
+    };
+
     // Calculate pagination
     const indexOfLastStudent = currentPage * studentsPerPage;
     const indexOfFirstStudent = indexOfLastStudent - studentsPerPage;
-    const currentStudents = filteredStudents.slice(indexOfFirstStudent, indexOfLastStudent);
+    const currentStudents = filteredStudents.slice(
+        indexOfFirstStudent,
+        indexOfLastStudent
+    );
     const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
 
     // Fetch students on component mount
@@ -174,7 +212,7 @@ const StudentList: React.FC = () => {
     // Filter students when search term changes
     useEffect(() => {
         filterStudents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchTerm, students]);
 
     if (loading) {
@@ -182,14 +220,14 @@ const StudentList: React.FC = () => {
     }
 
     return (
-        <div className="min-h-screen p-2 text-zinc-700">
+        <div className="min-h-screen text-zinc-700">
             <div className="max-w-7xl mx-auto">
-                    <button
-                        onClick={() => router.push("/admin/create-student")}
-                        className="btn btn-primary shadow-lg text-white fixed bottom-10 right-10"
-                    >
-                        Create Student
-                    </button>
+                <button
+                    onClick={() => router.push("/admin/create-student")}
+                    className="btn btn-primary shadow-lg text-white fixed bottom-10 right-10"
+                >
+                    Create Student
+                </button>
                 {/* Header */}
                 <div className="mb-4">
                     <div className="flex items-center justify-between gap-2">
@@ -200,11 +238,15 @@ const StudentList: React.FC = () => {
                                 </div>
                             </div>
                             <div>
-                                <h1 className="text-lg font-bold">Student List</h1>
-                                <p className="text-xs text-base-content/60">Manage student accounts</p>
+                                <h1 className="text-lg font-bold">
+                                    Student List
+                                </h1>
+                                <p className="text-xs text-base-content/60">
+                                    Manage student accounts
+                                </p>
                             </div>
                         </div>
-                        
+
                         <button
                             onClick={fetchStudents}
                             className="btn btn-outline btn-xs"
@@ -252,11 +294,17 @@ const StudentList: React.FC = () => {
                         <div className="stats stats-horizontal shadow-sm text-xs">
                             <div className="stat py-1 px-2">
                                 <div className="stat-title text-xs">Total</div>
-                                <div className="stat-value text-sm">{totalStudents}</div>
+                                <div className="stat-value text-sm">
+                                    {totalStudents}
+                                </div>
                             </div>
                             <div className="stat py-1 px-2">
-                                <div className="stat-title text-xs">Showing</div>
-                                <div className="stat-value text-sm">{filteredStudents.length}</div>
+                                <div className="stat-title text-xs">
+                                    Showing
+                                </div>
+                                <div className="stat-value text-sm">
+                                    {filteredStudents.length}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -269,10 +317,14 @@ const StudentList: React.FC = () => {
                             <div className="p-4 text-center">
                                 <MdPerson className="text-4xl text-base-content/20 mx-auto mb-2" />
                                 <h3 className="text-sm font-semibold mb-1">
-                                    {searchTerm ? "No students found" : "No students yet"}
+                                    {searchTerm
+                                        ? "No students found"
+                                        : "No students yet"}
                                 </h3>
                                 <p className="text-xs text-base-content/60">
-                                    {searchTerm ? "Try adjusting your search" : "Students will appear here"}
+                                    {searchTerm
+                                        ? "Try adjusting your search"
+                                        : "Students will appear here"}
                                 </p>
                             </div>
                         ) : (
@@ -281,15 +333,26 @@ const StudentList: React.FC = () => {
                                     <table className="table table-zebra table-sm w-full">
                                         <thead>
                                             <tr>
-                                                <th className="bg-base-200 text-xs">Student</th>
-                                                <th className="bg-base-200 text-xs">Contact</th>
-                                                <th className="bg-base-200 text-xs">Details</th>
-                                                <th className="bg-base-200 text-xs">Created</th>
+                                                <th className="bg-base-200 text-xs">
+                                                    Student
+                                                </th>
+                                                <th className="bg-base-200 text-xs">
+                                                    Contact
+                                                </th>
+                                                <th className="bg-base-200 text-xs">
+                                                    Details
+                                                </th>
+                                                <th className="bg-base-200 text-xs">
+                                                    Actions
+                                                </th>
                                             </tr>
                                         </thead>
                                         <tbody className="text-xs">
                                             {currentStudents.map((student) => (
-                                                <tr key={student.studentId} className="hover">
+                                                <tr
+                                                    key={student.studentId}
+                                                    className="hover"
+                                                >
                                                     <td>
                                                         <div className="flex items-center gap-2">
                                                             <div className="avatar placeholder">
@@ -301,9 +364,12 @@ const StudentList: React.FC = () => {
                                                                 </div>
                                                             </div>
                                                             <div>
-                                                                <div className="font-medium">{getFullName(student)}</div>
+                                                                <div className="font-medium">
+                                                                    {getFullName(student)}
+                                                                </div>
                                                                 <div className="text-xs text-base-content/60">
-                                                                    ID: {student.studentId}
+                                                                    ID:{" "}
+                                                                    {student.studentId}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -311,21 +377,51 @@ const StudentList: React.FC = () => {
                                                     <td>
                                                         <div className="flex items-center gap-1">
                                                             <MdEmail className="text-base-content/60 text-xs" />
-                                                            <span className="text-xs">{student.email}</span>
+                                                            <span className="text-xs">
+                                                                {student.email}
+                                                            </span>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div className="space-y-0.5">
                                                             <div className="flex items-center gap-1">
                                                                 <span className="text-xs">
-                                                                {student.sex}
+                                                                    {student.sex}
                                                                 </span>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td>
                                                         <div className="text-xs text-base-content/60">
-                                                            {formatDate(student.createdAt)}
+                                                            <ButtonXs
+                                                                variant="primary"
+                                                                onClick={() =>
+                                                                    router.push(
+                                                                        `/admin/student-details/${student.studentId}`
+                                                                    )
+                                                                }
+                                                            >
+                                                                View
+                                                            </ButtonXs>
+                                                            <ButtonXs
+                                                                variant="secondary"
+                                                                onClick={() =>
+                                                                    router.push(
+                                                                        `/admin/student-details/${student.studentId}`
+                                                                    )
+                                                                }
+                                                            >
+                                                                Edit
+                                                            </ButtonXs>
+                                                            <ButtonXs
+                                                                variant="error"
+                                                                onClick={() =>
+                                                                    handleDeleteClick(student)
+                                                                }
+                                                                className="text-white"
+                                                            >
+                                                                Delete
+                                                            </ButtonXs>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -335,44 +431,31 @@ const StudentList: React.FC = () => {
                                 </div>
 
                                 {/* Pagination */}
-                                {totalPages > 1 && (
-                                    <div className="flex justify-center p-2 border-t">
-                                        <div className="join">
-                                            <button
-                                                className="join-item btn btn-xs"
-                                                onClick={() => setCurrentPage(currentPage - 1)}
-                                                disabled={currentPage === 1}
-                                            >
-                                                «
-                                            </button>
-                                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                                <button
-                                                    key={page}
-                                                    className={`join-item btn btn-xs ${
-                                                        currentPage === page ? "btn-active" : ""
-                                                    }`}
-                                                    onClick={() => setCurrentPage(page)}
-                                                >
-                                                    {page}
-                                                </button>
-                                            ))}
-                                            <button
-                                                className="join-item btn btn-xs"
-                                                onClick={() => setCurrentPage(currentPage + 1)}
-                                                disabled={currentPage === totalPages}
-                                            >
-                                                »
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
+                                <Pagination
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
+                                    onPageChange={setCurrentPage}
+                                    totalItems={filteredStudents.length}
+                                    itemsPerPage={studentsPerPage}
+                                />
                             </>
                         )}
                     </div>
                 </div>
             </div>
+
+            {/* Confirm Delete Modal */}
+            <ConfirmDeleteModal
+                isOpen={deleteModalOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Student"
+                message="Are you sure you want to delete this student? This action will permanently remove the student from the system."
+                itemName={studentToDelete ? `${studentToDelete.firstName} ${studentToDelete.lastName}` : undefined}
+                isLoading={isDeleting}
+            />
         </div>
     );
 };
 
-export default StudentList; 
+export default StudentList;
