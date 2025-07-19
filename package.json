@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@testing-library/react": "^16.3.0",
+    "browser-image-compression": "^2.0.2",
     "date-fns": "^4.1.0",
     "firebase": "^10.13.2",
     "firebase-admin": "^13.4.0",
