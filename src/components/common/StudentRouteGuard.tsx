@@ -27,7 +27,18 @@ const StudentRouteGuard: React.FC<StudentRouteGuardProps> = ({ children }) => {
         if (pathname !== "/") router.replace("/");
         return;
       }
-      
+
+      //check if user is teacher
+      const teachersRef = collection(db, "teachers");
+      const teacherQuery = query(teachersRef, where("email", "==", user.email));
+      const teacherQuerySnapshot = await getDocs(teacherQuery);
+      if (!teacherQuerySnapshot.empty) {
+        errorToast("Account type is not a student. Please login with a student account.");
+        setIsLoading(false);
+        router.replace("/");
+        return;
+      }
+
       // Query students collection where email matches the current user's email
       const studentsRef = collection(db, "students");
       const q = query(studentsRef, where("email", "==", user.email));

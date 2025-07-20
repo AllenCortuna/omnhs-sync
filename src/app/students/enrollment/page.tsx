@@ -16,7 +16,10 @@ import {
     HiXCircle, 
     HiClock,
     HiPlus,
-    HiEye
+    HiEye,
+    HiDocument,
+    HiDownload,
+    HiPencil
 } from "react-icons/hi";
 import { formatDate } from "@/config/format";
 
@@ -61,12 +64,12 @@ const EnrollmentList: React.FC = () => {
                     where("studentId", "==", userData.studentId),
                     orderBy("createdAt", "desc")
                 );
-                
                 const querySnapshot = await getDocs(enrollmentsQuery);
                 const enrollmentsData: EnrollmentWithStrand[] = [];
                 
                 querySnapshot.forEach((doc) => {
-                    const enrollment = { id: doc.id, ...doc.data() } as EnrollmentWithStrand;
+                    // Spread doc.data() first, then add id to ensure it's not overwritten
+                    const enrollment = { ...doc.data(), id: doc.id } as EnrollmentWithStrand;
                     // Find the strand name
                     const strand = strands.find(s => s.id === enrollment.strandId);
                     enrollment.strandName = strand?.strandName || "Unknown Strand";
@@ -130,6 +133,41 @@ ${enrollment.returningStudent ? 'Returning Student' : 'New Student'}
 ${enrollment.isPWD ? 'PWD Student' : ''}
 ${enrollment.clearance ? 'Clearance: ✓ Uploaded' : 'Clearance: Not uploaded'}
 ${enrollment.copyOfGrades ? 'Grades: ✓ Uploaded' : 'Grades: Not uploaded'}`);
+    }
+
+    function handleEditEnrollment(enrollment: EnrollmentWithStrand) {
+        if (enrollment.status !== "pending") {
+            errorToast("Only pending enrollments can be edited");
+            return;
+        }
+        console.log(enrollment);
+        router.push(`/students/enrollment/edit?id=${enrollment.id}`);
+    }
+
+    function handleViewFile(fileUrl: string) {
+        if (!fileUrl) {
+            errorToast("No file available to view");
+            return;
+        }
+        
+        // Open file in new tab
+        window.open(fileUrl, '_blank');
+    }
+
+    function handleDownloadFile(fileUrl: string, fileName: string) {
+        if (!fileUrl) {
+            errorToast("No file available to download");
+            return;
+        }
+        
+        // Create a temporary link element to trigger download
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = fileName;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     }
 
     if (userLoading || loading) {
@@ -236,6 +274,64 @@ ${enrollment.copyOfGrades ? 'Grades: ✓ Uploaded' : 'Grades: Not uploaded'}`);
                                             )}
                                         </div>
 
+                                        {/* File viewing section */}
+                                        {(enrollment.clearance || enrollment.copyOfGrades) && (
+                                            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                                                <h4 className="font-medium text-xs text-gray-700 mb-3">Submitted Files</h4>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                                    {enrollment.clearance && (
+                                                        <div className="flex items-center justify-between p-2 bg-white rounded border">
+                                                            <div className="flex items-center gap-2">
+                                                                <HiDocument className="w-4 h-4 text-blue-600" />
+                                                                <span className="text-sm font-medium text-gray-700">Clearance</span>
+                                                            </div>
+                                                            <div className="flex gap-1">
+                                                                <button
+                                                                    onClick={() => handleViewFile(enrollment.clearance!)}
+                                                                    className="btn btn-xs btn-outline btn-primary"
+                                                                    title="View file"
+                                                                >
+                                                                    <HiEye className="w-3 h-3" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDownloadFile(enrollment.clearance!, "clearance")}
+                                                                    className="btn btn-xs btn-outline btn-secondary"
+                                                                    title="Download file"
+                                                                >
+                                                                    <HiDownload className="w-3 h-3" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    
+                                                    {enrollment.copyOfGrades && (
+                                                        <div className="flex items-center justify-between p-2 bg-white rounded border">
+                                                            <div className="flex items-center gap-2">
+                                                                <HiDocument className="w-4 h-4 text-green-600" />
+                                                                <span className="text-sm font-medium text-gray-700">Grades</span>
+                                                            </div>
+                                                            <div className="flex gap-1">
+                                                                <button
+                                                                    onClick={() => handleViewFile(enrollment.copyOfGrades!)}
+                                                                    className="btn btn-xs btn-outline btn-primary"
+                                                                    title="View file"
+                                                                >
+                                                                    <HiEye className="w-3 h-3" />
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDownloadFile(enrollment.copyOfGrades!, "grades")}
+                                                                    className="btn btn-xs btn-outline btn-secondary"
+                                                                    title="Download file"
+                                                                >
+                                                                    <HiDownload className="w-3 h-3" />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+
                                         {/* Returning student details */}
                                         {enrollment.returningStudent && (
                                             <div className="mt-3 p-3 bg-gray-50 rounded-lg">
@@ -266,6 +362,15 @@ ${enrollment.copyOfGrades ? 'Grades: ✓ Uploaded' : 'Grades: Not uploaded'}`);
                                             <HiEye className="w-4 h-4" />
                                             View
                                         </button>
+                                        {enrollment.status === "pending" && (
+                                            <button
+                                                onClick={() => handleEditEnrollment(enrollment)}
+                                                className="btn btn-sm btn-outline btn-secondary"
+                                            >
+                                                <HiPencil className="w-4 h-4" />
+                                                Edit
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>

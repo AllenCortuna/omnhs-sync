@@ -28,6 +28,7 @@ export interface Student {
     createdAt: string;
     lastLoginAt?: string;
     profileRef?: string; // reference to the student's profile in storage
+    profileChangeDate?: string;
     contactNumber?: string;
     address?: string;
     firstName?: string;

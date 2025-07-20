@@ -16,7 +16,6 @@ const TeacherRouteGuard: React.FC<TeacherRouteGuardProps> = ({ children }) => {
   const pathname = usePathname();
   const [isLoading, setIsLoading] = useState(true);
   const [isTeacher, setIsTeacher] = useState(false);
-
   useEffect(() => {
     setIsLoading(true);
     const unsubscribe = onAuthStateChanged(auth, async (user: FirebaseUser | null) => {
@@ -25,6 +24,17 @@ const TeacherRouteGuard: React.FC<TeacherRouteGuardProps> = ({ children }) => {
         setIsTeacher(false);
         setIsLoading(false);
         if (pathname !== "/") router.replace("/");
+        return;
+      }
+
+      //check if user is student
+      const studentsRef = collection(db, "students");
+      const studentQuery = query(studentsRef, where("email", "==", user.email));
+      const studentQuerySnapshot = await getDocs(studentQuery);
+      if (!studentQuerySnapshot.empty) {
+        errorToast("Account type is not a student. Please login with a student account.");
+        setIsLoading(false);
+        router.replace("/");
         return;
       }
       
