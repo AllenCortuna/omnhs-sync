@@ -1,6 +1,6 @@
 "use client";
 // React and Firebase imports
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
     collection,
@@ -9,15 +9,15 @@ import {
     orderBy,
     deleteDoc,
     where,
+    limit,
 } from "firebase/firestore";
 import { db } from "../../../../firebase";
 
 // Component imports
-import { LoadingOverlay, ConfirmDeleteModal, Pagination } from "../../../components/common";
+import { ConfirmDeleteModal, Pagination } from "../../../components/common";
 
 // Icon imports from react-icons
 import {
-    MdSearch,
     MdPerson,
     MdEmail,
     MdSchool,
@@ -59,6 +59,7 @@ const StudentList: React.FC = () => {
     const [students, setStudents] = useState<Student[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>("");
+    const [searchField, setSearchField] = useState<string>("firstName");
     const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [studentsPerPage] = useState<number>(10);
@@ -66,17 +67,51 @@ const StudentList: React.FC = () => {
     const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
     const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
+    const [isSearching, setIsSearching] = useState<boolean>(false);
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
 
     /**
-     * Fetches all students from Firestore
+     * Debounced search function
      */
-    const fetchStudents = async (): Promise<void> => {
+    const debouncedSearch = useCallback(
+        (searchQuery: string) => {
+            const timeoutId = setTimeout(() => {
+                setDebouncedSearchTerm(searchQuery);
+            }, 1000); // 2 second delay
+
+            return () => clearTimeout(timeoutId);
+        },
+        []
+    );
+
+    /**
+     * Fetches students from Firestore with pagination and search
+     */
+    const fetchStudents = async (searchQuery?: string, searchBy?: string): Promise<void> => {
         try {
             setLoading(true);
             const studentsRef = collection(db, "students");
-            const q = query(studentsRef, orderBy("createdAt", "desc"));
+            
+            let q;
+            if (searchQuery && searchQuery.trim()) {
+                // Search in Firebase using where clause
+                q = query(
+                    studentsRef,
+                    where(searchBy || "firstName", ">=", searchQuery),
+                    where(searchBy || "firstName", "<=", searchQuery + "\uf8ff"),
+                    orderBy(searchBy || "firstName", "asc"),
+                    limit(studentsPerPage)
+                );
+            } else {
+                // Default query - latest students
+                q = query(
+                    studentsRef, 
+                    orderBy("createdAt", "desc"),
+                    limit(studentsPerPage)
+                );
+            }
+            
             const querySnapshot = await getDocs(q);
-
             const studentsData: Student[] = [];
             querySnapshot.forEach((doc) => {
                 studentsData.push({ id: doc.id, ...doc.data() } as Student);
@@ -94,54 +129,39 @@ const StudentList: React.FC = () => {
     };
 
     /**
-     * Filters students based on search term
-     */
-    const filterStudents = (): void => {
-        if (!searchTerm.trim()) {
-            setFilteredStudents(students);
-            setCurrentPage(1);
-            return;
-        }
-
-        const filtered = students.filter((student) => {
-            const searchLower = searchTerm.toLowerCase();
-            return (
-                student.firstName?.toLowerCase().includes(searchLower) ||
-                student.lastName?.toLowerCase().includes(searchLower) ||
-                student.middleName?.toLowerCase().includes(searchLower) ||
-                student.email?.toLowerCase().includes(searchLower) ||
-                student.studentId.toLowerCase().includes(searchLower)
-            );
-        });
-
-        setFilteredStudents(filtered);
-        setCurrentPage(1);
-    };
-
-    /**
-     * Handles search input changes
+     * Handles search input changes with debouncing
      */
     const handleSearchChange = (
         e: React.ChangeEvent<HTMLInputElement>
     ): void => {
-        setSearchTerm(e.target.value);
+        const value = e.target.value;
+        setSearchTerm(value);
+        debouncedSearch(value);
     };
 
     /**
-     * Handles search form submission
+     * Handles search field dropdown changes
      */
-    const handleSearchSubmit = (e: React.FormEvent): void => {
-        e.preventDefault();
-        filterStudents();
+    const handleSearchFieldChange = (
+        e: React.ChangeEvent<HTMLSelectElement>
+    ): void => {
+        setSearchField(e.target.value);
     };
+
+
 
     /**
      * Clears search and resets to show all students
      */
-    const clearSearch = (): void => {
+    const clearSearch = async (): Promise<void> => {
         setSearchTerm("");
-        setFilteredStudents(students);
-        setCurrentPage(1);
+        setSearchField("firstName");
+        setIsSearching(true);
+        try {
+            await fetchStudents();
+        } finally {
+            setIsSearching(false);
+        }
     };
 
     /**
@@ -207,17 +227,26 @@ const StudentList: React.FC = () => {
     // Fetch students on component mount
     useEffect(() => {
         fetchStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Filter students when search term changes
+    // Trigger search when debounced search term changes
     useEffect(() => {
-        filterStudents();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchTerm, students]);
+        if (debouncedSearchTerm.trim()) {
+            setIsSearching(true);
+            fetchStudents(debouncedSearchTerm, searchField).finally(() => {
+                setIsSearching(false);
+            });
+        } else {
+            setIsSearching(true);
+            fetchStudents().finally(() => {
+                setIsSearching(false);
+            });
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [debouncedSearchTerm, searchField]);
 
-    if (loading) {
-        return <LoadingOverlay />;
-    }
+    // Remove the old useEffect that called filterStudents
 
     return (
         <div className="min-h-screen text-zinc-700">
@@ -248,7 +277,7 @@ const StudentList: React.FC = () => {
                         </div>
 
                         <button
-                            onClick={fetchStudents}
+                            onClick={() => fetchStudents()}
                             className="btn btn-outline btn-xs"
                             disabled={loading}
                         >
@@ -262,38 +291,42 @@ const StudentList: React.FC = () => {
                 <div className="card bg-base-100 shadow-sm mb-4 p-3">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         {/* Search Form */}
-                        <form onSubmit={handleSearchSubmit} className="flex-1">
+                        <div className="flex-1">
                             <div className="join w-full">
+                                <select
+                                    value={searchField}
+                                    onChange={handleSearchFieldChange}
+                                    className="select select-bordered select-sm join-item"
+                                    disabled={loading || isSearching}
+                                >
+                                    <option value="firstName">First Name</option>
+                                    <option value="lastName">Last Name</option>
+                                    <option value="studentId">Student ID</option>
+                                </select>
                                 <input
                                     type="text"
-                                    placeholder="Search students..."
+                                    placeholder={`Search by ${searchField}...`}
                                     className="input input-sm input-bordered join-item w-full"
                                     value={searchTerm}
                                     onChange={handleSearchChange}
                                 />
-                                <button
-                                    type="submit"
-                                    className="btn btn-primary btn-sm join-item"
-                                    disabled={loading}
-                                >
-                                    <MdSearch className="text-sm" />
-                                </button>
-                                {searchTerm && (
+                                {(searchTerm || isSearching) && (
                                     <button
                                         type="button"
                                         onClick={clearSearch}
                                         className="btn btn-outline btn-sm join-item"
+                                        disabled={loading || isSearching}
                                     >
                                         Clear
                                     </button>
                                 )}
                             </div>
-                        </form>
+                        </div>
 
                         {/* Stats */}
                         <div className="stats stats-horizontal shadow-sm text-xs">
                             <div className="stat py-1 px-2">
-                                <div className="stat-title text-xs">Total</div>
+                                <div className="stat-title text-xs">Loaded</div>
                                 <div className="stat-value text-sm">
                                     {totalStudents}
                                 </div>
@@ -319,12 +352,12 @@ const StudentList: React.FC = () => {
                                 <h3 className="text-sm font-semibold mb-1">
                                     {searchTerm
                                         ? "No students found"
-                                        : "No students yet"}
+                                        : "No students loaded"}
                                 </h3>
                                 <p className="text-xs text-base-content/60">
                                     {searchTerm
                                         ? "Try adjusting your search"
-                                        : "Students will appear here"}
+                                        : "Latest 10 students will appear here"}
                                 </p>
                             </div>
                         ) : (
@@ -407,7 +440,7 @@ const StudentList: React.FC = () => {
                                                                 variant="secondary"
                                                                 onClick={() =>
                                                                     router.push(
-                                                                        `/admin/student-details/${student.studentId}`
+                                                                        `/admin/student-list/edit?id=${student.id}`
                                                                     )
                                                                 }
                                                             >

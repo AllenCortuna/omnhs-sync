@@ -1,10 +1,11 @@
 import React from "react";
-import { MdEmail, MdPerson, MdLock, MdVisibility, MdVisibilityOff } from "react-icons/md";
+import { HiMail, HiUser, HiLockClosed, HiEye, HiEyeOff } from "react-icons/hi";
 
 interface FormInputProps {
     id: string;
     name: string;
     type: "text" | "email" | "password" | "date";
+    icon?: React.ReactNode;
     value: string;
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     placeholder?: string;
@@ -20,6 +21,7 @@ const FormInput: React.FC<FormInputProps> = ({
     id,
     name,
     type,
+    icon,
     value,
     onChange,
     placeholder,
@@ -33,11 +35,11 @@ const FormInput: React.FC<FormInputProps> = ({
     const getIcon = () => {
         switch (type) {
             case "email":
-                return <MdEmail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 text-base" />;
+                return <HiMail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 text-base" />;
             case "password":
-                return <MdLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 text-base" />;
+                return <HiLockClosed className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 text-base" />;
             default:
-                return <MdPerson className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 text-base" />;
+                return <HiUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 text-base" />;
         }
     };
 
@@ -62,7 +64,7 @@ const FormInput: React.FC<FormInputProps> = ({
                 disabled={disabled}
                 minLength={minLength}
             />
-            {getIcon()}
+            {icon || getIcon()}
             {type === "password" && onTogglePassword && (
                 <button
                     type="button"
@@ -72,9 +74,9 @@ const FormInput: React.FC<FormInputProps> = ({
                     disabled={disabled}
                 >
                     {showPassword ? (
-                        <MdVisibilityOff className="text-base" />
+                        <HiEyeOff className="text-base" />
                     ) : (
-                        <MdVisibility className="text-base" />
+                        <HiEye className="text-base" />
                     )}
                 </button>
             )}

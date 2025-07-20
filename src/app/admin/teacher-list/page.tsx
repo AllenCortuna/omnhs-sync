@@ -1,21 +1,23 @@
 "use client";
 // React and Firebase imports
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
     collection,
     getDocs,
     query,
     orderBy,
+    deleteDoc,
+    where,
+    limit,
 } from "firebase/firestore";
 import { db } from "../../../../firebase";
 
 // Component imports
-import { LoadingOverlay} from "../../../components/common";
+import { ConfirmDeleteModal, Pagination } from "../../../components/common";
 
 // Icon imports from react-icons
 import {
-    MdSearch,
     MdPerson,
     MdEmail,
     MdRefresh,
@@ -25,6 +27,7 @@ import {
 // Toast imports
 import { errorToast } from "../../../config/toast";
 import { Teacher } from "@/interface/user";
+import { ButtonXs } from "@/components/common/ButtonXs";
 
 /**
  * @file TeacherList.tsx - Admin page for displaying list of teachers
@@ -57,26 +60,64 @@ const TeacherList: React.FC = () => {
     const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>("");
+    const [searchField, setSearchField] = useState<string>("firstName");
     const [filteredTeachers, setFilteredTeachers] = useState<Teacher[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [teachersPerPage] = useState<number>(10);
     const [totalTeachers, setTotalTeachers] = useState<number>(0);
+    const [deleteModalOpen, setDeleteModalOpen] = useState<boolean>(false);
+    const [teacherToDelete, setTeacherToDelete] = useState<Teacher | null>(null);
+    const [isDeleting, setIsDeleting] = useState<boolean>(false);
+    const [isSearching, setIsSearching] = useState<boolean>(false);
+    const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
 
     /**
-     * Fetches all teachers from Firestore
+     * Debounced search function
      */
-    const fetchTeachers = async (): Promise<void> => {
+    const debouncedSearch = useCallback(
+        (searchQuery: string) => {
+            const timeoutId = setTimeout(() => {
+                setDebouncedSearchTerm(searchQuery);
+            }, 1000); // 1 second delay
+
+            return () => clearTimeout(timeoutId);
+        },
+        []
+    );
+
+    /**
+     * Fetches teachers from Firestore with pagination and search
+     */
+    const fetchTeachers = async (searchQuery?: string, searchBy?: string): Promise<void> => {
         try {
             setLoading(true);
             const teachersRef = collection(db, "teachers");
-            const q = query(teachersRef, orderBy("createdAt", "desc"));
-            const querySnapshot = await getDocs(q);
             
+            let q;
+            if (searchQuery && searchQuery.trim()) {
+                // Search in Firebase using where clause
+                q = query(
+                    teachersRef,
+                    where(searchBy || "firstName", ">=", searchQuery),
+                    where(searchBy || "firstName", "<=", searchQuery + "\uf8ff"),
+                    orderBy(searchBy || "firstName", "asc"),
+                    limit(teachersPerPage)
+                );
+            } else {
+                // Default query - latest teachers
+                q = query(
+                    teachersRef, 
+                    orderBy("createdAt", "desc"),
+                    limit(teachersPerPage)
+                );
+            }
+            
+            const querySnapshot = await getDocs(q);
             const teachersData: Teacher[] = [];
             querySnapshot.forEach((doc) => {
-                teachersData.push({ ...doc.data() } as Teacher);
+                teachersData.push({ id: doc.id, ...doc.data() } as unknown as Teacher);
             });
-            
+
             setTeachers(teachersData);
             setFilteredTeachers(teachersData);
             setTotalTeachers(teachersData.length);
@@ -89,52 +130,37 @@ const TeacherList: React.FC = () => {
     };
 
     /**
-     * Filters teachers based on search term
+     * Handles search input changes with debouncing
      */
-    const filterTeachers = (): void => {
-        if (!searchTerm.trim()) {
-            setFilteredTeachers(teachers);
-            setCurrentPage(1);
-            return;
-        }
-
-        const filtered = teachers.filter((teacher) => {
-            const searchLower = searchTerm.toLowerCase();
-            return (
-                teacher.firstName?.toLowerCase().includes(searchLower) ||
-                teacher.lastName?.toLowerCase().includes(searchLower) ||
-                teacher.middleName?.toLowerCase().includes(searchLower) ||
-                teacher.email?.toLowerCase().includes(searchLower) ||
-                teacher.employeeId.toLowerCase().includes(searchLower)
-            );
-        });
-
-        setFilteredTeachers(filtered);
-        setCurrentPage(1);
+    const handleSearchChange = (
+        e: React.ChangeEvent<HTMLInputElement>
+    ): void => {
+        const value = e.target.value;
+        setSearchTerm(value);
+        debouncedSearch(value);
     };
 
     /**
-     * Handles search input changes
+     * Handles search field dropdown changes
      */
-    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-        setSearchTerm(e.target.value);
-    };
-
-    /**
-     * Handles search form submission
-     */
-    const handleSearchSubmit = (e: React.FormEvent): void => {
-        e.preventDefault();
-        filterTeachers();
+    const handleSearchFieldChange = (
+        e: React.ChangeEvent<HTMLSelectElement>
+    ): void => {
+        setSearchField(e.target.value);
     };
 
     /**
      * Clears search and resets to show all teachers
      */
-    const clearSearch = (): void => {
+    const clearSearch = async (): Promise<void> => {
         setSearchTerm("");
-        setFilteredTeachers(teachers);
-        setCurrentPage(1);
+        setSearchField("firstName");
+        setIsSearching(true);
+        try {
+            await fetchTeachers();
+        } finally {
+            setIsSearching(false);
+        }
     };
 
     /**
@@ -160,29 +186,78 @@ const TeacherList: React.FC = () => {
         return parts.join(" ");
     };
 
+    const handleDeleteClick = (teacher: Teacher): void => {
+        setTeacherToDelete(teacher);
+        setDeleteModalOpen(true);
+    };
+
+    const handleDeleteConfirm = async (): Promise<void> => {
+        if (!teacherToDelete) return;
+
+        try {
+            setIsDeleting(true);
+            const teacherQuery = query(
+                collection(db, "teachers"),
+                where("employeeId", "==", teacherToDelete.employeeId)
+            );
+            const querySnapshot = await getDocs(teacherQuery);
+            if (!querySnapshot.empty) {
+                await deleteDoc(querySnapshot.docs[0].ref);
+            }
+            
+            // Remove from local state
+            setTeachers(teachers.filter(t => t.employeeId !== teacherToDelete.employeeId));
+            setFilteredTeachers(filteredTeachers.filter(t => t.employeeId !== teacherToDelete.employeeId));
+            setTotalTeachers(prev => prev - 1);
+            
+            setDeleteModalOpen(false);
+            setTeacherToDelete(null);
+        } catch (error) {
+            console.error("Error deleting teacher:", error);
+            errorToast("Failed to delete teacher. Please try again.");
+        } finally {
+            setIsDeleting(false);
+        }
+    };
+
+    const handleDeleteCancel = (): void => {
+        setDeleteModalOpen(false);
+        setTeacherToDelete(null);
+    };
+
     // Calculate pagination
     const indexOfLastTeacher = currentPage * teachersPerPage;
     const indexOfFirstTeacher = indexOfLastTeacher - teachersPerPage;
-    const currentTeachers = filteredTeachers.slice(indexOfFirstTeacher, indexOfLastTeacher);
+    const currentTeachers = filteredTeachers.slice(
+        indexOfFirstTeacher,
+        indexOfLastTeacher
+    );
     const totalPages = Math.ceil(filteredTeachers.length / teachersPerPage);
 
     // Fetch teachers on component mount
     useEffect(() => {
         fetchTeachers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // Filter teachers when search term changes
+    // Trigger search when debounced search term changes
     useEffect(() => {
-        filterTeachers();
+        if (debouncedSearchTerm.trim()) {
+            setIsSearching(true);
+            fetchTeachers(debouncedSearchTerm, searchField).finally(() => {
+                setIsSearching(false);
+            });
+        } else {
+            setIsSearching(true);
+            fetchTeachers().finally(() => {
+                setIsSearching(false);
+            });
+        }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchTerm, teachers]);
-
-    if (loading) {
-        return <LoadingOverlay />;
-    }
+    }, [debouncedSearchTerm, searchField]);
 
     return (
-        <div className="min-h-screen p-2 text-zinc-700">
+        <div className="min-h-screen text-zinc-700">
             <div className="max-w-7xl mx-auto">
                 <button
                     onClick={() => router.push("/admin/create-teacher")}
@@ -206,7 +281,7 @@ const TeacherList: React.FC = () => {
                         </div>
                         
                         <button
-                            onClick={fetchTeachers}
+                            onClick={() => fetchTeachers()}
                             className="btn btn-outline btn-xs"
                             disabled={loading}
                         >
@@ -220,38 +295,42 @@ const TeacherList: React.FC = () => {
                 <div className="card bg-base-100 shadow-sm mb-4 p-3">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                         {/* Search Form */}
-                        <form onSubmit={handleSearchSubmit} className="flex-1">
+                        <div className="flex-1">
                             <div className="join w-full">
+                                <select
+                                    value={searchField}
+                                    onChange={handleSearchFieldChange}
+                                    className="select select-bordered select-sm join-item"
+                                    disabled={loading || isSearching}
+                                >
+                                    <option value="firstName">First Name</option>
+                                    <option value="lastName">Last Name</option>
+                                    <option value="employeeId">Employee ID</option>
+                                </select>
                                 <input
                                     type="text"
-                                    placeholder="Search teachers..."
+                                    placeholder={`Search by ${searchField}...`}
                                     className="input input-sm input-bordered join-item w-full"
                                     value={searchTerm}
                                     onChange={handleSearchChange}
                                 />
-                                <button
-                                    type="submit"
-                                    className="btn btn-accent btn-sm join-item"
-                                    disabled={loading}
-                                >
-                                    <MdSearch className="text-sm" />
-                                </button>
-                                {searchTerm && (
+                                {(searchTerm || isSearching) && (
                                     <button
                                         type="button"
                                         onClick={clearSearch}
                                         className="btn btn-outline btn-sm join-item"
+                                        disabled={loading || isSearching}
                                     >
                                         Clear
                                     </button>
                                 )}
                             </div>
-                        </form>
+                        </div>
 
                         {/* Stats */}
                         <div className="stats stats-horizontal shadow-sm text-xs">
                             <div className="stat py-1 px-2">
-                                <div className="stat-title text-xs">Total</div>
+                                <div className="stat-title text-xs">Loaded</div>
                                 <div className="stat-value text-sm">{totalTeachers}</div>
                             </div>
                             <div className="stat py-1 px-2">
@@ -269,10 +348,14 @@ const TeacherList: React.FC = () => {
                             <div className="p-4 text-center">
                                 <MdPerson className="text-4xl text-base-content/20 mx-auto mb-2" />
                                 <h3 className="text-sm font-semibold mb-1">
-                                    {searchTerm ? "No teachers found" : "No teachers yet"}
+                                    {searchTerm
+                                        ? "No teachers found"
+                                        : "No teachers loaded"}
                                 </h3>
                                 <p className="text-xs text-base-content/60">
-                                    {searchTerm ? "Try adjusting your search" : "Teachers will appear here"}
+                                    {searchTerm
+                                        ? "Try adjusting your search"
+                                        : "Latest 10 teachers will appear here"}
                                 </p>
                             </div>
                         ) : (
@@ -285,6 +368,7 @@ const TeacherList: React.FC = () => {
                                                 <th className="bg-base-200 text-xs">Contact</th>
                                                 <th className="bg-base-200 text-xs">Position</th>
                                                 <th className="bg-base-200 text-xs">Created</th>
+                                                <th className="bg-base-200 text-xs">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody className="text-xs">
@@ -316,7 +400,45 @@ const TeacherList: React.FC = () => {
                                                     </td>
                                                     <td>
                                                         <div className="text-xs text-base-content/60">
+                                                            {teacher.designation || "N/A"}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div className="text-xs text-base-content/60">
                                                             {formatDate(teacher.createdAt)}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div className="text-xs text-base-content/60">
+                                                            <ButtonXs
+                                                                variant="primary"
+                                                                onClick={() =>
+                                                                    router.push(
+                                                                            `/admin/teacher-list/view-teacher?id=${teacher.id}`
+                                                                    )
+                                                                }
+                                                            >
+                                                                View
+                                                            </ButtonXs>
+                                                            <ButtonXs
+                                                                variant="secondary"
+                                                                onClick={() =>
+                                                                    router.push(
+                                                                        `/admin/teacher-list/edit?id=${teacher.id}`
+                                                                    )
+                                                                }
+                                                            >
+                                                                Edit
+                                                            </ButtonXs>
+                                                            <ButtonXs
+                                                                variant="error"
+                                                                onClick={() =>
+                                                                    handleDeleteClick(teacher)
+                                                                }
+                                                                className="text-white"
+                                                            >
+                                                                Delete
+                                                            </ButtonXs>
                                                         </div>
                                                     </td>
                                                 </tr>
@@ -326,42 +448,29 @@ const TeacherList: React.FC = () => {
                                 </div>
 
                                 {/* Pagination */}
-                                {totalPages > 1 && (
-                                    <div className="flex justify-center p-2 border-t">
-                                        <div className="join">
-                                            <button
-                                                className="join-item btn btn-xs"
-                                                onClick={() => setCurrentPage(currentPage - 1)}
-                                                disabled={currentPage === 1}
-                                            >
-                                                «
-                                            </button>
-                                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                                <button
-                                                    key={page}
-                                                    className={`join-item btn btn-xs ${
-                                                        currentPage === page ? "btn-active" : ""
-                                                    }`}
-                                                    onClick={() => setCurrentPage(page)}
-                                                >
-                                                    {page}
-                                                </button>
-                                            ))}
-                                            <button
-                                                className="join-item btn btn-xs"
-                                                onClick={() => setCurrentPage(currentPage + 1)}
-                                                disabled={currentPage === totalPages}
-                                            >
-                                                »
-                                            </button>
-                                        </div>
-                                    </div>
-                                )}
+                                <Pagination
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
+                                    onPageChange={setCurrentPage}
+                                    totalItems={filteredTeachers.length}
+                                    itemsPerPage={teachersPerPage}
+                                />
                             </>
                         )}
                     </div>
                 </div>
             </div>
+
+            {/* Confirm Delete Modal */}
+            <ConfirmDeleteModal
+                isOpen={deleteModalOpen}
+                onClose={handleDeleteCancel}
+                onConfirm={handleDeleteConfirm}
+                title="Delete Teacher"
+                message="Are you sure you want to delete this teacher? This action will permanently remove the teacher from the system."
+                itemName={teacherToDelete ? `${teacherToDelete.firstName} ${teacherToDelete.lastName}` : undefined}
+                isLoading={isDeleting}
+            />
         </div>
     );
 };

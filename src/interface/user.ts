@@ -8,11 +8,13 @@ export interface Admin {
 }
 
 export interface Teacher {
+    id?: string;
     employeeId: string;
     email: string;
     firstName: string;
     lastName: string;
     middleName?: string;
+    designation?: string;
     createdAt: string;
     lastLoginAt: string;
     profileRef: string; // reference to the teacher's profile in storage

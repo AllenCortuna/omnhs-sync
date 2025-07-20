@@ -3,7 +3,7 @@ import React, { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
-import { HiHome, HiAcademicCap, HiUser, HiDocumentText, HiUserGroup, HiLogout, HiMenu, HiX } from 'react-icons/hi';
+import { HiHome, HiAcademicCap, HiUserGroup, HiLogout, HiMenu, HiX, HiCalendar } from 'react-icons/hi';
 import { auth } from '../../../firebase';
 
 // Types and Interfaces
@@ -37,10 +37,9 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const primaryNavItems: NavigationItemProps[] = [
     { href: '/teachers/dashboard', icon: HiHome, label: 'Dashboard' },
-    { href: '/teachers/profile', icon: HiUser, label: 'Profile' },
     { href: '/teachers/classes', icon: HiAcademicCap, label: 'Classes' },
     { href: '/teachers/students', icon: HiUserGroup, label: 'Students' },
-    { href: '/teachers/documents', icon: HiDocumentText, label: 'Documents' },
+    { href: '/teachers/calendar', icon: HiCalendar, label: 'Calendar' },
   ];
 
   // Close mobile menu when screen size changes to desktop
