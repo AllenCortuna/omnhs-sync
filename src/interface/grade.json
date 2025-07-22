@@ -1,0 +1,31 @@
+{
+    "sectionId": "section123",
+    "sectionName": "Section A",
+    "subjectId": "subject456",
+    "subjectName": "Mathematics",
+    "quarter": "1st",
+    "schoolYear": "2023-2024",
+    "teacherId": "teacher789",
+    "teacherName": "Mr. Smith",
+    "createdAt": "2024-06-01T12:00:00Z",
+    "studentData": [
+      {
+        "id": "studentGrade1",
+        "studentId": "student001",
+        "studentName": "Alice",
+        "firstQuarterGrade": 90,
+        "secondQuarterGrade": 92,
+        "finalGrade": 91,
+        "remarks": "Excellent"
+      },
+      {
+        "id": "studentGrade2",
+        "studentId": "student002",
+        "studentName": "Bob",
+        "firstQuarterGrade": 85,
+        "secondQuarterGrade": 87,
+        "finalGrade": 86,
+        "remarks": "Good"
+      }
+    ]
+  }

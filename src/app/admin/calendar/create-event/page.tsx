@@ -50,7 +50,7 @@ export function CreateEventPage() {
   }
 
   return (
-    <div className="min-h-screen bg-base-200 text-zinc-700">
+    <div className="min-h-screen text-zinc-700">
       <div className="max-w-xl mx-auto p-6">
         <div className="flex items-center gap-4 mb-6">
           <BackButton onClick={() => router.back()} variant="outline" size="sm" />

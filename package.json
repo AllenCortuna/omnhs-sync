@@ -11,6 +11,11 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.18",
+    "@fullcalendar/daygrid": "^6.1.18",
+    "@fullcalendar/interaction": "^6.1.18",
+    "@fullcalendar/react": "^6.1.18",
+    "@fullcalendar/timegrid": "^6.1.18",
     "@testing-library/react": "^16.3.0",
     "browser-image-compression": "^2.0.2",
     "date-fns": "^4.1.0",
