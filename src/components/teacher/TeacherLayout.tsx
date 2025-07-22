@@ -134,7 +134,7 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
               <HiAcademicCap className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-primary martian-mono">OMNHS SYNC</h2>
+              <h2 className="text-xl font-bold text-primary martian-mono">OMNHSYNC</h2>
               <p className="text-primary text-sm">Teacher Portal</p>
             </div>
           </div>

@@ -3,7 +3,7 @@ import React, { ReactNode, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
-import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX, HiCog } from 'react-icons/hi';
+import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX, HiCog, HiCalendar } from 'react-icons/hi';
 import { auth } from '../../../firebase';
 
 // Types and Interfaces
@@ -39,6 +39,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { href: '/admin/dashboard', icon: HiHome, label: 'Dashboard' },
     { href: '/admin/student-list', icon: HiAcademicCap, label: 'Student List' },
     { href: '/admin/teacher-list', icon: HiUserGroup, label: 'Teacher List' },
+    { href: '/admin/calendar', icon: HiCalendar, label: 'Calendar' },
     { href: '/admin/enrollees', icon: HiUserAdd, label: 'Enrollee' },
     { href: '/admin/settings', icon: HiCog, label: 'Settings' },
   ];
@@ -116,7 +117,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               <HiShieldCheck className="w-6 h-6 text-primary" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-primary martian-mono">OMNHS SYNC</h2>
+              <h2 className="text-xl font-bold text-primary martian-mono">OMNHSYNC</h2>
               <p className="text-primary text-sm">Dashboard</p>
             </div>
           </div>

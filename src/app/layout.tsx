@@ -9,7 +9,7 @@ const font = Montserrat({
 });
 
 export const metadata = {
-  title: "OMNHS SYNC",
+  title: "OMNHSYNC",
   description: "Occidental Mindoro National High School Sync",
 };
 

@@ -11,6 +11,7 @@ import {
 } from "react-icons/hi";
 import { auth } from "../../firebase";
 import { successToast, errorToast } from "../config/toast";
+import Link from "next/link";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -328,7 +329,7 @@ const LoginAdmin: React.FC = () => {
                     </div>
                     <div>
                         <h1 className="text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent martian-mono">
-                            OMNHS SYNC
+                            OMNHSYNC
                         </h1>
                         <p className="text-xs text-gray-500 mt-2 ">
                             Occidental Mindanao National High School
@@ -444,18 +445,15 @@ const LoginAdmin: React.FC = () => {
                         </form>
                     </div>
                 </div>
-
-                {/* Footer */}
-                <div className="text-center space-y-2">
-                    <p className="text-sm text-base-content/60">
-                        Secure staff access • Protected by authentication
+                <div className="text-center flex flex-col gap-2">
+                    <p className="text-xs text-base-content/60 underline">
+                         <Link href="/student-signup" className="text-primary cursor-pointer">Sign up as Student?</Link>
                     </p>
-                    <div className="flex justify-center gap-1">
-                        <div className="w-1 h-1 rounded-full bg-primary animate-bounce"></div>
-                        <div className="w-1 h-1 rounded-full bg-primary animate-bounce delay-100"></div>
-                        <div className="w-1 h-1 rounded-full bg-primary animate-bounce delay-200"></div>
-                    </div>
+                    <p className="text-xs text-base-content/60 underline">
+                         <Link href="/teacher-signup" className="text-primary cursor-pointer">Sign up as Teacher?</Link>
+                    </p>
                 </div>
+
             </div>
         </div>
     );
