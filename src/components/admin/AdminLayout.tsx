@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX, HiCog, HiCalendar } from 'react-icons/hi';
 import { auth } from '../../../firebase';
+import { usePendingEnrollmentCount } from "@/hooks/usePendingEnrollmentCount";
 
 // Types and Interfaces
 interface AdminLayoutProps {
@@ -35,12 +36,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { count: pendingCount, loading: pendingLoading } = usePendingEnrollmentCount();
   const primaryNavItems: NavigationItemProps[] = [
     { href: '/admin/dashboard', icon: HiHome, label: 'Dashboard' },
     { href: '/admin/student-list', icon: HiAcademicCap, label: 'Student List' },
     { href: '/admin/teacher-list', icon: HiUserGroup, label: 'Teacher List' },
     { href: '/admin/calendar', icon: HiCalendar, label: 'Calendar' },
-    { href: '/admin/enrollees', icon: HiUserAdd, label: 'Enrollee' },
+    { href: '/admin/enrollees', icon: HiUserAdd, label: 'Enrollee', showNotification: true, notificationCount: pendingCount, loading: pendingLoading },
     { href: '/admin/settings', icon: HiCog, label: 'Settings' },
   ];
 

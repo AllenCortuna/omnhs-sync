@@ -18,7 +18,7 @@ export interface Subject {
     quarter: string;
 }
 
-export interface StudentData {
+export interface StudentGrade {
     id: string;
     studentId: string; // reference to the student
     studentName: string; // reference to the data record
@@ -28,19 +28,20 @@ export interface StudentData {
     remarks: string;
 }
 
-// SubjectRecord is a record of a subject's data for a specific section, quarter, school year, and term
+// SubjectRecord is a record of a subject's data for a specific section, semester, school year, and term
 export interface SubjectRecord{
     id: string;
     sectionId: string; // reference to the section
     sectionName: string; // reference to the section
     subjectId: string; // reference to the subject
     subjectName: string; // reference to the subject
-    quarter: string;
+    semester: string;
     schoolYear: string;
     teacherId: string; // reference to the teacher
     teacherName: string; // reference to the teacher
     createdAt: string;
-    studentData: StudentData[];
+    studentGrades: StudentGrade[];
+    studentList: [string];
 }
 
 export interface Enrollment {

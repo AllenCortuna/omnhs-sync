@@ -148,8 +148,8 @@ input[type="number"] {
   }
   
   .calendar-contain .fc-event {
-    border: 1px solid #244e8a;
-    background-color: #244e8a;
+    border: 1px solid #885d24;
+    background-color: #885d24;
     width: 90%;
     margin: 5% 2.5%;
     cursor: pointer;
