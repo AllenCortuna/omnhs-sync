@@ -116,7 +116,7 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
     <div className="flex min-h-screen bg-base-100 apercu-mono">
       {/* Notification Icon */}
       <button
-        className="fixed top-4 right-4 z-50 p-2 rounded-full bg-white shadow-lg border border-zinc-200 hover:bg-primary/10 transition-colors"
+        className="fixed top-4 right-20 z-50 p-2 rounded-full bg-white shadow-lg border border-zinc-200 hover:bg-primary/10 transition-colors"
         onClick={() => setNotifOpen(true)}
         aria-label="Notifications"
       >

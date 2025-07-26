@@ -70,7 +70,7 @@ export function StudentNotification({ open, onClose }: StudentNotificationProps)
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-end bg-black/20">
+    <div className="fixed inset-0 z-50 flex items-start pt-20 justify-end bg-black/20">
       <div className="bg-zinc-50 rounded-lg shadow-lg w-full max-w-sm mt-6 mr-6 p-4 relative animate-fade-in">
         <button
           className="absolute top-2 right-2 btn btn-xs btn-circle btn-ghost"

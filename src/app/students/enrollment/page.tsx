@@ -25,6 +25,7 @@ import { formatDate } from "@/config/format";
 
 interface EnrollmentWithStrand extends Enrollment {
     strandName?: string;
+    rejectionReason?: string;
 }
 
 const EnrollmentList: React.FC = () => {
@@ -185,7 +186,7 @@ ${enrollment.copyOfGrades ? 'Grades: ✓ Uploaded' : 'Grades: Not uploaded'}`);
                 </div>
                 <button
                     onClick={handleNewEnrollment}
-                    className="btn fixed bottom-5 right-5 btn-primary gap-2"
+                    className="btn z-50 fixed bottom-5 right-5 btn-primary gap-2"
                 >
                     <HiPlus className="w-4 h-4" />
                     New Enrollment
@@ -225,6 +226,13 @@ ${enrollment.copyOfGrades ? 'Grades: ✓ Uploaded' : 'Grades: Not uploaded'}`);
                                             </h3>
                                             {getStatusBadge(enrollment.status || "pending")}
                                         </div>
+                                        {/* Show rejection reason if rejected */}
+                                        {enrollment.status === "rejected" && enrollment.rejectionReason && (
+                                            <div className="flex items-center gap-2 mb-2 p-2 bg-red-50 border border-red-200 rounded">
+                                                <HiXCircle className="w-4 h-4 text-red-500" />
+                                                <span className="text-sm text-red-700 font-medium">Reason: {enrollment.rejectionReason}</span>
+                                            </div>
+                                        )}
                                         
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                                             <div className="flex items-center gap-2">

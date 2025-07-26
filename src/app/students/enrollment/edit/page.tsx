@@ -127,6 +127,13 @@ const EditEnrollment: React.FC = () => {
         const fetchEnrollment = async () => {
             if (!enrollmentId || !userData || userLoading) return;
 
+            // Defensive check for invalid enrollmentId
+            if (enrollmentId === 'undefined' || enrollmentId === 'null') {
+                errorToast("Invalid enrollment ID.");
+                router.push("/students/enrollment");
+                return;
+            }
+
             try {
                 setInitialLoading(true);
                 const enrollmentRef = doc(db, "enrollment", enrollmentId);
@@ -290,7 +297,8 @@ const EditEnrollment: React.FC = () => {
             }
             
             // Update enrollment in Firestore
-            const enrollmentRef = doc(db, "enrollment", enrollment.id);
+            console.log('Updating enrollment:', enrollment.id);
+            const enrollmentRef = doc(db, "enrollment", enrollmentId || "");
             await updateDoc(enrollmentRef, {
                 strandId: form.strandId || "",
                 semester: form.semester || "",
@@ -304,8 +312,6 @@ const EditEnrollment: React.FC = () => {
                 lastSchoolYear: form.lastSchoolYear || "",
                 updatedAt: new Date().toISOString(),
             });
-            
-            console.log('Enrollment updated successfully');
             successToast("Enrollment updated successfully!");
             router.push("/students/enrollment");
         } catch (error) {

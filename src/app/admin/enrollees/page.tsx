@@ -92,7 +92,7 @@ const EnrolleeListPage = () => {
     if (!rejectEnrollment) return;
     setLoading(true);
     const ref = doc(db, "enrollment", rejectEnrollment.id);
-    await updateDoc(ref, { status: "rejected", rejectionReason: reason });
+    await updateDoc(ref, { status: "rejected", rejectionReason: `${reason}. Please resubmit your enrollment.` });
     setRejectModalOpen(false);
     setRejectEnrollment(null);
     // Refresh enrollments
