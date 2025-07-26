@@ -13,7 +13,7 @@ interface FormState {
   endDate: string;
 }
 
-export function CreateEventPage() {
+const CreateEventPage = () => {
   const router = useRouter();
   const [form, setForm] = useState<FormState>({
     title: '',

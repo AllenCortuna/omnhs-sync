@@ -32,7 +32,7 @@ function EventModal({ event, onClose }: EventModalProps) {
   );
 }
 
-export function TeachersCalendarPage() {
+const TeachersCalendarPage = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [modalEvent, setModalEvent] = useState<CalendarEvent | null>(null);

@@ -5,16 +5,17 @@ import { db } from "../../../../firebase";
 import { Enrollment } from "@/interface/info";
 import { formatDate } from "@/config/format";
 import { HiAcademicCap, HiCalendar, HiChevronLeft, HiChevronRight, HiClock, HiSearch, HiUser } from "react-icons/hi";
-import { ApproveEnrollmentModal } from "@/components/admin/ApproveEnrollmentModal";
+import ApproveEnrollmentModal from "@/components/admin/ApproveEnrollmentModal";
 import { doc, updateDoc } from "firebase/firestore";
 import { strandService } from "@/services/strandService";
 import type { Strand } from "@/interface/info";
 import { ViewEnrollmentModal } from "@/components/admin/ViewEnrollmentModal";
 import { RejectEnrollmentModal } from "@/components/admin/RejectEnrollmentModal";
+import { useNotifyEnrollmentStatus } from "@/hooks/useNotifyEnrollmentStatus";
 
 const PAGE_SIZE = 10;
 
-export default function EnrolleeListPage() {
+const EnrolleeListPage = () => {
   const [enrollments, setEnrollments] = useState<Enrollment[]>([]);
   const [statusFilter, setStatusFilter] = useState<string>("pending");
   const [search, setSearch] = useState("");
@@ -29,6 +30,7 @@ export default function EnrolleeListPage() {
   const [viewEnrollment, setViewEnrollment] = useState<Enrollment | null>(null);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectEnrollment, setRejectEnrollment] = useState<Enrollment | null>(null);
+  const { notifyEnrollmentStatus } = useNotifyEnrollmentStatus();
 
   useEffect(() => {
     async function fetchEnrollments() {
@@ -77,6 +79,8 @@ export default function EnrolleeListPage() {
     await updateDoc(ref, { status: "approved", sectionId });
     setModalOpen(false);
     setSelectedEnrollment(null);
+    // notify student that they are approved
+    await notifyEnrollmentStatus({ studentId: selectedEnrollment.studentId, title: "Enrollment Approved", description: `Your enrollment has been approved for ${selectedEnrollment.semester} semester ${selectedEnrollment.schoolYear}.` });
     // Refresh enrollments
     const q = query(collection(db, "enrollment"), orderBy("createdAt", "desc"));
     const snapshot = await getDocs(q);
@@ -231,4 +235,6 @@ export default function EnrolleeListPage() {
       />
     </div>
   );
-} 
+}
+
+export default EnrolleeListPage;

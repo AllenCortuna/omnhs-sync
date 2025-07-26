@@ -3,8 +3,9 @@ import React, { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
-import { HiHome, HiAcademicCap, HiDocumentText, HiLogout, HiMenu, HiX, HiCalendar, HiCog } from 'react-icons/hi';
+import { HiHome, HiAcademicCap, HiDocumentText, HiLogout, HiMenu, HiX, HiCalendar, HiCog, HiBell } from 'react-icons/hi';
 import { auth } from '../../../firebase';
+import { StudentNotification } from './StudentNotification';
 
 // Types and Interfaces
 interface StudentLayoutProps {
@@ -35,6 +36,7 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
   const primaryNavItems: NavigationItemProps[] = [
     { href: '/students/dashboard', icon: HiHome, label: 'Dashboard' },
     { href: '/students/enrollment', icon: HiAcademicCap, label: 'Enrollment' },
@@ -112,6 +114,19 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
 
   return (
     <div className="flex min-h-screen bg-base-100 apercu-mono">
+      {/* Notification Icon */}
+      <button
+        className="fixed top-4 right-4 z-50 p-2 rounded-full bg-white shadow-lg border border-zinc-200 hover:bg-primary/10 transition-colors"
+        onClick={() => setNotifOpen(true)}
+        aria-label="Notifications"
+      >
+        <HiBell className="w-6 h-6 text-primary" />
+        {/* Optionally add a red dot for unread notifications */}
+      </button>
+      <StudentNotification
+        open={notifOpen}
+        onClose={() => setNotifOpen(false)}
+      />
       {/* Mobile Menu Button */}
       <button 
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

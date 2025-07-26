@@ -9,9 +9,9 @@ interface ApproveEnrollmentModalProps {
   onClose: () => void;
   enrollment: Enrollment | null;
   onApprove: (sectionId: string) => void;
-}
+} 
 
-export function ApproveEnrollmentModal({ open, onClose, enrollment, onApprove }: ApproveEnrollmentModalProps) {
+const ApproveEnrollmentModal = ({ open, onClose, enrollment, onApprove }: ApproveEnrollmentModalProps) => {
   const [sections, setSections] = useState<Section[]>([]);
   const [selectedSection, setSelectedSection] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -66,4 +66,6 @@ export function ApproveEnrollmentModal({ open, onClose, enrollment, onApprove }:
       <div className="modal-backdrop" onClick={onClose}></div>
     </div>
   );
-} 
+}
+
+export default ApproveEnrollmentModal;

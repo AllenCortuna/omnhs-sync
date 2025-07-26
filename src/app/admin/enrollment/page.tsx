@@ -8,7 +8,7 @@ import { sectionService } from "@/services/sectionService";
 import { errorToast, successToast } from "@/config/toast";
 import type { Enrollment, Strand, Section } from "@/interface/info";
 import { LoadingOverlay } from "@/components/common";
-import { ApproveEnrollmentModal } from "@/components/admin";
+import ApproveEnrollmentModal from "@/components/admin/ApproveEnrollmentModal";
 import { formatDate } from "@/config/format";
 import { 
     HiAcademicCap, 
@@ -29,7 +29,7 @@ interface EnrollmentWithDetails extends Enrollment {
 
 
 
-function AdminEnrollmentPage() {
+const AdminEnrollmentPage = () => {
     const { userData, isLoading: userLoading } = useSaveUserData({
         role: "admin",
     });
@@ -506,4 +506,4 @@ function AdminEnrollmentPage() {
     );
 }
 
-export default AdminEnrollmentPage;
+    export default AdminEnrollmentPage;

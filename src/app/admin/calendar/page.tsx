@@ -20,7 +20,7 @@ function groupEventsByDate(events: CalendarEvent[]) {
     return map;
 }
 
-export function AdminCalendarPage() {
+const AdminCalendarPage = () => {
     const router = useRouter();
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     const [isLoading, setIsLoading] = useState(true);

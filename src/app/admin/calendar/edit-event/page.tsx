@@ -14,7 +14,7 @@ interface FormState {
   endDate: string;
 }
 
-export function EditEventPage() {
+const EditEventPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
