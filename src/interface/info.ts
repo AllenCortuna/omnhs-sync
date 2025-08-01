@@ -47,6 +47,7 @@ export interface SubjectRecord{
 export interface Enrollment {
     id: string;
     studentId: string; // reference to the student
+    gradeLevel: string; // reference to the grade level
     strandId: string; // reference to the strand
     semester: string; // reference to the semester
     schoolYear: string; // reference to the school year

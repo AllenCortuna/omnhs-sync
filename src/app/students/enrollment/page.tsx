@@ -238,6 +238,13 @@ ${enrollment.copyOfGrades ? 'Grades: ✓ Uploaded' : 'Grades: Not uploaded'}`);
                                             <div className="flex items-center gap-2">
                                                 <HiCalendar className="w-4 h-4 text-gray-500" />
                                                 <span className="text-gray-600">
+                                                    {enrollment.gradeLevel} Level
+                                                </span>
+                                            </div>
+                                            
+                                            <div className="flex items-center gap-2">
+                                                <HiCalendar className="w-4 h-4 text-gray-500" />
+                                                <span className="text-gray-600">
                                                     {enrollment.semester} Semester
                                                 </span>
                                             </div>

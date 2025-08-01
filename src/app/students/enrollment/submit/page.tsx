@@ -80,6 +80,7 @@ function validateFile(file: File): boolean {
 }
 
 const initialForm: Partial<Enrollment> = {
+    gradeLevel: "",
     strandId: "",
     schoolYear: "",
     semester: "",
@@ -273,6 +274,7 @@ const StudentEnrollment: React.FC = () => {
             const enrollment: Enrollment = {
                 id: "", // Firestore will generate
                 studentId: userData.studentId,
+                gradeLevel: form.gradeLevel || "",
                 strandId: form.strandId || "",
                 semester: form.semester || "",
                 schoolYear: form.schoolYear || "",
@@ -338,6 +340,19 @@ const StudentEnrollment: React.FC = () => {
                     onChange={handleChange}
                     options={strands}
                     placeholder="Select Strand"
+                    required
+                    disabled={loading}
+                />
+                <FormSelect
+                    id="gradeLevel"
+                    name="gradeLevel"
+                    value={form.gradeLevel || ""}
+                    onChange={handleChange}
+                    options={[
+                        { value: "Grade 11", label: "Grade 11" },
+                        { value: "Grade 12", label: "Grade 12" },
+                    ]}
+                    placeholder="Select Grade Level"
                     required
                     disabled={loading}
                 />

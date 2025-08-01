@@ -12,6 +12,7 @@ import {
 import { auth } from "../../firebase";
 import { successToast, errorToast } from "../config/toast";
 import Link from "next/link";
+import { FaUserCog, FaUserGraduate, FaUserTie } from "react-icons/fa";
 
 // ============================================================================
 // TYPES & INTERFACES
@@ -59,7 +60,7 @@ const LoginAdmin: React.FC = () => {
         email: "",
         password: "",
     });
-    const [role, setRole] = useState<string>("admin");
+    const [role, setRole] = useState<string>("");
 
     /** Password visibility toggle state */
     const [showPassword, setShowPassword] = useState<boolean>(false);
@@ -316,17 +317,55 @@ const LoginAdmin: React.FC = () => {
     // RENDER
     // ========================================================================
 
+    if (role === "") {
+        return (
+            <div className="min-h-screen bg-[#ffffff] flex items-center justify-center p-4 animate-gradient-x">
+                <div className="w-full max-w-md space-y-8 transform hover:scale-[1.01] transition-transform duration-300">
+                    <div> 
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        {/* <img src="/img/logo.png" alt="OMNHSYNC" className="w-20 h-20 mx-auto" /> */}
+                        <h1 className="text-5xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent martian-mono">
+                            OMNHSYNC
+                        </h1>
+                        <p className="text-xs text-gray-500 mt-2 ">
+                            Occidental Mindanao National High School
+                        </p>
+                    </div>
+
+                    <div className="flex flex-row gap-2 martian-mono">
+                        <button
+                            className="flex flex-col p-4 items-center justify-center gap-2 border-2 border-secondary text-primary w-1/3 normal-case text-xs font-semibold shadow-lg hover:shadow-primary/30 transition-all duration-300 rounded-xl hover:bg-primary hover:text-white"
+                            onClick={() => setRole("admin")}
+                        >
+                            <FaUserCog className="w-5 h-5" />
+                            <span>Sign In as Admin</span>
+                        </button>
+
+                        <button
+                            className="flex flex-col p-4 items-center justify-center gap-2 border-2 border-secondary text-primary w-1/3 normal-case text-xs font-semibold shadow-lg hover:shadow-primary/30 transition-all duration-300 rounded-xl hover:bg-primary hover:text-white"
+                            onClick={() => setRole("teachers")}
+                        >
+                            <FaUserTie className="w-5 h-5" />
+                            <span>Sign In as Teacher</span>
+                        </button>
+                        <button
+                            className="flex flex-col p-4 items-center justify-center gap-2 border-2 border-secondary text-primary w-1/3 normal-case text-xs font-semibold shadow-lg hover:shadow-primary/30 transition-all duration-300 rounded-xl hover:bg-primary hover:text-white"
+                            onClick={() => setRole("students")}
+                        >
+                            <FaUserGraduate className="w-5 h-5" />
+                            <span>Sign In as Student</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="min-h-screen bg-[#ffffff] flex items-center justify-center p-4 animate-gradient-x">
             <div className="w-full max-w-md space-y-8 transform hover:scale-[1.01] transition-transform duration-300">
                 {/* Header Section */}
                 <div className="text-center space-y-4">
-                    <div className="relative mx-auto w-20 h-20">
-                        <div className="absolute inset-0 bg-primary/20 rounded-2xl blur-xl animate-pulse"></div>
-                        <div className="relative bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center h-full shadow-lg">
-                            <HiShieldCheck className="w-10 h-10 text-white animate-bounce" />
-                        </div>
-                    </div>
                     <div>
                         <h1 className="text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent martian-mono">
                             OMNHSYNC
@@ -343,20 +382,9 @@ const LoginAdmin: React.FC = () => {
                         <form onSubmit={handleLogin} className="space-y-10">
                             {/* Role Selector */}
                             <div className="form-control">
-                                <label className="label">
-                                    <span className="label-text text-zinc-500 font-medium text-base-content/80 text-xs">
-                                        Role
-                                    </span>
-                                </label>
-                                <select
-                                    className="select select-bordered w-full text-xs text-primary"
-                                    value={role}
-                                    onChange={(e) => setRole(e.target.value)}
-                                >
-                                    <option value="admin">Admin</option>
-                                    <option value="teachers">Teacher</option>
-                                    <option value="students">Student</option>
-                                </select>
+                                <span className="text-primary font-semibold martian-mono text-xs text-center">
+                                    Sign In as {role}
+                                </span>
                             </div>
 
                             {/* Email Input */}
@@ -447,13 +475,28 @@ const LoginAdmin: React.FC = () => {
                 </div>
                 <div className="text-center flex flex-col gap-2">
                     <p className="text-xs text-base-content/60 underline">
-                         <Link href="/student-signup" className="text-primary cursor-pointer">Sign up as Student?</Link>
+                        <Link
+                            href="/student-signup"
+                            className="text-primary cursor-pointer"
+                        >
+                            Sign up as Student?
+                        </Link>
                     </p>
                     <p className="text-xs text-base-content/60 underline">
-                         <Link href="/teacher-signup" className="text-primary cursor-pointer">Sign up as Teacher?</Link>
+                        <Link
+                            href="/teacher-signup"
+                            className="text-primary cursor-pointer"
+                        >
+                            Sign up as Teacher?
+                        </Link>
                     </p>
+                    <button
+                        className="btn btn-secondary text-white text-xs font-semibold shadow-lg hover:shadow-primary/30 transition-all duration-300 min-h-12 w-20 mx-auto"
+                        onClick={() => setRole("")}
+                    >
+                        Change Role
+                    </button>
                 </div>
-
             </div>
         </div>
     );

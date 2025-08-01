@@ -261,7 +261,7 @@ const TeacherList: React.FC = () => {
             <div className="max-w-7xl mx-auto">
                 <button
                     onClick={() => router.push("/admin/create-teacher")}
-                    className="btn btn-accent shadow-lg text-white fixed bottom-10 right-10"
+                    className="btn btn-primary shadow-lg text-white fixed bottom-10 right-10"
                 >
                     Create Teacher
                 </button>
@@ -270,7 +270,7 @@ const TeacherList: React.FC = () => {
                     <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                             <div className="avatar placeholder">
-                                <div className="bg-accent text-accent-content rounded-lg w-8 h-8 flex items-center justify-center">
+                                <div className="bg-primary text-primary-content rounded-lg w-8 h-8 flex items-center justify-center">
                                     <MdWork className="text-lg" />
                                 </div>
                             </div>
@@ -377,7 +377,7 @@ const TeacherList: React.FC = () => {
                                                     <td>
                                                         <div className="flex items-center gap-2">
                                                             <div className="avatar placeholder">
-                                                                <div className="bg-accent text-accent-content rounded-lg w-7 h-7">
+                                                                <div className="bg-primary text-primary-content rounded-lg w-7 h-7">
                                                                     <span className="text-xs">
                                                                         {teacher.firstName?.charAt(0)}
                                                                         {teacher.lastName?.charAt(0)}
