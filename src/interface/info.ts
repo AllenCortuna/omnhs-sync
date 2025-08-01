@@ -35,13 +35,14 @@ export interface SubjectRecord{
     sectionName: string; // reference to the section
     subjectId: string; // reference to the subject
     subjectName: string; // reference to the subject
+    gradeLevel: string; // reference to the grade level
     semester: string;
     schoolYear: string;
     teacherId: string; // reference to the teacher
     teacherName: string; // reference to the teacher
     createdAt: string;
     studentGrades: StudentGrade[];
-    studentList: [string];
+    studentList: string[];
 }
 
 export interface Enrollment {

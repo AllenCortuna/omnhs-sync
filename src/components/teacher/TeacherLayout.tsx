@@ -37,7 +37,7 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const primaryNavItems: NavigationItemProps[] = [
     { href: '/teachers/dashboard', icon: HiHome, label: 'Dashboard' },
-    { href: '/teachers/classes', icon: HiAcademicCap, label: 'Classes' },
+    { href: '/teachers/class-schedule', icon: HiAcademicCap, label: 'Class Schedule' },
     { href: '/teachers/students', icon: HiUserGroup, label: 'Students' },
     { href: '/teachers/calendar', icon: HiCalendar, label: 'Calendar' },
   ];
