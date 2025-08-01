@@ -37,7 +37,6 @@ const AdminEnrollmentPage = () => {
     const [strands, setStrands] = useState<Strand[]>([]);
     const [sections, setSections] = useState<Section[]>([]);
     const [loading, setLoading] = useState(true);
-    const [approvalLoading, setApprovalLoading] = useState(false);
     const [selectedEnrollment, setSelectedEnrollment] = useState<EnrollmentWithDetails | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -147,7 +146,6 @@ const AdminEnrollmentPage = () => {
         }
 
         try {
-            setApprovalLoading(true);
             
             // Find the current enrollment to check if it's already approved
             const currentEnrollment = enrollments.find(e => e.id === enrollmentId);
@@ -182,39 +180,17 @@ const AdminEnrollmentPage = () => {
         } catch (error) {
             console.error('Error approving enrollment:', error);
             errorToast("Failed to approve enrollment. Please try again.");
-        } finally {
-            setApprovalLoading(false);
         }
     }
 
-    async function handleReject(enrollmentId: string) {
-        try {
-            setApprovalLoading(true);
-            
-            // Update the enrollment status
-            const enrollmentRef = doc(db, "enrollment", enrollmentId);
-            await updateDoc(enrollmentRef, {
-                status: "rejected",
-                updatedAt: new Date().toISOString()
-            });
-
-            // Update local state
-            setEnrollments(prev => prev.map(enrollment => 
-                enrollment.id === enrollmentId 
-                    ? { ...enrollment, status: "rejected" }
-                    : enrollment
-            ));
-
-            successToast("Enrollment rejected successfully!");
-            setIsModalOpen(false);
-            setSelectedEnrollment(null);
-        } catch (error) {
-            console.error('Error rejecting enrollment:', error);
-            errorToast("Failed to reject enrollment. Please try again.");
-        } finally {
-            setApprovalLoading(false);
+    // Wrapper function for the modal that captures the enrollment ID
+    const handleModalApprove = (sectionId: string) => {
+        if (selectedEnrollment?.id) {
+            handleApprove(selectedEnrollment.id, sectionId);
         }
-    }
+    };
+
+
 
     function handleCloseModal() {
         setIsModalOpen(false);
@@ -243,7 +219,6 @@ const AdminEnrollmentPage = () => {
         const firstSection = availableSections[0];
         
         try {
-            setApprovalLoading(true);
             
             // Update the enrollment status and assign section
             const enrollmentRef = doc(db, "enrollment", enrollment.id);
@@ -269,8 +244,6 @@ const AdminEnrollmentPage = () => {
         } catch (error) {
             console.error('Error approving enrollment:', error);
             errorToast("Failed to approve enrollment. Please try again.");
-        } finally {
-            setApprovalLoading(false);
         }
     }
 
@@ -283,7 +256,6 @@ const AdminEnrollmentPage = () => {
         }
 
         try {
-            setApprovalLoading(true);
             
             // Update the enrollment status
             const enrollmentRef = doc(db, "enrollment", enrollmentId);
@@ -303,8 +275,6 @@ const AdminEnrollmentPage = () => {
         } catch (error) {
             console.error('Error rejecting enrollment:', error);
             errorToast("Failed to reject enrollment. Please try again.");
-        } finally {
-            setApprovalLoading(false);
         }
     }
 
@@ -494,13 +464,10 @@ const AdminEnrollmentPage = () => {
             )}
 
             <ApproveEnrollmentModal
+                open={isModalOpen}
                 enrollment={selectedEnrollment}
-                sections={sections}
-                onApprove={handleApprove}
-                onReject={handleReject}
+                onApprove={handleModalApprove}
                 onClose={handleCloseModal}
-                isOpen={isModalOpen}
-                loading={approvalLoading}
             />
         </div>
     );
