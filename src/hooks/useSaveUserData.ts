@@ -77,29 +77,38 @@ export const useSaveUserData = (params?: UseSaveUserDataParams): UseSaveUserData
 
         for (const collectionName of collectionsToSearch) {
           try {
+            console.log(`Searching in collection: ${collectionName}`);
+            console.log(`Searching for email: ${user.email}`);
+
             const collectionRef = collection(db, collectionName);
             const q = query(
               collectionRef,
-              where("email", "==", user.email),
+              where("email", "==", user.email?.toLowerCase() || ''), // Normalize email
               limit(1)
             );
             const querySnapshot = await getDocs(q);
 
+            console.log(`Found ${querySnapshot.size} documents`);
+
             if (!querySnapshot.empty) {
-              const data = querySnapshot.docs[0].data();
+              const doc = querySnapshot.docs[0];
+              const data = doc.data();
               
-              // Type the data based on collection
+              console.log('Found user data:', data);
+              console.log('Document ID:', doc.id);
+
+              // Type the data based on collection and include document ID
               switch (collectionName) {
                 case 'admin':
-                  foundUserData = data as Admin;
+                  foundUserData = { ...data, id: doc.id } as unknown as Admin;
                   foundUserType = 'admin';
                   break;
                 case 'teachers':
-                  foundUserData = data as Teacher;
+                  foundUserData = { ...data, id: doc.id } as unknown as Teacher;
                   foundUserType = 'teacher';
                   break;
                 case 'students':
-                  foundUserData = data as Student;
+                  foundUserData = { ...data, id: doc.id } as unknown as Student;
                   foundUserType = 'student';
                   break;
               }
@@ -109,17 +118,25 @@ export const useSaveUserData = (params?: UseSaveUserDataParams): UseSaveUserData
             }
           } catch (collectionError) {
             console.error(`Error querying ${collectionName} collection:`, collectionError);
+            // Log more details about the error
+            if (collectionError instanceof Error) {
+              console.error('Error name:', collectionError.name);
+              console.error('Error message:', collectionError.message);
+              console.error('Error stack:', collectionError.stack);
+            }
             // Continue to next collection
           }
         }
 
         if (foundUserData && foundUserType) {
+          console.log('Setting user data:', { type: foundUserType, data: foundUserData });
           // Save to global store
           setGlobalUserData(foundUserData, foundUserType);
           setUserData(foundUserData);
           setUserType(foundUserType);
         } else {
           // User not found in any collection
+          console.warn('No user data found in any collection');
           setError('User data not found');
           setUserData(null);
           setUserType(null);
@@ -127,7 +144,11 @@ export const useSaveUserData = (params?: UseSaveUserDataParams): UseSaveUserData
         }
       } catch (error) {
         console.error('Error in useSaveUserData:', error);
-        setError('Failed to load user data');
+        if (error instanceof Error) {
+          setError(`Failed to load user data: ${error.message}`);
+        } else {
+          setError('Failed to load user data');
+        }
         setUserData(null);
         setUserType(null);
         clearUserData();
@@ -147,4 +168,4 @@ export const useSaveUserData = (params?: UseSaveUserDataParams): UseSaveUserData
   };
 };
 
-export default useSaveUserData; 
+export default useSaveUserData;

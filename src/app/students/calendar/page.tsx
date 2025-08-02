@@ -5,7 +5,7 @@ import { EventClickArg } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin from "@fullcalendar/interaction";
 import { db } from "../../../../firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, query, where, or } from "firebase/firestore";
 import { CalendarEvent } from "@/interface/calendar";
 import UpcomingEvents from '@/components/student/UpcomingEvents';
 
@@ -40,8 +40,17 @@ const StudentsCalendarPage = () => {
   useEffect(() => {
     async function fetchEvents() {
       setIsLoading(true);
-      const snapshot = await getDocs(collection(db, "events"));
-      const data: CalendarEvent[] = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
+      const eventsRef = collection(db, "events");
+      const q = query(
+        eventsRef,
+        or(
+          where("recipient", "==", "all"),
+          where("recipient", "==", "students")
+        )
+      );
+      const snapshot = await getDocs(q);
+      const data: CalendarEvent[] = snapshot.docs
+        .map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
       setEvents(data);
       setIsLoading(false);
     }

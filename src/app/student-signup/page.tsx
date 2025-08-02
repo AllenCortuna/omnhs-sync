@@ -1,13 +1,12 @@
 "use client";
 // React and Firebase imports
 import React, { useState } from "react";
-import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../../../firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../../firebase";
 import { useRouter } from "next/navigation";
 
 // Component imports
-import { FormInput, CreateButton } from "@/components/common";
+import { FormInput, CreateButton, BackButton } from "@/components/common";
 
 // Toast imports
 import { successToast, errorToast } from "@/config/toast";
@@ -24,7 +23,7 @@ import {
 /**
  * @file StudentSignup.tsx - Student account creation page
  * @module StudentSignup
- * 
+ *
  * @description
  * This component provides a form for students to create their accounts.
  * It handles:
@@ -54,7 +53,7 @@ interface StudentSignupFormData {
  */
 const StudentSignup: React.FC = () => {
     const router = useRouter();
-    
+
     // Form data state
     const [formData, setFormData] = useState<StudentSignupFormData>({
         email: "",
@@ -67,15 +66,14 @@ const StudentSignup: React.FC = () => {
 
     // Password visibility toggle states
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
+    const [showConfirmPassword, setShowConfirmPassword] =
+        useState<boolean>(false);
 
     /**
      * Updates form data state when input fields change
      * @param {React.ChangeEvent<HTMLInputElement>} e - Input change event
      */
-    const handleChange = (
-        e: React.ChangeEvent<HTMLInputElement>
-    ): void => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
@@ -95,7 +93,11 @@ const StudentSignup: React.FC = () => {
         }
 
         // Check if all fields are filled
-        if (!formData.email || !formData.password || !formData.confirmPassword) {
+        if (
+            !formData.email ||
+            !formData.password ||
+            !formData.confirmPassword
+        ) {
             errorToast("All fields are required");
             return false;
         }
@@ -133,26 +135,15 @@ const StudentSignup: React.FC = () => {
 
         try {
             // Create Firebase auth account
-            const userCredential = await createUserWithEmailAndPassword(
+            await createUserWithEmailAndPassword(
                 auth,
                 formData.email,
                 formData.password
             );
-            const newUser = userCredential.user;
 
-            // Store basic user data in Firestore
-            await setDoc(doc(db, "students", newUser.uid), {
-                email: formData.email,
-                uid: newUser.uid,
-                createdAt: new Date().toISOString(),
-                role: "student",
-                profileComplete: false, // Flag to indicate profile needs completion
-            });
-
-            // Sign out the user (they'll need to sign in again)
-            await signOut(auth);
-
-            successToast("Account created successfully! Please complete your profile.");
+            successToast(
+                "Account created successfully! Please complete your profile."
+            );
 
             // Redirect to complete-info page
             router.push("/student-complete-info");
@@ -169,7 +160,8 @@ const StudentSignup: React.FC = () => {
                     errorMessage = "The email address is not valid.";
                     break;
                 case "auth/weak-password":
-                    errorMessage = "The password is too weak. Please choose a stronger password.";
+                    errorMessage =
+                        "The password is too weak. Please choose a stronger password.";
                     break;
             }
             errorToast(errorMessage);
@@ -181,6 +173,9 @@ const StudentSignup: React.FC = () => {
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 to-secondary/5">
             <div className="card w-full max-w-md bg-base-100 shadow-xl">
+                <div className="fixed top-4 left-4">
+                    <BackButton variant="primary" size="sm" label="Back" />
+                </div>
                 <div className="card-body">
                     {/* Header */}
                     <div className="text-center mb-6">
@@ -189,8 +184,10 @@ const StudentSignup: React.FC = () => {
                                 <MdPerson className="text-2xl" />
                             </div>
                         </div>
-                        <h1 className="text-2xl font-bold text-base-content">Student Signup</h1>
-                        <p className="text-base-content/60 text-sm mt-2">
+                        <h1 className="text-2xl font-bold text-primary">
+                            Student Signup
+                        </h1>
+                        <p className="text-primary/60 text-xs mt-2">
                             Create your student account to get started
                         </p>
                     </div>
@@ -200,7 +197,9 @@ const StudentSignup: React.FC = () => {
                         {/* Email Field */}
                         <div className="form-control">
                             <label className="label" htmlFor="email">
-                                <span className="label-text font-medium">Email Address</span>
+                                <span className="label-text font-medium">
+                                    Email Address
+                                </span>
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -223,7 +222,9 @@ const StudentSignup: React.FC = () => {
                         {/* Password Field */}
                         <div className="form-control">
                             <label className="label" htmlFor="password">
-                                <span className="label-text font-medium">Password</span>
+                                <span className="label-text font-medium">
+                                    Password
+                                </span>
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -243,7 +244,9 @@ const StudentSignup: React.FC = () => {
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => setShowPassword(!showPassword)}
+                                    onClick={() =>
+                                        setShowPassword(!showPassword)
+                                    }
                                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/40 hover:text-base-content/60"
                                     disabled={loading}
                                 >
@@ -264,7 +267,9 @@ const StudentSignup: React.FC = () => {
                         {/* Confirm Password Field */}
                         <div className="form-control">
                             <label className="label" htmlFor="confirmPassword">
-                                <span className="label-text font-medium">Confirm Password</span>
+                                <span className="label-text font-medium">
+                                    Confirm Password
+                                </span>
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -273,7 +278,11 @@ const StudentSignup: React.FC = () => {
                                 <FormInput
                                     id="confirmPassword"
                                     name="confirmPassword"
-                                    type={showConfirmPassword ? "text" : "password"}
+                                    type={
+                                        showConfirmPassword
+                                            ? "text"
+                                            : "password"
+                                    }
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
                                     placeholder="Confirm your password"
@@ -284,7 +293,11 @@ const StudentSignup: React.FC = () => {
                                 />
                                 <button
                                     type="button"
-                                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                    onClick={() =>
+                                        setShowConfirmPassword(
+                                            !showConfirmPassword
+                                        )
+                                    }
                                     className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/40 hover:text-base-content/60"
                                     disabled={loading}
                                 >
@@ -308,7 +321,10 @@ const StudentSignup: React.FC = () => {
                     <div className="text-center">
                         <p className="text-xs text-base-content/60">
                             Already have an account?{" "}
-                            <a href="/login" className="text-primary hover:underline">
+                            <a
+                                href="/login"
+                                className="text-primary hover:underline"
+                            >
                                 Sign in here
                             </a>
                         </p>

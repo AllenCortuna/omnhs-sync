@@ -320,15 +320,15 @@ const LoginAdmin: React.FC = () => {
     if (role === "") {
         return (
             <div className="min-h-screen bg-[#ffffff] flex items-center justify-center p-4 animate-gradient-x">
-                <div className="w-full max-w-md space-y-8 transform hover:scale-[1.01] transition-transform duration-300">
+                <div className="flex flex-col items-start justify-start w-full max-w-md space-y-8 transform hover:scale-[1.01] transition-transform duration-300">
                     <div> 
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         {/* <img src="/img/logo.png" alt="OMNHSYNC" className="w-20 h-20 mx-auto" /> */}
                         <h1 className="text-5xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent martian-mono">
                             OMNHSYNC
                         </h1>
-                        <p className="text-xs text-gray-500 mt-2 ">
-                            Occidental Mindanao National High School
+                        <p className="text-xs ml-3 text-gray-500 mt-2 ">
+                            Occidental Mindoro National High School
                         </p>
                     </div>
 
@@ -355,6 +355,18 @@ const LoginAdmin: React.FC = () => {
                             <FaUserGraduate className="w-5 h-5" />
                             <span>Sign In as Student</span>
                         </button>
+                    </div>
+
+                    <div className="block pt-20 text-secondary martian-mono">Sign up as</div>
+                    <div className="flex flex-row gap-2 martian-mono">
+                        <Link href="/teacher-signup" className="flex flex-col p-4 items-center justify-center gap-2 border-2 border-secondary text-primary w-1/3 normal-case text-xs font-semibold shadow-lg hover:shadow-primary/30 transition-all duration-300 rounded-xl hover:bg-primary hover:text-white">
+                            <FaUserTie className="w-5 h-5" />
+                            <span>Sign up as Teacher</span>
+                        </Link>
+                        <Link href="/student-signup" className="flex flex-col p-4 items-center justify-center gap-2 border-2 border-secondary text-primary w-1/3 normal-case text-xs font-semibold shadow-lg hover:shadow-primary/30 transition-all duration-300 rounded-xl hover:bg-primary hover:text-white">
+                            <FaUserGraduate className="w-5 h-5" />
+                            <span>Sign up as Student</span>
+                        </Link>
                     </div>
                 </div>
             </div>

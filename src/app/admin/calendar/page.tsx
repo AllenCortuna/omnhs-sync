@@ -72,12 +72,12 @@ const AdminCalendarPage = () => {
                     >
                         <CreateButton
                             loading={false}
-                            buttonText={"+ Create Event"}
+                            buttonText={"Create Event"}
                             className="w-auto"
                         />
                     </div>
                 </div>
-                <div className="bg-base-100 shadow-xl rounded-lg p-4 flex flex-col md:flex-row gap-8">
+                <div className="rounded-lg p-4 flex flex-col md:flex-row gap-8">
                     <div className="mt-8">
                         <h2 className="text-lg font-semibold text-primary mb-2">
                             Events <br /> <span className="text-base-content/60 text-sm">{formatDate(selectedDate || "")}</span>
@@ -129,7 +129,7 @@ const AdminCalendarPage = () => {
                             </ul>
                         )}
                     </div>
-                    <div className="calendar-contain m-4 w-full">
+                    <div className="m-4 w-full">
                         <FullCalendar
                             plugins={[dayGridPlugin, interactionPlugin]}
                             initialView="dayGridMonth"

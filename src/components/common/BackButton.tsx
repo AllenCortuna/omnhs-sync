@@ -34,7 +34,7 @@ const BackButton: React.FC<BackButtonProps> = ({
     const router = useRouter();
 
     const getButtonClasses = () => {
-        const baseClasses = type === "circle" ? "btn btn-circle border-2" : "btn";
+        const baseClasses = type === "circle" ? "btn btn-outline w-fit border-2" : "btn";
         const variantClasses = {
             primary: "btn-primary",
             secondary: "btn-secondary",

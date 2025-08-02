@@ -1,13 +1,12 @@
 "use client";
 // React and Firebase imports
 import React, { useState } from "react";
-import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../../../firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../../../firebase";
 import { useRouter } from "next/navigation";
 
 // Component imports
-import { FormInput, CreateButton } from "@/components/common";
+import { FormInput, CreateButton, BackButton } from "@/components/common";
 
 // Toast imports
 import { successToast, errorToast } from "@/config/toast";
@@ -133,24 +132,11 @@ const TeacherSignup: React.FC = () => {
 
         try {
             // Create Firebase auth account
-            const userCredential = await createUserWithEmailAndPassword(
+            await createUserWithEmailAndPassword(
                 auth,
                 formData.email,
                 formData.password
             );
-            const newUser = userCredential.user;
-
-            // Store basic user data in Firestore
-            await setDoc(doc(db, "teachers", newUser.uid), {
-                email: formData.email,
-                uid: newUser.uid,
-                createdAt: new Date().toISOString(),
-                role: "teacher",
-                profileComplete: false, // Flag to indicate profile needs completion
-            });
-
-            // Sign out the user (they'll need to sign in again)
-            await signOut(auth);
 
             successToast("Account created successfully! Please complete your profile.");
 
@@ -179,18 +165,21 @@ const TeacherSignup: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-accent/5 to-primary/5">
+        <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 to-primary/5">
             <div className="card w-full max-w-md bg-base-100 shadow-xl">
+                <div className="fixed top-4 left-4">
+                    <BackButton variant="primary" size="sm" label="Back" />
+                </div>
                 <div className="card-body">
                     {/* Header */}
                     <div className="text-center mb-6">
                         <div className="avatar placeholder mb-4">
-                            <div className="bg-accent text-accent-content rounded-full w-16 h-16 flex items-center justify-center">
+                            <div className="bg-primary text-primary-content rounded-full w-16 h-16 flex items-center justify-center">
                                 <MdSchool className="text-2xl" />
                             </div>
                         </div>
-                        <h1 className="text-2xl font-bold text-base-content">Teacher Signup</h1>
-                        <p className="text-base-content/60 text-sm mt-2">
+                        <h1 className="text-2xl font-bold text-primary">Teacher Signup</h1>
+                        <p className="text-primary/60 text-xs mt-2">
                             Create your teacher account to get started
                         </p>
                     </div>
@@ -308,7 +297,7 @@ const TeacherSignup: React.FC = () => {
                     <div className="text-center">
                         <p className="text-xs text-base-content/60">
                             Already have an account?{" "}
-                            <a href="/login" className="text-accent hover:underline">
+                            <a href="/login" className="text-primary hover:underline">
                                 Sign in here
                             </a>
                         </p>

@@ -30,6 +30,8 @@ const IncompleteRouteGuard: React.FC<IncompleteRouteGuardProps> = ({ children })
       setIsAuthenticated(true);
       setIsLoading(false);
     });
+    // Cleanup function that runs when component unmounts
+    // Unsubscribes from the Firebase auth state listener to prevent memory leaks
     return () => {
       if (unsubscribe) unsubscribe();
     };

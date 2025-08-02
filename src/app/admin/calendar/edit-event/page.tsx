@@ -12,6 +12,7 @@ interface FormState {
   description: string;
   startDate: string;
   endDate: string;
+  recipient: string;
 }
 
 const EditEventPage = () => {
@@ -19,6 +20,7 @@ const EditEventPage = () => {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
   const [form, setForm] = useState<FormState>({
+    recipient: '',
     title: '',
     description: '',
     startDate: '',
@@ -37,6 +39,7 @@ const EditEventPage = () => {
         if (eventSnap.exists()) {
           const data = eventSnap.data() as CalendarEvent;
           setForm({
+            recipient: data.recipient,
             title: data.title,
             description: data.description || '',
             startDate: data.startDate,
@@ -57,7 +60,7 @@ const EditEventPage = () => {
     fetchEvent();
   }, [id, router]);
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
@@ -69,6 +72,7 @@ const EditEventPage = () => {
     try {
       const eventRef = doc(db, "events", id);
       await updateDoc(eventRef, {
+        recipient: form.recipient,
         title: form.title,
         description: form.description,
         startDate: form.startDate,
@@ -101,6 +105,14 @@ const EditEventPage = () => {
         ) : (
           <form className="card bg-base-100 shadow-xl p-6 space-y-4" onSubmit={handleSubmit}>
             <div>
+              <label className="label">
+                <span className="label-text font-semibold">Recipient</span>
+              </label>
+              <select name="recipient" id="recipient" className="select select-bordered w-full" value={form.recipient} onChange={handleChange} required disabled={isSubmitting}>
+                <option value="all">All</option>
+                <option value="students">Students</option>
+                <option value="teachers">Teachers</option>
+              </select>
               <label className="label">
                 <span className="label-text font-semibold">Title</span>
               </label>
@@ -171,6 +183,6 @@ const EditEventPage = () => {
       </div>
     </div>
   );
-}
+};
 
-export default EditEventPage; 
+export default EditEventPage;

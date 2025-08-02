@@ -4,4 +4,5 @@ export interface CalendarEvent {
     description?: string;
     startDate: string;
     endDate: string;
+    recipient: string;
 }

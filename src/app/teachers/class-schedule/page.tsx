@@ -4,9 +4,8 @@ import { useSaveUserData } from "@/hooks";
 import { subjectRecordService } from "@/services/subjectRecordService";
 import { strandService } from "@/services/strandService";
 import { sectionService } from "@/services/sectionService";
-import { subjectService } from "@/services/subjectService";
 import { errorToast, successToast } from "@/config/toast";
-import type { SubjectRecord, Strand, Section, Subject } from "@/interface/info";
+import type { SubjectRecord, Strand, Section } from "@/interface/info";
 import type { Teacher } from "@/interface/user";
 import { LoadingOverlay } from "@/components/common";
 import { 
@@ -30,12 +29,10 @@ const ClassSchedule: React.FC = () => {
     const [subjectRecords, setSubjectRecords] = useState<SubjectRecord[]>([]);
     const [strands, setStrands] = useState<Strand[]>([]);
     const [sections, setSections] = useState<Section[]>([]);
-    const [subjects, setSubjects] = useState<Subject[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [selectedStrandId, setSelectedStrandId] = useState<string>("");
     const [selectedSectionId, setSelectedSectionId] = useState<string>("");
-    const [selectedSubjectId, setSelectedSubjectId] = useState<string>("");
 
     // Form state
     const [formData, setFormData] = useState({
@@ -75,7 +72,7 @@ const ClassSchedule: React.FC = () => {
         const fetchSubjectRecords = async () => {
             if (!userData || userLoading) return;
             
-            if (!("teacherId" in userData)) {
+            if (!("employeeId" in userData)) {
                 errorToast("User data is not a teacher");
                 return;
             }
@@ -116,26 +113,6 @@ const ClassSchedule: React.FC = () => {
         fetchSections();
     }, [selectedStrandId]);
 
-    // Fetch subjects when strand changes
-    useEffect(() => {
-        const fetchSubjects = async () => {
-            if (!selectedStrandId) {
-                setSubjects([]);
-                return;
-            }
-
-            try {
-                const subjectsData = await subjectService.getSubjectsByStrandId(selectedStrandId);
-                setSubjects(subjectsData);
-            } catch (error) {
-                console.error('Error fetching subjects:', error);
-                setSubjects([]);
-            }
-        };
-
-        fetchSubjects();
-    }, [selectedStrandId]);
-
     // Update form data when selections change
     useEffect(() => {
         if (selectedSectionId) {
@@ -147,17 +124,6 @@ const ClassSchedule: React.FC = () => {
             }));
         }
     }, [selectedSectionId, sections]);
-
-    useEffect(() => {
-        if (selectedSubjectId) {
-            const subject = subjects.find(s => s.id === selectedSubjectId);
-            setFormData(prev => ({
-                ...prev,
-                subjectId: selectedSubjectId,
-                subjectName: subject?.subjectName || ""
-            }));
-        }
-    }, [selectedSubjectId, subjects]);
 
     const handleAddClass = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -210,7 +176,6 @@ const ClassSchedule: React.FC = () => {
         });
         setSelectedStrandId("");
         setSelectedSectionId("");
-        setSelectedSubjectId("");
     };
 
     const handleDeleteClass = async (recordId: string) => {
@@ -240,7 +205,7 @@ const ClassSchedule: React.FC = () => {
                 </div>
             );
         }
-        return (
+  return (
             <div className="badge badge-success gap-1 text-white">
                 <HiUserGroup className="w-3 h-3" />
                 {studentCount} Students
@@ -420,25 +385,23 @@ const ClassSchedule: React.FC = () => {
                                     </select>
                                 </div>
 
-                                {/* Subject Selection */}
+                                {/* Subject Name */}
                                 <div className="form-control">
                                     <label className="label">
-                                        <span className="label-text">Subject *</span>
+                                        <span className="label-text">Subject Name *</span>
                                     </label>
-                                    <select
-                                        className="select select-bordered w-full"
-                                        value={selectedSubjectId}
-                                        onChange={(e) => setSelectedSubjectId(e.target.value)}
+                                    <input
+                                        type="text"
+                                        placeholder="e.g., Mathematics, Science, English"
+                                        className="input input-bordered w-full"
+                                        value={formData.subjectName}
+                                        onChange={(e) => setFormData(prev => ({ 
+                                            ...prev, 
+                                            subjectName: e.target.value,
+                                            subjectId: e.target.value // Use subject name as ID for simplicity
+                                        }))}
                                         required
-                                        disabled={!selectedStrandId}
-                                    >
-                                        <option value="">Select Subject</option>
-                                        {subjects.map((subject) => (
-                                            <option key={subject.id} value={subject.id}>
-                                                {subject.subjectName}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    />
                                 </div>
 
                                 {/* Grade Level */}
