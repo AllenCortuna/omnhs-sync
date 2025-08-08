@@ -10,6 +10,7 @@ import { successToast, errorToast } from "@/config/toast";
 import type { Enrollment } from "@/interface/info";
 import { useStudentByEmail } from "@/hooks/useStudentByEmail";
 import { useRouter } from "next/navigation";
+import { getSchoolYearOptions, SEMESTER_OPTIONS } from "@/config/school";
 
 function getFileExtension(filename: string): string {
     return filename.split(".").pop() || "";
@@ -93,20 +94,9 @@ const initialForm: Partial<Enrollment> = {
     lastSchoolYear: "",
 };
 
-const SEMESTER_OPTIONS = [
-  { value: "1st", label: "1st Semester" },
-  { value: "2nd", label: "2nd Semester" },
-];
 
-function getSchoolYearOptions(): { value: string; label: string }[] {
-  const now = new Date();
-  const thisYear = now.getFullYear();
-  const lastYear = thisYear - 1;
-  return [
-    { value: `${lastYear}-${thisYear}`, label: `${lastYear}-${thisYear}` },
-    { value: `${thisYear}-${thisYear + 1}`, label: `${thisYear}-${thisYear + 1}` },
-  ];
-}
+
+
 
 const StudentEnrollment: React.FC = () => {
     const { userData, isLoading: userLoading } = useSaveUserData({

@@ -8,10 +8,10 @@ import { errorToast, successToast } from "@/config/toast";
 import type { SubjectRecord, Strand, Section } from "@/interface/info";
 import type { Teacher } from "@/interface/user";
 import { LoadingOverlay } from "@/components/common";
-import { 
-    HiAcademicCap, 
-    HiCalendar, 
-    HiDocumentText, 
+import {
+    HiAcademicCap,
+    HiCalendar,
+    HiDocumentText,
     HiPlus,
     HiEye,
     HiPencil,
@@ -20,7 +20,8 @@ import {
     HiClock,
 } from "react-icons/hi";
 import { formatDate } from "@/config/format";
-
+import { getSchoolYearOptions, SEMESTER_OPTIONS } from "@/config/school";
+import Link from "next/link";
 
 const ClassSchedule: React.FC = () => {
     const { userData, isLoading: userLoading } = useSaveUserData({
@@ -44,7 +45,7 @@ const ClassSchedule: React.FC = () => {
         semester: "",
         schoolYear: "",
         teacherId: "",
-        teacherName: ""
+        teacherName: "",
     });
 
     // Fetch initial data
@@ -53,11 +54,11 @@ const ClassSchedule: React.FC = () => {
             try {
                 setLoading(true);
                 const [strandsData] = await Promise.all([
-                    strandService.getAllStrands()
+                    strandService.getAllStrands(),
                 ]);
                 setStrands(strandsData);
             } catch (error) {
-                console.error('Error fetching initial data:', error);
+                console.error("Error fetching initial data:", error);
                 errorToast("Failed to load initial data");
             } finally {
                 setLoading(false);
@@ -71,7 +72,7 @@ const ClassSchedule: React.FC = () => {
     useEffect(() => {
         const fetchSubjectRecords = async () => {
             if (!userData || userLoading) return;
-            
+
             if (!("employeeId" in userData)) {
                 errorToast("User data is not a teacher");
                 return;
@@ -80,10 +81,13 @@ const ClassSchedule: React.FC = () => {
             try {
                 setLoading(true);
                 const teacherData = userData as Teacher;
-                const records = await subjectRecordService.getSubjectRecordsByTeacher(teacherData.employeeId);
+                const records =
+                    await subjectRecordService.getSubjectRecordsByTeacher(
+                        teacherData.employeeId
+                    );
                 setSubjectRecords(records);
             } catch (error) {
-                console.error('Error fetching subject records:', error);
+                console.error("Error fetching subject records:", error);
                 errorToast("Failed to load class schedule");
             } finally {
                 setLoading(false);
@@ -102,10 +106,12 @@ const ClassSchedule: React.FC = () => {
             }
 
             try {
-                const sectionsData = await sectionService.getSectionsByStrandId(selectedStrandId);
+                const sectionsData = await sectionService.getSectionsByStrandId(
+                    selectedStrandId
+                );
                 setSections(sectionsData);
             } catch (error) {
-                console.error('Error fetching sections:', error);
+                console.error("Error fetching sections:", error);
                 setSections([]);
             }
         };
@@ -116,26 +122,31 @@ const ClassSchedule: React.FC = () => {
     // Update form data when selections change
     useEffect(() => {
         if (selectedSectionId) {
-            const section = sections.find(s => s.id === selectedSectionId);
-            setFormData(prev => ({
+            const section = sections.find((s) => s.id === selectedSectionId);
+            setFormData((prev) => ({
                 ...prev,
                 sectionId: selectedSectionId,
-                sectionName: section?.sectionName || ""
+                sectionName: section?.sectionName || "",
             }));
         }
     }, [selectedSectionId, sections]);
 
     const handleAddClass = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (!userData || !("employeeId" in userData)) {
             errorToast("User data is not a teacher");
             return;
         }
 
         // Validate required fields
-        if (!formData.sectionId || !formData.subjectId || !formData.gradeLevel || 
-            !formData.semester || !formData.schoolYear) {
+        if (
+            !formData.sectionId ||
+            !formData.subjectId ||
+            !formData.gradeLevel ||
+            !formData.semester ||
+            !formData.schoolYear
+        ) {
             errorToast("Please fill in all required fields");
             return;
         }
@@ -143,19 +154,21 @@ const ClassSchedule: React.FC = () => {
         try {
             setLoading(true);
             const teacherData = userData as Teacher;
-            
-            const newSubjectRecord = await subjectRecordService.createSubjectRecord({
-                ...formData,
-                teacherId: teacherData.employeeId,
-                teacherName: teacherData.firstName + " " + teacherData.lastName
-            });
 
-            setSubjectRecords(prev => [newSubjectRecord, ...prev]);
+            const newSubjectRecord =
+                await subjectRecordService.createSubjectRecord({
+                    ...formData,
+                    teacherId: teacherData.employeeId,
+                    teacherName:
+                        teacherData.firstName + " " + teacherData.lastName,
+                });
+
+            setSubjectRecords((prev) => [newSubjectRecord, ...prev]);
             successToast("Class added successfully!");
             setShowAddModal(false);
             resetForm();
         } catch (error) {
-            console.error('Error adding class:', error);
+            console.error("Error adding class:", error);
             errorToast("Failed to add class. Please try again.");
         } finally {
             setLoading(false);
@@ -172,7 +185,7 @@ const ClassSchedule: React.FC = () => {
             semester: "",
             schoolYear: "",
             teacherId: "",
-            teacherName: ""
+            teacherName: "",
         });
         setSelectedStrandId("");
         setSelectedSectionId("");
@@ -186,10 +199,12 @@ const ClassSchedule: React.FC = () => {
         try {
             setLoading(true);
             await subjectRecordService.deleteSubjectRecord(recordId);
-            setSubjectRecords(prev => prev.filter(record => record.id !== recordId));
+            setSubjectRecords((prev) =>
+                prev.filter((record) => record.id !== recordId)
+            );
             successToast("Class deleted successfully!");
         } catch (error) {
-            console.error('Error deleting class:', error);
+            console.error("Error deleting class:", error);
             errorToast("Failed to delete class. Please try again.");
         } finally {
             setLoading(false);
@@ -199,13 +214,13 @@ const ClassSchedule: React.FC = () => {
     const getStatusBadge = (studentCount: number) => {
         if (studentCount === 0) {
             return (
-                <div className="badge badge-warning gap-1 text-white">
+                <div className="badge badge-primary badge-xs gap-1 text-white rounded-none">
                     <HiClock className="w-3 h-3" />
                     No Students
                 </div>
             );
         }
-  return (
+        return (
             <div className="badge badge-success gap-1 text-white">
                 <HiUserGroup className="w-3 h-3" />
                 {studentCount} Students
@@ -221,8 +236,10 @@ const ClassSchedule: React.FC = () => {
         <div className="max-w-6xl mx-auto p-4">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Class Schedule</h1>
-                    <p className="text-gray-600 mt-1">
+                    <h1 className="text-xl font-bold text-primary">
+                        Class Schedule
+                    </h1>
+                    <p className="text-gray-500 mt-1 text-xs">
                         Manage your assigned classes and subjects
                     </p>
                 </div>
@@ -242,7 +259,8 @@ const ClassSchedule: React.FC = () => {
                         No Classes Found
                     </h3>
                     <p className="text-gray-500 mb-6">
-                        You haven&apos;t been assigned any classes yet. Add your first class to get started.
+                        You haven&apos;t been assigned any classes yet. Add your
+                        first class to get started.
                     </p>
                     <button
                         onClick={() => setShowAddModal(true)}
@@ -263,12 +281,14 @@ const ClassSchedule: React.FC = () => {
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3 mb-2">
-                                            <h3 className="text-lg font-semibold text-gray-800">
+                                            <h3 className="italic font-bold text-primary">
                                                 {record.subjectName}
                                             </h3>
-                                            {getStatusBadge(record.studentList?.length || 0)}
+                                            {getStatusBadge(
+                                                record.studentList?.length || 0
+                                            )}
                                         </div>
-                                        
+
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                                             <div className="flex items-center gap-2">
                                                 <HiAcademicCap className="w-4 h-4 text-gray-500" />
@@ -276,54 +296,59 @@ const ClassSchedule: React.FC = () => {
                                                     {record.sectionName}
                                                 </span>
                                             </div>
-                                            
+
                                             <div className="flex items-center gap-2">
                                                 <HiCalendar className="w-4 h-4 text-gray-500" />
                                                 <span className="text-gray-600">
                                                     {record.gradeLevel} Level
                                                 </span>
                                             </div>
-                                            
+
                                             <div className="flex items-center gap-2">
                                                 <HiCalendar className="w-4 h-4 text-gray-500" />
                                                 <span className="text-gray-600">
                                                     {record.semester} Semester
                                                 </span>
                                             </div>
-                                            
+
                                             <div className="flex items-center gap-2">
                                                 <HiDocumentText className="w-4 h-4 text-gray-500" />
                                                 <span className="text-gray-600">
                                                     {record.schoolYear}
                                                 </span>
                                             </div>
-                                            
+
                                             <div className="flex items-center gap-2">
                                                 <span className="text-gray-500 text-xs">
-                                                    {formatDate(record.createdAt)}
+                                                    {formatDate(
+                                                        record.createdAt
+                                                    )}
                                                 </span>
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="flex flex-col gap-2">
                                         <button
-                                            className="btn btn-sm btn-outline btn-primary"
+                                            className="btn btn-xs btn-outline btn-primary rounded-none"
                                             title="View class details"
                                         >
                                             <HiEye className="w-4 h-4" />
                                             View
                                         </button>
-                                        <button
-                                            className="btn btn-sm btn-outline btn-secondary"
+                                        <Link
+                                            className="btn btn-xs btn-outline btn-secondary rounded-none"
                                             title="Edit class"
+                                            href={`/teachers/class-schedule/add-student?subjectRecordId=${record.id}`}
                                         >
                                             <HiPencil className="w-4 h-4" />
-                                            Edit
-                                        </button>
+                                            Edit Students
+                                        </Link>
                                         <button
-                                            onClick={() => handleDeleteClass(record.id)}
-                                            className="btn btn-sm btn-outline btn-error"
+                                            onClick={() =>
+                                                handleDeleteClass(record.id)
+                                            }
+                                            className="btn btn-xs btn-outline btn-error rounded-none"
                                             title="Delete class"
                                         >
                                             <HiTrash className="w-4 h-4" />
@@ -341,23 +366,32 @@ const ClassSchedule: React.FC = () => {
             {showAddModal && (
                 <div className="modal modal-open">
                     <div className="modal-box max-w-2xl">
-                        <h3 className="font-bold text-lg mb-4">Add New Class</h3>
+                        <h3 className="font-bold text-lg mb-4">
+                            Add New Class
+                        </h3>
                         <form onSubmit={handleAddClass}>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Strand Selection */}
                                 <div className="form-control">
                                     <label className="label">
-                                        <span className="label-text">Strand *</span>
+                                        <span className="label-text">
+                                            Strand *
+                                        </span>
                                     </label>
                                     <select
                                         className="select select-bordered w-full"
                                         value={selectedStrandId}
-                                        onChange={(e) => setSelectedStrandId(e.target.value)}
+                                        onChange={(e) =>
+                                            setSelectedStrandId(e.target.value)
+                                        }
                                         required
                                     >
                                         <option value="">Select Strand</option>
                                         {strands.map((strand) => (
-                                            <option key={strand.id} value={strand.id}>
+                                            <option
+                                                key={strand.id}
+                                                value={strand.id}
+                                            >
                                                 {strand.strandName}
                                             </option>
                                         ))}
@@ -367,18 +401,25 @@ const ClassSchedule: React.FC = () => {
                                 {/* Section Selection */}
                                 <div className="form-control">
                                     <label className="label">
-                                        <span className="label-text">Section *</span>
+                                        <span className="label-text">
+                                            Section *
+                                        </span>
                                     </label>
                                     <select
                                         className="select select-bordered w-full"
                                         value={selectedSectionId}
-                                        onChange={(e) => setSelectedSectionId(e.target.value)}
+                                        onChange={(e) =>
+                                            setSelectedSectionId(e.target.value)
+                                        }
                                         required
                                         disabled={!selectedStrandId}
                                     >
                                         <option value="">Select Section</option>
                                         {sections.map((section) => (
-                                            <option key={section.id} value={section.id}>
+                                            <option
+                                                key={section.id}
+                                                value={section.id}
+                                            >
                                                 {section.sectionName}
                                             </option>
                                         ))}
@@ -388,69 +429,175 @@ const ClassSchedule: React.FC = () => {
                                 {/* Subject Name */}
                                 <div className="form-control">
                                     <label className="label">
-                                        <span className="label-text">Subject Name *</span>
+                                        <span className="label-text">
+                                            Subject Name *
+                                        </span>
                                     </label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g., Mathematics, Science, English"
-                                        className="input input-bordered w-full"
+                                    <select
+                                        className="select select-bordered w-full"
                                         value={formData.subjectName}
-                                        onChange={(e) => setFormData(prev => ({ 
-                                            ...prev, 
-                                            subjectName: e.target.value,
-                                            subjectId: e.target.value // Use subject name as ID for simplicity
-                                        }))}
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                subjectName: e.target.value,
+                                                subjectId: e.target.value,
+                                            }))
+                                        }
                                         required
-                                    />
+                                    >
+                                        <option value="">Select Subject</option>
+                                        <option value="Oral Communication">
+                                            Oral Communication
+                                        </option>
+                                        <option value="Reading and Writing">
+                                            Reading and Writing
+                                        </option>
+                                        <option value="Komunikasyon at Pananaliksik sa Wika at Kulturang Pilipino">
+                                            Komunikasyon at Pananaliksik sa Wika
+                                            at Kulturang Pilipino
+                                        </option>
+                                        <option value="Pagbasa at Pagsusuri ng Ibat-Ibang Teksto Tungo sa Pananaliksik">
+                                            Pagbasa at Pagsusuri ng
+                                            Iba&apos;t-Ibang Teksto Tungo sa
+                                            Pananaliksik
+                                        </option>
+                                        <option value="21st Century Literature from the Philippines and the World">
+                                            21st Century Literature from the
+                                            Philippines and the World
+                                        </option>
+                                        <option value="Contemporary Philippine Arts from the Regions">
+                                            Contemporary Philippine Arts from
+                                            the Regions
+                                        </option>
+                                        <option value="Media and Information Literacy">
+                                            Media and Information Literacy
+                                        </option>
+                                        <option value="General Math">
+                                            General Math
+                                        </option>
+                                        <option value="Statistics and Probability">
+                                            Statistics and Probability
+                                        </option>
+                                        <option value="Earth and Life Science">
+                                            Earth and Life Science
+                                        </option>
+                                        <option value="Physical Science">
+                                            Physical Science
+                                        </option>
+                                        <option value="Introduction to the Philosophy of the Human Person">
+                                            Introduction to the Philosophy of
+                                            the Human Person
+                                        </option>
+                                        <option value="Physical Education and Health">
+                                            Physical Education and Health
+                                        </option>
+                                        <option value="Personal Development">
+                                            Personal Development
+                                        </option>
+                                        <option value="Understanding Culture, Society and Politics">
+                                            Understanding Culture, Society and
+                                            Politics
+                                        </option>
+                                        <option value="Earth Science">
+                                            Earth Science
+                                        </option>
+                                        <option value="Disaster Readiness and Risk Reduction">
+                                            Disaster Readiness and Risk
+                                            Reduction
+                                        </option>
+                                    </select>
                                 </div>
 
                                 {/* Grade Level */}
                                 <div className="form-control">
                                     <label className="label">
-                                        <span className="label-text">Grade Level *</span>
+                                        <span className="label-text">
+                                            Grade Level *
+                                        </span>
                                     </label>
                                     <select
                                         className="select select-bordered w-full"
                                         value={formData.gradeLevel}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, gradeLevel: e.target.value }))}
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                gradeLevel: e.target.value,
+                                            }))
+                                        }
                                         required
                                     >
-                                        <option value="">Select Grade Level</option>
-                                        <option value="Grade 11">Grade 11</option>
-                                        <option value="Grade 12">Grade 12</option>
+                                        <option value="">
+                                            Select Grade Level
+                                        </option>
+                                        <option value="Grade 11">
+                                            Grade 11
+                                        </option>
+                                        <option value="Grade 12">
+                                            Grade 12
+                                        </option>
                                     </select>
                                 </div>
 
                                 {/* Semester */}
                                 <div className="form-control">
                                     <label className="label">
-                                        <span className="label-text">Semester *</span>
+                                        <span className="label-text">
+                                            Semester *
+                                        </span>
                                     </label>
                                     <select
                                         className="select select-bordered w-full"
                                         value={formData.semester}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, semester: e.target.value }))}
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                semester: e.target.value,
+                                            }))
+                                        }
                                         required
                                     >
-                                        <option value="">Select Semester</option>
-                                        <option value="First">First Semester</option>
-                                        <option value="Second">Second Semester</option>
+                                        <option value="">
+                                            Select Semester
+                                        </option>
+                                        {SEMESTER_OPTIONS.map((option) => (
+                                            <option
+                                                key={option.value}
+                                                value={option.value}
+                                            >
+                                                {option.label}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
 
                                 {/* School Year */}
                                 <div className="form-control">
                                     <label className="label">
-                                        <span className="label-text">School Year *</span>
+                                        <span className="label-text">
+                                            School Year *
+                                        </span>
                                     </label>
-                                    <input
-                                        type="text"
-                                        placeholder="e.g., 2024-2025"
-                                        className="input input-bordered w-full"
+                                    <select
+                                        className="select select-bordered w-full"
                                         value={formData.schoolYear}
-                                        onChange={(e) => setFormData(prev => ({ ...prev, schoolYear: e.target.value }))}
-                                        required
-                                    />
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                schoolYear: e.target.value,
+                                            }))
+                                        }
+                                    >
+                                        {getSchoolYearOptions().map(
+                                            (option) => (
+                                                <option
+                                                    key={option.value}
+                                                    value={option.value}
+                                                >
+                                                    {option.label}
+                                                </option>
+                                            )
+                                        )}
+                                    </select>
                                 </div>
                             </div>
 
