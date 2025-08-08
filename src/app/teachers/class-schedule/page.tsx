@@ -328,6 +328,14 @@ const ClassSchedule: React.FC = () => {
                                             <HiPencil className="w-4 h-4" />
                                             Edit Students
                                         </Link>
+                                        <Link
+                                            className="btn btn-xs btn-outline btn-accent rounded-none"
+                                            title="Manage grades"
+                                            href={`/teachers/class-schedule/student-grade?subjectRecordId=${record.id}`}
+                                        >
+                                            <HiDocumentText className="w-4 h-4" />
+                                            Grades
+                                        </Link>
                                         <button
                                             onClick={() =>
                                                 handleDeleteClass(record.id)

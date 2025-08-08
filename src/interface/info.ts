@@ -26,6 +26,14 @@ export interface StudentGrade {
     secondQuarterGrade: number;
     finalGrade: number;
     remarks: string;
+    subjectRecordId: string; // reference to the subject record
+    subjectName: string; // reference to the subject
+    gradeLevel: string; // reference to the grade level
+    semester: string;
+    schoolYear: string;
+    teacherId: string; // reference to the teacher
+    teacherName: string; // reference to the teacher
+    createdAt: string;
 }
 
 // SubjectRecord is a record of a subject's data for a specific section, semester, school year, and term
