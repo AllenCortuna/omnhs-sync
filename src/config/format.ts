@@ -12,10 +12,14 @@ export const formatCurrency = (amount: number) => {
 /**
  * Formats date for display
  */
-export const formatDate = (dateString: string): string => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-        year: "numeric",
+export const formatDate = (date: string | { seconds: number; nanoseconds: number }): string => {
+    const dateObj = typeof date === 'string' 
+        ? new Date(date)
+        : new Date(date.seconds * 1000);
+
+    return dateObj.toLocaleDateString("en-US", {
+        year: "numeric", 
         month: "short",
-        day: "numeric",
+        day: "numeric"
     });
 };

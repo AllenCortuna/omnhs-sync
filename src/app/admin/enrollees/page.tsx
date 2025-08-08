@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useMemo } from "react";
-import { collection, getDocs, query, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db } from "../../../../firebase";
 import { Enrollment } from "@/interface/info";
 import { formatDate } from "@/config/format";
@@ -84,7 +84,20 @@ const EnrolleeListPage = () => {
     // Refresh enrollments
     const q = query(collection(db, "enrollment"), orderBy("createdAt", "desc"));
     const snapshot = await getDocs(q);
+
     setEnrollments(snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id } as Enrollment)));
+
+    // update student data
+    const studentQuery = query(collection(db, "students"), where("studentId", "==", selectedEnrollment.studentId));
+    const studentSnapshot = await getDocs(studentQuery);
+    if (!studentSnapshot.empty) {
+      const studentDoc = studentSnapshot.docs[0];
+      await updateDoc(studentDoc.ref, { 
+        enrolledForSemester: selectedEnrollment.semester,
+        enrolledForSchoolYear: selectedEnrollment.schoolYear,
+        enrolledForSectionId: sectionId
+      });
+    }
     setLoading(false);
   }
 

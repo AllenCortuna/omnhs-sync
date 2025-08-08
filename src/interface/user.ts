@@ -26,6 +26,9 @@ export interface Teacher {
 export interface Student {
     id?: string;
     studentId: string;
+    enrolledForSchoolYear?: string;
+    enrolledForSemester?: string;
+    enrolledForSectionId?: string;
     email?: string;
     createdAt: string;
     lastLoginAt?: string;

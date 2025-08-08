@@ -17,7 +17,6 @@ import {
     HiPencil,
     HiTrash,
     HiUserGroup,
-    HiClock,
 } from "react-icons/hi";
 import { formatDate } from "@/config/format";
 import { getSchoolYearOptions, SEMESTER_OPTIONS } from "@/config/school";
@@ -211,22 +210,6 @@ const ClassSchedule: React.FC = () => {
         }
     };
 
-    const getStatusBadge = (studentCount: number) => {
-        if (studentCount === 0) {
-            return (
-                <div className="badge badge-primary badge-xs gap-1 text-white rounded-none">
-                    <HiClock className="w-3 h-3" />
-                    No Students
-                </div>
-            );
-        }
-        return (
-            <div className="badge badge-success gap-1 text-white">
-                <HiUserGroup className="w-3 h-3" />
-                {studentCount} Students
-            </div>
-        );
-    };
 
     if (userLoading || loading) {
         return <LoadingOverlay />;
@@ -284,9 +267,10 @@ const ClassSchedule: React.FC = () => {
                                             <h3 className="italic font-bold text-primary">
                                                 {record.subjectName}
                                             </h3>
-                                            {getStatusBadge(
-                                                record.studentList?.length || 0
-                                            )}
+                                            <div className="text-xs text-gray-500 flex items-center gap-1 italic ml-5">
+                                                <HiUserGroup className="w-3 h-3" />
+                                                {record.studentList?.length || 0} Students
+                                            </div>
                                         </div>
 
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
@@ -319,10 +303,10 @@ const ClassSchedule: React.FC = () => {
                                             </div>
 
                                             <div className="flex items-center gap-2">
-                                                <span className="text-gray-500 text-xs">
-                                                    {formatDate(
-                                                        record.createdAt
-                                                    )}
+                                                <span className="text-gray-500 text-xs italic">
+                                                    {
+                                                        formatDate(record.createdAt)
+                                                    }
                                                 </span>
                                             </div>
                                         </div>

@@ -77,8 +77,8 @@ export const useSaveUserData = (params?: UseSaveUserDataParams): UseSaveUserData
 
         for (const collectionName of collectionsToSearch) {
           try {
-            console.log(`Searching in collection: ${collectionName}`);
-            console.log(`Searching for email: ${user.email}`);
+            // console.log(`Searching in collection: ${collectionName}`);
+            // console.log(`Searching for email: ${user.email}`);
 
             const collectionRef = collection(db, collectionName);
             const q = query(
@@ -88,14 +88,14 @@ export const useSaveUserData = (params?: UseSaveUserDataParams): UseSaveUserData
             );
             const querySnapshot = await getDocs(q);
 
-            console.log(`Found ${querySnapshot.size} documents`);
+            // console.log(`Found ${querySnapshot.size} documents`);
 
             if (!querySnapshot.empty) {
               const doc = querySnapshot.docs[0];
               const data = doc.data();
               
-              console.log('Found user data:', data);
-              console.log('Document ID:', doc.id);
+              // console.log('Found user data:', data);
+              // console.log('Document ID:', doc.id);
 
               // Type the data based on collection and include document ID
               switch (collectionName) {
@@ -129,7 +129,7 @@ export const useSaveUserData = (params?: UseSaveUserDataParams): UseSaveUserData
         }
 
         if (foundUserData && foundUserType) {
-          console.log('Setting user data:', { type: foundUserType, data: foundUserData });
+          // console.log('Setting user data:', { type: foundUserType, data: foundUserData });
           // Save to global store
           setGlobalUserData(foundUserData, foundUserType);
           setUserData(foundUserData);
