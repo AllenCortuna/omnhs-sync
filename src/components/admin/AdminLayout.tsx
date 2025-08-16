@@ -1,5 +1,5 @@
 "use client"
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
@@ -46,7 +46,22 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { href: '/admin/settings', icon: HiCog, label: 'Settings' },
   ];
 
-  // const [showSecondary, setShowSecondary] = useState(false);
+  // Close mobile menu when screen size changes to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) { // lg breakpoint
+        setIsMobileMenuOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   /**
    * Handles user logout
@@ -104,14 +119,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       <button 
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         className="lg:hidden fixed top-4 right-4 z-50 p-2 rounded-lg bg-primary text-white"
+        aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+        aria-expanded={isMobileMenuOpen}
       >
         {isMobileMenuOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
       </button>
 
       {/* Sidebar */}
-      <div className={`fixed lg:static w-72 bg-base-100 shadow-xl flex flex-col h-full z-40 transition-transform duration-300 border-r border-primary${
-        isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-      }`}>
+      <div 
+        className={`fixed lg:static w-72 bg-base-100 shadow flex flex-col h-screen z-40 transition-transform duration-300 ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
         {/* Header Section */}
         <div className="p-6 border-b border-primary-content/20">
           <div className="flex items-center gap-3 mb-2">
@@ -131,15 +150,6 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             {primaryNavItems.map((item) => (
               <NavigationItem key={item.href} {...item} />
             ))}
-            {/* <li>
-              <button
-                className="btn btn-ghost w-full mt-2"
-                onClick={() => setShowSecondary((prev) => !prev)}
-              >
-                {showSecondary ? "Hide More" : "Show More"}
-                {showSecondary ? <HiChevronUp className="w-5 h-5" /> : <HiChevronDown className="w-5 h-5" />}
-              </button>
-            </li> */}
           </ul>
         </div>
 
@@ -162,6 +172,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         <div 
           className="fixed inset-0 bg-black/50 z-30 lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
         />
       )}
 
