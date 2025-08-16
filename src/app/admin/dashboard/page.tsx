@@ -149,40 +149,40 @@ const AdminDashboard = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-base-100 rounded-xl border border-base-300 p-6">
-        <h2 className="text-lg font-semibold text-base-content mb-4">Quick Actions</h2>
+      <div className="bg-base-100 rounded-xl border border-base-300 p-6 martian-mono text-primary">
+        <h2 className="font-semibold text-primary text-sm mb-4">Quick Actions</h2>
         <div className="flex flex-wrap gap-3">
           <Link 
             href="/admin/settings" 
-            className="btn btn-primary btn-sm gap-2"
+            className="btn btn-primary btn-xs text-white gap-2"
           >
             <HiPlus className="w-4 h-4" />
             Manage Strands & Sections
           </Link>
           <Link 
             href="/admin/create-student" 
-            className="btn btn-outline btn-sm gap-2"
+            className="btn btn-outline text-primary btn-xs gap-2"
           >
             <HiUsers className="w-4 h-4" />
             Add Student
           </Link>
           <Link 
             href="/admin/create-teacher" 
-            className="btn btn-outline btn-sm gap-2"
+            className="btn btn-outline text-primary btn-xs gap-2"
           >
             <HiUserGroup className="w-4 h-4" />
             Add Teacher
           </Link>
           <Link 
             href="/admin/student-list" 
-            className="btn btn-ghost btn-sm gap-2"
+            className="btn btn-outline text-primary btn-xs gap-2"
           >
             <HiUsers className="w-4 h-4" />
             View All Students
           </Link>
           <Link 
             href="/admin/teacher-list" 
-            className="btn btn-ghost btn-sm gap-2"
+            className="btn btn-outline text-primary btn-xs gap-2"
           >
             <HiAcademicCap className="w-4 h-4" />
             View All Teachers
@@ -195,7 +195,7 @@ const AdminDashboard = () => {
         {/* Strands List */}
         <div className="bg-base-100 rounded-xl border border-base-300 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-base-content">Academic Strands</h2>
+            <h2 className="text-lg font-semibold text-primary martian-mono">Academic Strands</h2>
             <Link 
               href="/admin/settings" 
               className="btn btn-ghost btn-sm gap-2"
@@ -229,9 +229,9 @@ const AdminDashboard = () => {
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <h3 className="font-medium text-base-content">{strand.strandName}</h3>
-                        <p className="text-sm text-base-content/60 line-clamp-2">
-                          {strand.strandDescription}
+                        <h3 className="font-semibold text-sm text-primary martian-mono">{strand.strandName}</h3>
+                        <p className="text-xs text-zinc-500 line-clamp-2 italic">
+                          {strand.strandDescription}  
                         </p>
                       </div>
                       <span className="badge badge-primary badge-sm">
@@ -246,7 +246,7 @@ const AdminDashboard = () => {
                           {strandSections.slice(0, 3).map((section) => (
                             <span 
                               key={section.id} 
-                              className="badge badge-outline badge-xs"
+                              className="badge badge-secondary p-2 text-[10px] text-white martian-mono badge-xs"
                             >
                               {section.sectionName}
                             </span>
@@ -269,7 +269,7 @@ const AdminDashboard = () => {
         {/* Sections List */}
         <div className="bg-base-100 rounded-xl border border-base-300 p-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-base-content">All Sections</h2>
+            <h2 className="text-lg font-semibold text-primary martian-mono">All Sections</h2>
             <Link 
               href="/admin/settings" 
               className="btn btn-ghost btn-sm gap-2"
@@ -303,14 +303,14 @@ const AdminDashboard = () => {
                   >
                     <div className="flex items-start justify-between mb-2">
                       <div>
-                        <h3 className="font-medium text-base-content">{section.sectionName}</h3>
-                        <p className="text-sm text-base-content/60">
+                        <h3 className="font-semibold text-sm text-primary martian-mono">{section.sectionName}</h3>
+                        <p className="text-xs text-zinc-500 line-clamp-2 italic">
                           Strand: {strand?.strandName || 'Unknown'}
                         </p>
                       </div>
                       <Link 
                         href="/admin/settings" 
-                        className="btn btn-ghost btn-xs text-primary hover:bg-primary/10"
+                        className="btn btn-ghost btn-xs text-primary hover:bg-primary/10 martian-mono"
                       >
                         <HiArrowRight className="w-3 h-3" />
                       </Link>
@@ -325,7 +325,7 @@ const AdminDashboard = () => {
 
       {/* System Overview */}
       <div className="bg-base-100 rounded-xl border border-base-300 p-6">
-        <h2 className="text-lg font-semibold text-base-content mb-4">System Overview</h2>
+        <h2 className="text-lg font-semibold text-primary martian-mono mb-4">System Overview</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
           <div className="text-center p-4 bg-base-50 rounded-lg">
             <p className="text-2xl font-bold text-primary">{strands.length}</p>
