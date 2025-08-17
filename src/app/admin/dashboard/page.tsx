@@ -76,74 +76,64 @@ const AdminDashboard = () => {
           <HiAcademicCap className="w-7 h-7 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-base-content">Admin Dashboard</h1>
-          <p className="text-base-content/60">Overview of academic structure and statistics</p>
+          <h1 className="text-2xl font-bold text-primary martian-mono">Admin Dashboard</h1>
+          <p className="text-zinc-500 italic text-sm">Overview of academic structure and statistics</p>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-        <div className="bg-base-100 rounded-xl border border-base-300 p-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center">
-              <HiAcademicCap className="w-7 h-7 text-blue-500" />
-            </div>
-            <div>
-              <p className="text-sm text-base-content/60">Total Strands</p>
-              <p className="text-2xl font-bold text-base-content">{strands.length}</p>
+      <div className="stats stats-vertical lg:stats-horizontal shadow w-full">
+        <div className="stat">
+          <div className="stat-figure text-primary">
+            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
+              <HiAcademicCap className="w-6 h-6 text-primary" />
             </div>
           </div>
+          <div className="stat-title text-xs italic text-zinc-500">Total Strands</div>
+          <div className="stat-value text-primary text-2xl martian-mono">{strands.length}</div>
         </div>
 
-        <div className="bg-base-100 rounded-xl border border-base-300 p-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center">
-              <HiClipboardList className="w-7 h-7 text-green-500" />
-            </div>
-            <div>
-              <p className="text-sm text-base-content/60">Total Sections</p>
-              <p className="text-2xl font-bold text-base-content">{sections.length}</p>
+        <div className="stat">
+          <div className="stat-figure text-secondary">
+            <div className="w-10 h-10 bg-secondary/20 rounded-xl flex items-center justify-center">
+              <HiClipboardList className="w-6 h-6 text-secondary" />
             </div>
           </div>
+          <div className="stat-title text-xs italic text-zinc-500">Total Sections</div>
+          <div className="stat-value text-secondary text-2xl martian-mono">{sections.length}</div>
         </div>
 
-        <div className="bg-base-100 rounded-xl border border-base-300 p-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-purple-500/20 rounded-xl flex items-center justify-center">
-              <HiUserGroup className="w-7 h-7 text-purple-500" />
-            </div>
-            <div>
-              <p className="text-sm text-base-content/60">Total Teachers</p>
-              <p className="text-2xl font-bold text-base-content">{teacherCount}</p>
+        <div className="stat">
+          <div className="stat-figure text-primary">
+            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
+              <HiUserGroup className="w-6 h-6 text-primary" />
             </div>
           </div>
+          <div className="stat-title text-xs italic text-zinc-500">Total Teachers</div>
+          <div className="stat-value text-primary text-2xl martian-mono">{teacherCount}</div>
         </div>
 
-        <div className="bg-base-100 rounded-xl border border-base-300 p-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-orange-500/20 rounded-xl flex items-center justify-center">
-              <HiUsers className="w-7 h-7 text-orange-500" />
-            </div>
-            <div>
-              <p className="text-sm text-base-content/60">Total Students</p>
-              <p className="text-2xl font-bold text-base-content">{studentCount}</p>
+        <div className="stat">
+          <div className="stat-figure text-secondary">
+            <div className="w-10 h-10 bg-secondary/20 rounded-xl flex items-center justify-center">
+              <HiUsers className="w-6 h-6 text-secondary" />
             </div>
           </div>
+          <div className="stat-title text-xs italic text-zinc-500">Total Students</div>
+          <div className="stat-value text-secondary text-2xl martian-mono">{studentCount}</div>
         </div>
 
-        <div className="bg-base-100 rounded-xl border border-base-300 p-6">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-indigo-500/20 rounded-xl flex items-center justify-center">
-              <HiUsers className="w-7 h-7 text-indigo-500" />
+        <div className="stat">
+          <div className="stat-figure text-primary">
+            <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
+              <HiUsers className="w-6 h-6 text-primary" />
             </div>
-            <div>
-              <p className="text-sm text-base-content/60">Active Programs</p>
-              <p className="text-2xl font-bold text-base-content">
-                {strands.filter(strand => 
-                  sections.some(section => section.strandId === strand.id)
-                ).length}
-              </p>
-            </div>
+          </div>
+          <div className="stat-title text-xs italic text-zinc-500">Active Programs</div>
+          <div className="stat-value text-primary text-2xl martian-mono">
+            {strands.filter(strand => 
+              sections.some(section => section.strandId === strand.id)
+            ).length}
           </div>
         </div>
       </div>
@@ -326,36 +316,41 @@ const AdminDashboard = () => {
       {/* System Overview */}
       <div className="bg-base-100 rounded-xl border border-base-300 p-6">
         <h2 className="text-lg font-semibold text-primary martian-mono mb-4">System Overview</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-6">
-          <div className="text-center p-4 bg-base-50 rounded-lg">
-            <p className="text-2xl font-bold text-primary">{strands.length}</p>
-            <p className="text-sm text-base-content/60">Academic Strands</p>
+        <div className="stats stats-vertical md:stats-horizontal shadow w-full">
+          <div className="stat">
+            <div className="stat-title text-xs italic text-zinc-500">Academic Strands</div>
+            <div className="stat-value text-primary text-xl martian-mono">{strands.length}</div>
           </div>
-          <div className="text-center p-4 bg-base-50 rounded-lg">
-            <p className="text-2xl font-bold text-success">{sections.length}</p>
-            <p className="text-sm text-base-content/60">Class Sections</p>
+
+          <div className="stat">
+            <div className="stat-title text-xs italic text-zinc-500">Class Sections</div>
+            <div className="stat-value text-secondary text-xl martian-mono">{sections.length}</div>
           </div>
-          <div className="text-center p-4 bg-base-50 rounded-lg">
-            <p className="text-2xl font-bold text-info">
+
+          <div className="stat">
+            <div className="stat-title text-xs italic text-zinc-500">Avg Sections/Strand</div>
+            <div className="stat-value text-primary text-xl martian-mono">
               {strands.length > 0 ? Math.round((sections.length / strands.length) * 10) / 10 : 0}
-            </p>
-            <p className="text-sm text-base-content/60">Avg Sections/Strand</p>
+            </div>
           </div>
-          <div className="text-center p-4 bg-base-50 rounded-lg">
-            <p className="text-2xl font-bold text-warning">
+
+          <div className="stat">
+            <div className="stat-title text-xs italic text-zinc-500">Active Programs</div>
+            <div className="stat-value text-secondary text-xl martian-mono">
               {strands.filter(strand => 
                 sections.some(section => section.strandId === strand.id)
               ).length}
-            </p>
-            <p className="text-sm text-base-content/60">Active Programs</p>
+            </div>
           </div>
-          <div className="text-center p-4 bg-base-50 rounded-lg">
-            <p className="text-2xl font-bold text-purple-500">{teacherCount}</p>
-            <p className="text-sm text-base-content/60">Total Teachers</p>
+
+          <div className="stat">
+            <div className="stat-title text-xs italic text-zinc-500">Total Teachers</div>
+            <div className="stat-value text-primary text-xl martian-mono">{teacherCount}</div>
           </div>
-          <div className="text-center p-4 bg-base-50 rounded-lg">
-            <p className="text-2xl font-bold text-orange-500">{studentCount}</p>
-            <p className="text-sm text-base-content/60">Total Students</p>
+
+          <div className="stat">
+            <div className="stat-title text-xs italic text-zinc-500">Total Students</div>
+            <div className="stat-value text-secondary text-xl martian-mono">{studentCount}</div>
           </div>
         </div>
       </div>
