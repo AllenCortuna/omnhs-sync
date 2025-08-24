@@ -10,11 +10,6 @@ import { LoadingOverlay } from "@/components/common";
 import { useRouter } from "next/navigation";
 import { 
     HiAcademicCap, 
-    HiCalendar, 
-    HiDocumentText, 
-    HiCheckCircle, 
-    HiXCircle, 
-    HiClock,
     HiPlus,
     HiEye,
     HiDocument,
@@ -93,23 +88,20 @@ const EnrollmentList: React.FC = () => {
         switch (status) {
             case "approved":
                 return (
-                    <div className="badge badge-success gap-1 text-white">
-                        <HiCheckCircle className="w-3 h-3" />
+                    <div className="badge badge-success gap-1 text-white text-[10px] martian-mono">
                         Approved
                     </div>
                 );
             case "rejected":
                 return (
-                    <div className="badge badge-error gap-1 text-white">
-                        <HiXCircle className="w-3 h-3" />
+                    <div className="badge badge-error gap-1 text-white text-[10px] martian-mono">
                         Rejected
                     </div>
                 );
             case "pending":
             default:
                 return (
-                    <div className="badge badge-warning gap-1 text-white">
-                        <HiClock className="w-3 h-3" />
+                    <div className="badge badge-warning gap-1 text-white text-[10px] martian-mono">
                         Pending
                     </div>
                 );
@@ -179,8 +171,8 @@ ${enrollment.copyOfGrades ? 'Grades: ✓ Uploaded' : 'Grades: Not uploaded'}`);
         <div className="max-w-6xl mx-auto p-4">
             <div className="flex justify-between items-center mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">My Enrollments</h1>
-                    <p className="text-gray-600 mt-1">
+                    <h1 className="martian-mono font-bold text-primary">My Enrollments</h1>
+                    <p className="text-gray-600 mt-1 text-xs italic">
                         View and manage your enrollment submissions
                     </p>
                 </div>
@@ -196,10 +188,10 @@ ${enrollment.copyOfGrades ? 'Grades: ✓ Uploaded' : 'Grades: Not uploaded'}`);
             {enrollments.length === 0 ? (
                 <div className="text-center py-12">
                     <HiAcademicCap className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-600 mb-2">
+                    <h3 className="text-sm font-semibold text-gray-600 mb-2 italic">
                         No Enrollments Found
                     </h3>
-                    <p className="text-gray-500 mb-6">
+                    <p className="text-gray-500 mb-6 text-xs italic">
                         You haven&apos;t submitted any enrollments yet. Start by creating a new enrollment.
                     </p>
                     <button
@@ -221,7 +213,7 @@ ${enrollment.copyOfGrades ? 'Grades: ✓ Uploaded' : 'Grades: Not uploaded'}`);
                                 <div className="flex justify-between items-start">
                                     <div className="flex-1">
                                         <div className="flex items-center gap-3 mb-2">
-                                            <h3 className="text-lg font-semibold text-gray-800">
+                                            <h3 className="text-sm font-bold text-primary martian-mono">
                                                 {enrollment.strandName}
                                             </h3>
                                             {getStatusBadge(enrollment.status || "pending")}
@@ -229,36 +221,31 @@ ${enrollment.copyOfGrades ? 'Grades: ✓ Uploaded' : 'Grades: Not uploaded'}`);
                                         {/* Show rejection reason if rejected */}
                                         {enrollment.status === "rejected" && enrollment.rejectionReason && (
                                             <div className="flex items-center gap-2 mb-2 p-2 bg-red-50 border border-red-200 rounded">
-                                                <HiXCircle className="w-4 h-4 text-red-500" />
                                                 <span className="text-sm text-red-700 font-medium">Reason: {enrollment.rejectionReason}</span>
                                             </div>
                                         )}
                                         
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                                             <div className="flex items-center gap-2">
-                                                <HiCalendar className="w-4 h-4 text-gray-500" />
-                                                <span className="text-gray-600">
+                                                <span className="text-gray-600 text-sm italic">
                                                     {enrollment.gradeLevel} Level
                                                 </span>
                                             </div>
                                             
                                             <div className="flex items-center gap-2">
-                                                <HiCalendar className="w-4 h-4 text-gray-500" />
-                                                <span className="text-gray-600">
+                                                <span className="text-gray-600 text-sm italic">
                                                     {enrollment.semester} Semester
                                                 </span>
                                             </div>
                                             
                                             <div className="flex items-center gap-2">
-                                                <HiAcademicCap className="w-4 h-4 text-gray-500" />
-                                                <span className="text-gray-600">
+                                                <span className="text-gray-600 text-sm italic">
                                                     {enrollment.schoolYear}
                                                 </span>
                                             </div>
                                             
                                             <div className="flex items-center gap-2">
-                                                <HiDocumentText className="w-4 h-4 text-gray-500" />
-                                                <span className="text-gray-600">
+                                                <span className="text-gray-600 text-sm italic">
                                                     {enrollment.returningStudent ? "Returning" : "New"} Student
                                                 </span>
                                             </div>
@@ -276,23 +263,23 @@ ${enrollment.copyOfGrades ? 'Grades: ✓ Uploaded' : 'Grades: Not uploaded'}`);
                                                 <span className="badge badge-info badge-sm text-white">PWD</span>
                                             )}
                                             {enrollment.clearance && (
-                                                <span className="badge badge-success badge-sm text-white">Clearance ✓</span>
+                                                <span className="badge badge-success badge-sm text-white text-[10px] martian-mono">Clearance ✓</span>
                                             )}
                                             {enrollment.copyOfGrades && (
-                                                <span className="badge badge-success badge-sm text-white">Grades ✓</span>
+                                                <span className="badge badge-success badge-sm text-white text-[10px] martian-mono">Grades ✓</span>
                                             )}
                                             {!enrollment.clearance && (
-                                                <span className="badge badge-warning badge-sm text-white">No Clearance</span>
+                                                <span className="badge badge-warning badge-sm text-white text-[10px] martian-mono">No Clearance</span>
                                             )}
                                             {!enrollment.copyOfGrades && (
-                                                <span className="badge badge-warning badge-sm text-white">No Grades</span>
+                                                <span className="badge badge-warning badge-sm text-white text-[10px] martian-mono">No Grades</span>
                                             )}
                                         </div>
 
                                         {/* File viewing section */}
                                         {(enrollment.clearance || enrollment.copyOfGrades) && (
                                             <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                                                <h4 className="font-medium text-xs text-gray-700 mb-3">Submitted Files</h4>
+                                                <h4 className="font-medium text-sm text-gray-700 mb-3 italic">Submitted Files</h4>
                                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                     {enrollment.clearance && (
                                                         <div className="flex items-center justify-between p-2 bg-white rounded border">
@@ -372,9 +359,8 @@ ${enrollment.copyOfGrades ? 'Grades: ✓ Uploaded' : 'Grades: Not uploaded'}`);
                                     <div className="flex flex-col gap-2">
                                         <button
                                             onClick={() => handleViewEnrollment(enrollment)}
-                                            className="btn btn-sm btn-outline btn-primary"
+                                            className="btn btn-xs text-[10px] martian-mono text-white rounded-none btn-primary"
                                         >
-                                            <HiEye className="w-4 h-4" />
                                             View
                                         </button>
                                         {enrollment.status === "pending" && (

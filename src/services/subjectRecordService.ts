@@ -147,6 +147,28 @@ export const subjectRecordService = {
   },
 
   /**
+   * Get subject records by student ID (where student is enrolled)
+   */
+  async getSubjectRecordsByStudent(studentId: string): Promise<SubjectRecord[]> {
+    try {
+      const q = query(
+        collection(db, COLLECTION_NAME), 
+        where('studentList', 'array-contains', studentId),
+        orderBy('createdAt', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      })) as SubjectRecord[];
+    } catch (error) {
+      console.error('Error fetching subject records by student:', error);
+      throw new Error('Failed to fetch subject records');
+    }
+  },
+
+  /**
    * Delete a subject record
    */
   async deleteSubjectRecord(id: string): Promise<void> {
