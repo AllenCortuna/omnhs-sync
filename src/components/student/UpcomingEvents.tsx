@@ -14,7 +14,7 @@ export function UpcomingEvents({ events }: UpcomingEventsProps) {
 
   if (upcoming.length === 0) {
     return (
-      <div className="card bg-base-100 shadow p-4 text-center text-base-content/60">
+      <div className="text-center text-zinc-600 italic text-xs ">
         No upcoming events.
       </div>
     );

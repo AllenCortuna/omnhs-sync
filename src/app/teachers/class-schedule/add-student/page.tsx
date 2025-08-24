@@ -9,12 +9,9 @@ import type { SubjectRecord } from "@/interface/info";
 import type { Student } from "@/interface/user";
 import { LoadingOverlay, BackButton } from "@/components/common";
 import {
-    HiAcademicCap,
     HiCalendar,
     HiDocumentText,
     HiPlus,
-    HiMinus,
-    HiSearch,
     HiUser,
     HiUserGroup,
     HiX,
@@ -77,6 +74,10 @@ const AddStudentToClass: React.FC = () => {
                         students.push(student);
                     }
                 });
+
+                console.log("students", students);
+                console.log("alreadyAdded", alreadyAdded);
+                console.log("record.studentList", record.studentList);
 
                 setAvailableStudents(students);
                 setAddedStudents(alreadyAdded);
@@ -207,18 +208,14 @@ const AddStudentToClass: React.FC = () => {
     return (
         <div className="max-w-6xl mx-auto p-4">
             <div className="mb-6">
-                <BackButton />
+                <BackButton/>
                 <div className="mt-4">
-                    <h1 className="text-xl font-bold text-primary mb-2">
-                        Manage Class Students
-                    </h1>
-                    <div className="bg-white rounded-lg shadow-sm border p-4">
+                    <div className="bg-white rounded-lg shadow-sm p-4">
                         <div className="flex items-center gap-3 mb-3">
-                            <HiAcademicCap className="w-5 h-5 text-primary" />
-                            <h2 className="font-semibold text-lg">{subjectRecord.subjectName}</h2>
+                            <h2 className="font-semibold text-primary martian-mono text-lg">{subjectRecord.subjectName}</h2>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm font-semibold italic">
                             <div className="flex items-center gap-2">
                                 <HiUserGroup className="w-4 h-4 text-gray-500" />
                                 <span className="text-gray-600">{subjectRecord.sectionName}</span>
@@ -238,10 +235,9 @@ const AddStudentToClass: React.FC = () => {
                         </div>
                         
                         <div className="mt-3 pt-3 border-t">
-                            <div className="flex items-center gap-2">
-                                <HiUserGroup className="w-4 h-4 text-primary" />
-                                <span className="font-medium text-sm">
-                                    {subjectRecord.studentList.length} students enrolled
+                            <div className="flex items-center gap-2 text-zinc-500">
+                                <span className="font-medium text-xs martian-mono">
+                                    Total Students: {subjectRecord.studentList.length}
                                 </span>
                             </div>
                         </div>
@@ -249,28 +245,23 @@ const AddStudentToClass: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2">
                 {/* Available Students */}
-                <div className="card bg-white shadow-md">
+                <div className="card bg-white shadow rounded-none">
                     <div className="card-body">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="card-title text-lg">
-                                <HiUser className="w-5 h-5" />
+                            <h3 className="card-title text-sm font-bold martian-mono text-primary">
                                 Available Students
-                                <div className="badge badge-primary">{filteredAvailableStudents.length}</div>
-                            </h3>
+                            </h3> 
                         </div>
 
                         {/* Search */}
                         <div className="form-control mb-4">
                             <div className="input-group">
-                                <span>
-                                    <HiSearch className="w-4 h-4" />
-                                </span>
                                 <input
                                     type="text"
                                     placeholder="Search students..."
-                                    className="input input-bordered w-full"
+                                    className="input input-bordered w-full text-xs rounded-none text-gray-700"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
@@ -280,8 +271,7 @@ const AddStudentToClass: React.FC = () => {
                         {/* Student List */}
                         <div className="max-h-96 overflow-y-auto space-y-2">
                             {filteredAvailableStudents.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500">
-                                    <HiUser className="w-12 h-12 mx-auto mb-2 opacity-50" />
+                                <div className="text-center py-8 text-gray-500 text-xs italic">
                                     <p>
                                         {searchTerm ? "No students found matching search" : "No available students"}
                                     </p>
@@ -316,13 +306,11 @@ const AddStudentToClass: React.FC = () => {
                 </div>
 
                 {/* Enrolled Students */}
-                <div className="card bg-white shadow-md">
+                <div className="card bg-white shadow rounded-none">
                     <div className="card-body">
                         <div className="flex items-center justify-between mb-4">
-                            <h3 className="card-title text-lg">
-                                <HiUserGroup className="w-5 h-5" />
+                            <h3 className="card-title text-sm font-bold martian-mono text-primary">
                                 Enrolled in Class
-                                <div className="badge badge-success">{addedStudents.length}</div>
                             </h3>
                         </div>
 
@@ -337,13 +325,13 @@ const AddStudentToClass: React.FC = () => {
                                 addedStudents.map((student) => (
                                     <div
                                         key={student.studentId}
-                                        className="flex items-center justify-between p-3 border rounded bg-green-50 border-green-200"
+                                        className="flex items-center justify-between p-3 bg-white border-y"
                                     >
                                         <div>
-                                            <div className="font-medium text-sm">
+                                            <div className="martian-mono text-xs font-semibold text-primary">
                                                 {getStudentDisplayName(student)}
                                             </div>
-                                            <div className="text-xs text-gray-500">
+                                            <div className="text-xs italic text-gray-500">
                                                 ID: {student.studentId}
                                             </div>
                                         </div>
@@ -400,7 +388,6 @@ const AddStudentToClass: React.FC = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <HiMinus className="w-4 h-4" />
                                         Remove Student
                                     </>
                                 )}

@@ -174,7 +174,7 @@ const StudentSignup: React.FC = () => {
         <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 to-secondary/5">
             <div className="card w-full max-w-md bg-base-100 shadow-xl">
                 <div className="fixed top-4 left-4">
-                    <BackButton variant="primary" size="sm" label="Back" />
+                    <BackButton />
                 </div>
                 <div className="card-body">
                     {/* Header */}

@@ -61,15 +61,12 @@ const CreateEventPage = () => {
             <div className="max-w-xl mx-auto p-6">
                 <div className="flex items-center gap-4 mb-6">
                     <BackButton
-                        onClick={() => router.back()}
-                        variant="outline"
-                        size="sm"
                     />
                     <div>
-                        <h1 className="text-2xl font-bold">
+                        <h1 className="font-bold text-primary martian-mono">
                             Create Calendar Event
                         </h1>
-                        <p className="text-sm text-base-content/60">
+                        <p className="text-xs text-zinc-500 italic">
                             Add a new event to the school calendar
                         </p>
                     </div>

@@ -9,16 +9,12 @@ import type { SubjectRecord, StudentGrade } from "@/interface/info";
 import type { Student } from "@/interface/user";
 import { LoadingOverlay, BackButton } from "@/components/common";
 import {
-    HiAcademicCap,
-    HiCalendar,
-    HiDocumentText,
-    HiSave,
-    HiUser,
     HiUserGroup,
     HiX,
     HiPencil,
 } from "react-icons/hi";
 import Link from "next/link";
+import { IoSave } from "react-icons/io5";
 
 interface GradeFormData {
     studentId: string;
@@ -247,36 +243,32 @@ const StudentGradePage: React.FC = () => {
                     <h1 className="text-xl font-bold text-primary mb-2">
                         Student Grades
                     </h1>
-                    <div className="bg-white rounded-lg shadow-sm border p-4">
+                    <hr />
+                    <div className="bg-white rounded-none shadow p-4">
                         <div className="flex items-center gap-3 mb-3">
-                            <HiAcademicCap className="w-5 h-5 text-primary" />
-                            <h2 className="font-semibold text-lg">{subjectRecord.subjectName}</h2>
+                            <h2 className="font-bold text-sm martian-mono text-primary">{subjectRecord.subjectName}</h2>
                         </div>
                         
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm font-semibold">
                             <div className="flex items-center gap-2">
-                                <HiUserGroup className="w-4 h-4 text-gray-500" />
                                 <span className="text-gray-600">{subjectRecord.sectionName}</span>
                             </div>
                             
                             <div className="flex items-center gap-2">
-                                <HiCalendar className="w-4 h-4 text-gray-500" />
                                 <span className="text-gray-600">
                                     {subjectRecord.gradeLevel} - {subjectRecord.semester} Semester
                                 </span>
                             </div>
                             
                             <div className="flex items-center gap-2">
-                                <HiDocumentText className="w-4 h-4 text-gray-500" />
                                 <span className="text-gray-600">{subjectRecord.schoolYear}</span>
                             </div>
                         </div>
                         
                         <div className="mt-3 pt-3 border-t">
-                            <div className="flex items-center gap-2">
-                                <HiUserGroup className="w-4 h-4 text-primary" />
-                                <span className="font-medium text-sm">
-                                    {students.length} students enrolled
+                            <div className="flex items-center gap-2 text-zinc-500">
+                                <span className="font-medium text-[10px] italic martian-mono">
+                                    Total Students: {students.length}
                                 </span>
                             </div>
                         </div>
@@ -305,14 +297,10 @@ const StudentGradePage: React.FC = () => {
                 <div className="card bg-white shadow-md">
                     <div className="card-body">
                         <div className="flex justify-between items-center mb-6">
-                            <h3 className="card-title text-lg">
-                                <HiUser className="w-5 h-5" />
-                                Student Grades
-                            </h3>
                             <button
                                 onClick={handleSaveGrades}
                                 disabled={saving}
-                                className="btn btn-primary gap-2"
+                                className="btn btn-primary gap-2 text-white text-xs martian-mono font-medium rounded-none"
                             >
                                 {saving ? (
                                     <>
@@ -321,7 +309,7 @@ const StudentGradePage: React.FC = () => {
                                     </>
                                 ) : (
                                     <>
-                                        <HiSave className="w-4 h-4" />
+                                        <IoSave className="w-4 h-4" />
                                         Save All Grades
                                     </>
                                 )}
@@ -343,10 +331,10 @@ const StudentGradePage: React.FC = () => {
                                 <tbody>
                                     {gradeForms.map((form) => (
                                         <tr key={form.studentId}>
-                                            <td className="font-medium text-sm">
+                                            <td className="font-semibold text-xs martian-mono text-primary">
                                                 {form.studentName}
                                             </td>
-                                            <td className="text-xs text-gray-500">
+                                            <td className="text-xs text-zinc-600 italic">
                                                 {form.studentId}
                                             </td>
                                             <td>
@@ -354,7 +342,7 @@ const StudentGradePage: React.FC = () => {
                                                     type="number"
                                                     min="75"
                                                     max="100"
-                                                    className={`input input-bordered input-sm w-20 ${getGradeColor(form.firstQuarterGrade)}`}
+                                                    className={`input input-bordered rounded-none text-xs martian-mono input-sm w-20 ${getGradeColor(form.firstQuarterGrade)}`}
                                                     value={form.firstQuarterGrade}
                                                     onChange={(e) => handleGradeChange(form.studentId, 'firstQuarterGrade', e.target.value)}
                                                     placeholder="Grade"
@@ -365,7 +353,7 @@ const StudentGradePage: React.FC = () => {
                                                     type="number"
                                                     min="75"
                                                     max="100"
-                                                    className={`input input-bordered input-sm w-20 ${getGradeColor(form.secondQuarterGrade)}`}
+                                                    className={`input input-bordered rounded-none text-xs martian-mono input-sm w-20 ${getGradeColor(form.secondQuarterGrade)}`}
                                                     value={form.secondQuarterGrade}
                                                     onChange={(e) => handleGradeChange(form.studentId, 'secondQuarterGrade', e.target.value)}
                                                     placeholder="Grade"
@@ -379,7 +367,7 @@ const StudentGradePage: React.FC = () => {
                                             <td>
                                                 <input
                                                     type="text"
-                                                    className="input input-bordered input-sm w-32"
+                                                    className="input input-bordered rounded-none text-xs martian-mono input-sm w-32"
                                                     value={form.remarks}
                                                     onChange={(e) => handleGradeChange(form.studentId, 'remarks', e.target.value)}
                                                     placeholder="Remarks"
@@ -392,8 +380,8 @@ const StudentGradePage: React.FC = () => {
                         </div>
 
                         <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                            <h4 className="font-semibold text-sm mb-2">Grade Guidelines:</h4>
-                            <ul className="text-xs text-gray-600 space-y-1">
+                            <h4 className="font-bold text-sm mb-2 text-primary martian-mono">Grade Guidelines:</h4>
+                            <ul className="text-xs italic text-gray-600 space-y-1">
                                 <li>• Grades must be between 75-100</li>
                                 <li>• Final grade is automatically calculated as the average of both quarters</li>
                                 <li>• Leave fields empty if grades are not yet available</li>

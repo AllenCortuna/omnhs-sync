@@ -1,7 +1,7 @@
 "use client";
 import { Teacher } from '@/interface/user';
 import { doc, getDoc } from 'firebase/firestore';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 import { db } from '../../../../../firebase';
 import { formatDate } from '@/config/format';
@@ -9,7 +9,6 @@ import { BackButton } from '@/components/common';
 
 const ViewTeacher = () => {
     const searchParams = useSearchParams();
-    const router = useRouter();
     const id = searchParams.get('id');
     const [teacher, setTeacher] = useState<Teacher | null>(null);
 
@@ -44,13 +43,10 @@ const ViewTeacher = () => {
                 {/* Header with Back Button */}
                 <div className="flex items-center gap-4 mb-6">
                     <BackButton
-                        onClick={() => router.back()}
-                        variant="outline"
-                        size="sm"
                     />
                     <div>
-                        <h1 className="text-2xl font-bold">Teacher Information</h1>
-                        <p className="text-sm text-base-content/60">
+                        <h1 className="font-bold text-primary martian-mono">Teacher Information</h1>
+                        <p className="text-xs text-zinc-500 italic">
                             View detailed teacher profile
                         </p>
                     </div>

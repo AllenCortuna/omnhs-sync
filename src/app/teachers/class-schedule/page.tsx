@@ -10,13 +10,10 @@ import type { Teacher } from "@/interface/user";
 import { LoadingOverlay } from "@/components/common";
 import {
     HiAcademicCap,
-    HiCalendar,
     HiDocumentText,
     HiPlus,
-    HiEye,
     HiPencil,
     HiTrash,
-    HiUserGroup,
 } from "react-icons/hi";
 import { formatDate } from "@/config/format";
 import { getSchoolYearOptions, SEMESTER_OPTIONS } from "@/config/school";
@@ -222,7 +219,7 @@ const ClassSchedule: React.FC = () => {
                     <h1 className="text-xl font-bold text-primary">
                         Class Schedule
                     </h1>
-                    <p className="text-gray-500 mt-1 text-xs">
+                    <p className="text-gray-500 mt-1 text-xs italic">
                         Manage your assigned classes and subjects
                     </p>
                 </div>
@@ -258,7 +255,7 @@ const ClassSchedule: React.FC = () => {
                     {subjectRecords.map((record) => (
                         <div
                             key={record.id}
-                            className="card bg-white shadow-md hover:shadow-lg transition-shadow"
+                            className="card bg-white shadow rounded-none hover:shadow-lg transition-shadow"
                         >
                             <div className="card-body">
                                 <div className="flex justify-between items-start">
@@ -268,42 +265,37 @@ const ClassSchedule: React.FC = () => {
                                                 {record.subjectName}
                                             </h3>
                                             <div className="text-xs text-gray-500 flex items-center gap-1 italic ml-5">
-                                                <HiUserGroup className="w-3 h-3" />
                                                 {record.studentList?.length || 0} Students
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                                        <div className="font-medium martian-mono text-xs grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                             <div className="flex items-center gap-2">
-                                                <HiAcademicCap className="w-4 h-4 text-gray-500" />
                                                 <span className="text-gray-600">
                                                     {record.sectionName}
                                                 </span>
                                             </div>
 
                                             <div className="flex items-center gap-2">
-                                                <HiCalendar className="w-4 h-4 text-gray-500" />
                                                 <span className="text-gray-600">
                                                     {record.gradeLevel} Level
                                                 </span>
                                             </div>
 
                                             <div className="flex items-center gap-2">
-                                                <HiCalendar className="w-4 h-4 text-gray-500" />
                                                 <span className="text-gray-600">
                                                     {record.semester} Semester
                                                 </span>
                                             </div>
 
                                             <div className="flex items-center gap-2">
-                                                <HiDocumentText className="w-4 h-4 text-gray-500" />
                                                 <span className="text-gray-600">
                                                     {record.schoolYear}
                                                 </span>
                                             </div>
 
                                             <div className="flex items-center gap-2">
-                                                <span className="text-gray-500 text-xs italic">
+                                                <span className="text-gray-500 text-[10px] italic">
                                                     {
                                                         formatDate(record.createdAt)
                                                     }
@@ -313,13 +305,6 @@ const ClassSchedule: React.FC = () => {
                                     </div>
 
                                     <div className="flex flex-col gap-2">
-                                        <button
-                                            className="btn btn-xs btn-outline btn-primary rounded-none"
-                                            title="View class details"
-                                        >
-                                            <HiEye className="w-4 h-4" />
-                                            View
-                                        </button>
                                         <Link
                                             className="btn btn-xs btn-outline btn-secondary rounded-none"
                                             title="Edit class"
