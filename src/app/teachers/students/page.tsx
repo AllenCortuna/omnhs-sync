@@ -8,9 +8,11 @@ import type { Teacher, Student } from "@/interface/user";
 import { LoadingOverlay } from "@/components/common";
 import {
     HiUser,
+    HiPencil,
 } from "react-icons/hi";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "../../../../firebase";
+import Link from "next/link";
 
 interface StudentWithClasses {
     student: Student;
@@ -21,6 +23,12 @@ interface StudentWithClasses {
         gradeLevel: string;
         semester: string;
         schoolYear: string;
+        grades?: {
+            firstQuarterGrade: number;
+            secondQuarterGrade: number;
+            finalGrade: number;
+            rating: string;
+        };
     }[];
 }
 
@@ -97,13 +105,22 @@ const StudentsPage: React.FC = () => {
                         record.studentList.forEach((studentId) => {
                             const studentEntry = studentClassMap.get(studentId);
                             if (studentEntry) {
+                                // Find grades for this student in this subject
+                                const studentGrade = record.studentGrades?.find(g => g.studentId === studentId);
+                                
                                 studentEntry.enrolledClasses.push({
                                     subjectRecordId: record.id,
                                     subjectName: record.subjectName,
                                     sectionName: record.sectionName,
                                     gradeLevel: record.gradeLevel,
                                     semester: record.semester,
-                                    schoolYear: record.schoolYear
+                                    schoolYear: record.schoolYear,
+                                    grades: studentGrade ? {
+                                        firstQuarterGrade: studentGrade.firstQuarterGrade,
+                                        secondQuarterGrade: studentGrade.secondQuarterGrade,
+                                        finalGrade: studentGrade.finalGrade,
+                                        rating: studentGrade.rating || ""
+                                    } : undefined
                                 });
                             }
                         });
@@ -198,6 +215,26 @@ const StudentsPage: React.FC = () => {
                     <div className="stat-title text-xs martian-mono">Total Classes</div>
                     <div className="stat-value text-secondary">{subjectRecords.length}</div>
                 </div>
+                
+                <div className="stat">
+                    <div className="stat-title text-xs martian-mono">Students with Grades</div>
+                    <div className="stat-value text-success">
+                        {studentsWithClasses.filter(student => 
+                            student.enrolledClasses.some(cls => cls.grades)
+                        ).length}
+                    </div>
+                </div>
+                
+                <div className="stat">
+                    <div className="stat-title text-xs martian-mono">Students with Honors</div>
+                    <div className="stat-value text-warning">
+                        {studentsWithClasses.filter(student => 
+                            student.enrolledClasses.some(cls => 
+                                cls.grades?.rating && cls.grades.rating.includes("Honors")
+                            )
+                        ).length}
+                    </div>
+                </div>
             </div>
 
             {/* Students List */}
@@ -270,6 +307,67 @@ const StudentsPage: React.FC = () => {
                                                     <div className="flex items-center gap-1">
                                                         <span>{cls.schoolYear}</span>
                                                     </div>
+                                                </div>
+                                                
+                                                {/* Grades Section */}
+                                                {cls.grades && (
+                                                    <div className="mt-3 pt-3 border-t border-gray-200">
+                                                        <div className="text-xs font-semibold text-primary mb-2 martian-mono">
+                                                            Grades
+                                                        </div>
+                                                        <div className="grid grid-cols-2 gap-2 text-xs">
+                                                            <div>
+                                                                <span className="text-gray-600">1st Quarter:</span>
+                                                                <span className={`ml-1 font-bold martian-mono ${cls.grades.firstQuarterGrade >= 75 ? 'text-success' : 'text-error'}`}>
+                                                                    {cls.grades.firstQuarterGrade || "—"}
+                                                                </span>
+                                                            </div>
+                                                            <div>
+                                                                <span className="text-gray-600">2nd Quarter:</span>
+                                                                <span className={`ml-1 font-bold martian-mono ${cls.grades.secondQuarterGrade >= 75 ? 'text-success' : 'text-error'}`}>
+                                                                    {cls.grades.secondQuarterGrade || "—"}
+                                                                </span>
+                                                            </div>
+                                                            <div className="col-span-2">
+                                                                <span className="text-gray-600">Final Grade:</span>
+                                                                <span className={`ml-1 font-bold martian-mono ${cls.grades.finalGrade >= 75 ? 'text-success' : 'text-error'}`}>
+                                                                    {cls.grades.finalGrade || "—"}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        
+                                                        {/* Rating */}
+                                                        {cls.grades.rating && (
+                                                            <div className="mt-2 pt-2 border-t border-gray-200">
+                                                                <div className="text-xs">
+                                                                    <span className="text-gray-600">Rating:</span>
+                                                                    <span className="ml-1 font-bold text-primary martian-mono text-xs">
+                                                                        {cls.grades.rating}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                )}
+                                                
+                                                {/* No Grades Message */}
+                                                {!cls.grades && (
+                                                    <div className="mt-3 pt-3 border-t border-gray-200">
+                                                        <div className="text-xs text-gray-500 italic">
+                                                            No grades recorded yet
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                
+                                                {/* Edit Grades Button */}
+                                                <div className="mt-3 pt-3 border-t border-gray-200">
+                                                    <Link
+                                                        href={`/teachers/class-schedule/student-grade?subjectRecordId=${cls.subjectRecordId}`}
+                                                        className="btn btn-xs btn-primary gap-1 text-white rounded-none"
+                                                    >
+                                                        <HiPencil className="w-3 h-3" />
+                                                        {cls.grades ? 'Edit Grades' : 'Input Grades'}
+                                                    </Link>
                                                 </div>
                                             </div>
                                         ))}

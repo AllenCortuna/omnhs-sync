@@ -66,14 +66,7 @@ const StudentGrades = () => {
         return Math.round((totalGrade / validGrades.length) * 100) / 100;
     };
 
-    // Get grade status and color
-    const getGradeStatus = (grade: number): { status: string; color: string } => {
-        if (grade >= 90) return { status: 'Outstanding', color: 'text-success' };
-        if (grade >= 85) return { status: 'Very Satisfactory', color: 'text-success' };
-        if (grade >= 80) return { status: 'Satisfactory', color: 'text-warning' };
-        if (grade >= 75) return { status: 'Fairly Satisfactory', color: 'text-warning' };
-        return { status: 'Did Not Meet Expectations', color: 'text-error' };
-    };
+
 
     if (userLoading || loading) {
         return <LoadingOverlay />;
@@ -201,10 +194,10 @@ const StudentGrades = () => {
                                             </div>
                                             
                                             <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                                <div className="text-sm text-gray-600 mb-1 italic">Status</div>
+                                                <div className="text-sm text-gray-600 mb-1 italic">Rating</div>
                                                 {gradeData.studentGrade.finalGrade > 0 ? (
-                                                    <div className={`text-sm font-semibold martian-mono ${getGradeStatus(gradeData.studentGrade.finalGrade).color}`}>
-                                                        {getGradeStatus(gradeData.studentGrade.finalGrade).status}
+                                                    <div className="text-sm font-semibold martian-mono text-primary">
+                                                        {gradeData.studentGrade.rating || "—"}
                                                     </div>
                                                 ) : (
                                                     <div className="text-sm text-gray-400">Not Graded</div>

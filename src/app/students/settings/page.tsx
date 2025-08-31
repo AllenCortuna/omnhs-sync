@@ -11,9 +11,6 @@ import { useRouter } from "next/navigation";
 import {
     HiUser,
     HiPhone,
-    HiHeart,
-    HiHome,
-    HiIdentification,
     HiCalendar,
     HiGlobe,
     HiAcademicCap,
@@ -135,10 +132,10 @@ const StudentSettings: React.FC = () => {
     return (
         <div className="max-w-4xl mx-auto p-4">
             <div className="mb-6">
-                <h1 className="text-2xl font-bold text-gray-800 mb-2">
+                <h1 className="text-2xl martian-mono font-bold text-primary mb-2">
                     Student Settings
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-gray-500 italic text-xs">
                     Update your personal information and contact details
                 </p>
             </div>
@@ -153,8 +150,7 @@ const StudentSettings: React.FC = () => {
                 {/* Personal Information Section */}
                 <div className="card bg-white shadow-md">
                     <div className="card-body">
-                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2">
-                            <HiUser className="w-5 h-5 text-primary" />
+                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2 martian-mono text-primary">
                             Personal Information
                         </h2>
 
@@ -204,15 +200,12 @@ const StudentSettings: React.FC = () => {
                              />
 
                             <div>
-                                <label className="block text-xs mb-1 text-gray-600">
-                                    Sex
-                                </label>
                                 <select
                                     name="sex"
                                     value={fetchedStudent.sex || ""}
                                     onChange={() => {}}
                                     disabled={true}
-                                    className="select select-bordered select-xs w-full"
+                                    className="select select-bordered select-sm w-full"
                                 >
                                     <option value="">Select Sex</option>
                                     <option value="Male">Male</option>
@@ -243,15 +236,12 @@ const StudentSettings: React.FC = () => {
                             />
 
                             <div>
-                                <label className="block text-xs mb-1 text-gray-600">
-                                    Civil Status
-                                </label>
                                 <select
                                     name="civilStatus"
                                     value={form.civilStatus || ""}
                                     onChange={handleChange}
                                     disabled={loading}
-                                    className="select select-bordered select-xs w-full"
+                                    className="select select-bordered select-sm w-full"
                                 >
                                     <option value="">
                                         Select Civil Status
@@ -302,8 +292,7 @@ const StudentSettings: React.FC = () => {
                 {/* Contact Information Section */}
                 <div className="card bg-white shadow-md">
                     <div className="card-body">
-                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2">
-                            <HiPhone className="w-5 h-5 text-primary" />
+                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2 martian-mono text-primary">
                             Contact Information
                         </h2>
 
@@ -336,8 +325,7 @@ const StudentSettings: React.FC = () => {
                 {/* Father's Information Section */}
                 <div className="card bg-white shadow-md">
                     <div className="card-body">
-                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2">
-                            <HiIdentification className="w-5 h-5 text-primary" />
+                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2 martian-mono text-primary">
                             Father&apos;s Information
                         </h2>
 
@@ -381,8 +369,7 @@ const StudentSettings: React.FC = () => {
                 {/* Mother's Information Section */}
                 <div className="card bg-white shadow-md">
                     <div className="card-body">
-                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2">
-                            <HiHeart className="w-5 h-5 text-primary" />
+                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2 martian-mono text-primary">
                             Mother&apos;s Information
                         </h2>
 
@@ -426,8 +413,7 @@ const StudentSettings: React.FC = () => {
                 {/* Guardian's Information Section */}
                 <div className="card bg-white shadow-md">
                     <div className="card-body">
-                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2">
-                            <HiHome className="w-5 h-5 text-primary" />
+                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2 martian-mono text-primary">
                             Guardian&apos;s Information
                         </h2>
 

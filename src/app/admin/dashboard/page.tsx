@@ -209,7 +209,7 @@ const AdminDashboard = () => {
               </Link>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-96 overflow-y-auto rounded-lg">
               {strands.map((strand) => {
                 const strandSections = getSectionsByStrand(strand.id);
                 return (
@@ -283,7 +283,7 @@ const AdminDashboard = () => {
               </Link>
             </div>
           ) : (
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <div className="space-y-3 max-h-96 overflow-y-auto rounded-lg">
               {sections.map((section) => {
                 const strand = strands.find(s => s.id === section.strandId);
                 return (

@@ -4,7 +4,7 @@ import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db } from "../../../../firebase";
 import { Enrollment } from "@/interface/info";
 import { formatDate } from "@/config/format";
-import { HiAcademicCap, HiCalendar, HiChevronLeft, HiChevronRight, HiClock, HiSearch, HiUser } from "react-icons/hi";
+import { HiAcademicCap, HiCalendar, HiChevronLeft, HiChevronRight, HiClock, HiSearch } from "react-icons/hi";
 import ApproveEnrollmentModal from "@/components/admin/ApproveEnrollmentModal";
 import { doc, updateDoc } from "firebase/firestore";
 import { strandService } from "@/services/strandService";
@@ -117,19 +117,19 @@ const EnrolleeListPage = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Enrollment Submissions</h1>
+      <h1 className="text-lg font-extrabold mb-4 martian-mono text-primary">Enrollment Submissions</h1>
       <div className="mb-4 flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
         <div className="flex gap-2">
-          <button className={`btn btn-sm ${statusFilter === "pending" ? "btn-primary" : "btn-outline"}`} onClick={() => { setStatusFilter("pending"); setCurrentPage(1); }}>Pending</button>
-          <button className={`btn btn-sm ${statusFilter === "approved" ? "btn-primary" : "btn-outline"}`} onClick={() => { setStatusFilter("approved"); setCurrentPage(1); }}>Approved</button>
-          <button className={`btn btn-sm ${statusFilter === "rejected" ? "btn-primary" : "btn-outline"}`} onClick={() => { setStatusFilter("rejected"); setCurrentPage(1); }}>Rejected</button>
+          <button className={`btn btn-sm martian-mono text-xs text-primary ${statusFilter === "pending" ? "btn-primary text-white" : "btn-outline"}`} onClick={() => { setStatusFilter("pending"); setCurrentPage(1); }}>Pending</button>
+          <button className={`btn btn-sm martian-mono text-xs text-primary ${statusFilter === "approved" ? "btn-primary text-white" : "btn-outline"}`} onClick={() => { setStatusFilter("approved"); setCurrentPage(1); }}>Approved</button>
+          <button className={`btn btn-sm martian-mono text-xs text-primary ${statusFilter === "rejected" ? "btn-primary text-white" : "btn-outline"}`} onClick={() => { setStatusFilter("rejected"); setCurrentPage(1); }}>Rejected</button>
         </div>
         <div className="flex gap-2">
-          <select className="select select-sm select-bordered" value={schoolYearFilter} onChange={e => { setSchoolYearFilter(e.target.value); setCurrentPage(1); }}>
+          <select className="select select-sm select-bordered martian-mono text-xs text-primary" value={schoolYearFilter} onChange={e => { setSchoolYearFilter(e.target.value); setCurrentPage(1); }}>
             <option value="all">All Years</option>
             {schoolYears.map(year => <option key={year} value={year}>{year}</option>)}
           </select>
-          <select className="select select-sm select-bordered" value={semesterFilter} onChange={e => { setSemesterFilter(e.target.value); setCurrentPage(1); }}>
+          <select className="select select-sm select-bordered martian-mono text-xs text-primary" value={semesterFilter} onChange={e => { setSemesterFilter(e.target.value); setCurrentPage(1); }}>
             <option value="all">All Semesters</option>
             {semesters.map(sem => <option key={sem} value={sem}>{sem}</option>)}
           </select>
@@ -160,8 +160,7 @@ const EnrolleeListPage = () => {
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-1 mb-1">
-                    <HiUser className="w-4 h-4 text-primary/70" />
-                    <span className="font-semibold text-sm text-zinc-700 group-hover:text-primary transition-colors">{enrollment.studentName}</span>
+                    <span className="font-semibold text-sm text-primary transition-colors martian-mono">{enrollment.studentName}</span>
                   </div>
                   <div className="flex flex-col gap-1 mt-1">
                     <div className="flex items-center gap-1 text-xs text-zinc-600">

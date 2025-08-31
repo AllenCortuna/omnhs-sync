@@ -22,6 +22,7 @@ interface GradeFormData {
     firstQuarterGrade: number | "";
     secondQuarterGrade: number | "";
     finalGrade: number | "";
+    rating: string;
     remarks: string;
 }
 
@@ -83,6 +84,7 @@ const StudentGradePage: React.FC = () => {
                             firstQuarterGrade: existingGrade?.firstQuarterGrade || "",
                             secondQuarterGrade: existingGrade?.secondQuarterGrade || "",
                             finalGrade: existingGrade?.finalGrade || "",
+                            rating: existingGrade?.rating || "",
                             remarks: existingGrade?.remarks || "",
                         };
                     });
@@ -105,6 +107,14 @@ const StudentGradePage: React.FC = () => {
         return Math.round((firstQuarter + secondQuarter) / 2);
     };
 
+    // Calculate rating based on final grade
+    const calculateRating = (finalGrade: number): string => {
+        if (finalGrade >= 98) return "With Highest Honors";
+        if (finalGrade >= 95) return "With High Honors";
+        if (finalGrade >= 90) return "With Honors";
+        return "";
+    };
+
     // Handle grade input changes
     const handleGradeChange = (studentId: string, field: keyof GradeFormData, value: string | number) => {
         setGradeForms(prev => prev.map(form => {
@@ -118,6 +128,8 @@ const StudentGradePage: React.FC = () => {
                     
                     if (!isNaN(firstQuarter) && !isNaN(secondQuarter) && firstQuarter > 0 && secondQuarter > 0) {
                         updatedForm.finalGrade = calculateFinalGrade(firstQuarter, secondQuarter);
+                        // Auto-calculate rating based on final grade
+                        updatedForm.rating = calculateRating(updatedForm.finalGrade);
                     }
                 }
                 
@@ -177,6 +189,7 @@ const StudentGradePage: React.FC = () => {
                     firstQuarterGrade: Number(form.firstQuarterGrade) || 0,
                     secondQuarterGrade: Number(form.secondQuarterGrade) || 0,
                     finalGrade: Number(form.finalGrade) || 0,
+                    rating: form.rating,
                     remarks: form.remarks,
                     subjectRecordId: subjectRecord.id,
                     subjectName: subjectRecord.subjectName,
@@ -325,6 +338,7 @@ const StudentGradePage: React.FC = () => {
                                         <th className="text-sm">1st Quarter</th>
                                         <th className="text-sm">2nd Quarter</th>
                                         <th className="text-sm">Final Grade</th>
+                                        <th className="text-sm">Rating</th>
                                         <th className="text-sm">Remarks</th>
                                     </tr>
                                 </thead>
@@ -365,6 +379,11 @@ const StudentGradePage: React.FC = () => {
                                                 </span>
                                             </td>
                                             <td>
+                                                <span className="text-xs font-medium text-primary martian-mono">
+                                                    {form.rating || "—"}
+                                                </span>
+                                            </td>
+                                            <td>
                                                 <input
                                                     type="text"
                                                     className="input input-bordered rounded-none text-xs martian-mono input-sm w-32"
@@ -384,6 +403,10 @@ const StudentGradePage: React.FC = () => {
                             <ul className="text-xs italic text-gray-600 space-y-1">
                                 <li>• Grades must be between 75-100</li>
                                 <li>• Final grade is automatically calculated as the average of both quarters</li>
+                                <li>• Rating is automatically assigned based on final grade:</li>
+                                <li className="ml-4">  - &quot;With Highest Honors&quot;: 98-100%</li>
+                                <li className="ml-4">  - &quot;With High Honors&quot;: 95-97%</li>
+                                <li className="ml-4">  - &quot;With Honors&quot;: 90-94%</li>
                                 <li>• Leave fields empty if grades are not yet available</li>
                                 <li>• Click &quot;Save All Grades&quot; to update the grade records</li>
                             </ul>

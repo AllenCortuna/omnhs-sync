@@ -327,7 +327,7 @@ const LoginAdmin: React.FC = () => {
                         <h1 className="text-5xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent martian-mono">
                             OMNHSYNC
                         </h1>
-                        <p className="text-xs ml-3 text-gray-500 mt-2 ">
+                        <p className="text-xs ml-3 italic text-gray-500 mt-2 ">
                             Occidental Mindoro National High School
                         </p>
                     </div>

@@ -25,6 +25,7 @@ export interface StudentGrade {
     firstQuarterGrade: number;
     secondQuarterGrade: number;
     finalGrade: number;
+    rating?: string;
     remarks: string;
     subjectRecordId: string; // reference to the subject record
     subjectName: string; // reference to the subject
