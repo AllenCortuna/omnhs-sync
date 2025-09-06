@@ -15,7 +15,10 @@ interface StudentGradeDisplay {
 const StudentGrades = () => {
     const { userData, isLoading: userLoading } = useSaveUserData({ role: 'student' });
     const [grades, setGrades] = useState<StudentGradeDisplay[]>([]);
+    const [allGrades, setAllGrades] = useState<StudentGradeDisplay[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedSemester, setSelectedSemester] = useState<string>('all');
+    const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>('all');
 
     // Fetch student grades for all enrolled subjects
     useEffect(() => {
@@ -45,6 +48,7 @@ const StudentGrades = () => {
                     };
                 });
 
+                setAllGrades(gradesData);
                 setGrades(gradesData);
             } catch (error) {
                 console.error('Error fetching grades:', error);
@@ -56,6 +60,31 @@ const StudentGrades = () => {
 
         fetchGrades();
     }, [userData, userLoading]);
+
+    // Filter grades based on selected semester and school year
+    useEffect(() => {
+        if (allGrades.length === 0) return;
+
+        let filteredGrades = allGrades;
+
+        if (selectedSemester !== 'all') {
+            filteredGrades = filteredGrades.filter(grade => 
+                grade.subjectRecord.semester === selectedSemester
+            );
+        }
+
+        if (selectedSchoolYear !== 'all') {
+            filteredGrades = filteredGrades.filter(grade => 
+                grade.subjectRecord.schoolYear === selectedSchoolYear
+            );
+        }
+
+        setGrades(filteredGrades);
+    }, [allGrades, selectedSemester, selectedSchoolYear]);
+
+    // Get unique semesters and school years for filter options
+    const semesters = Array.from(new Set(allGrades.map(grade => grade.subjectRecord.semester))).sort();
+    const schoolYears = Array.from(new Set(allGrades.map(grade => grade.subjectRecord.schoolYear))).sort();
 
     // Calculate GPA for all subjects
     const calculateGPA = (): number => {
@@ -100,11 +129,78 @@ const StudentGrades = () => {
                 <hr className="mt-4" />
             </div>
 
+            {/* Filters */}
+            {allGrades.length > 0 && (
+                <div className="card bg-white shadow-md mb-6">
+                    <div className="card-body">
+                        <div className="flex flex-wrap items-center gap-4">
+                            <div className="flex flex-wrap gap-3">
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="text-xs italic font-normal text-zinc-500">Semester</span>
+                                    </label>
+                                    <select
+                                        value={selectedSemester}
+                                        onChange={(e) => setSelectedSemester(e.target.value)}
+                                        className="select select-bordered select-sm w-full max-w-xs text-xs martian-mono text-primary rounded-none"
+                                    >
+                                        <option value="all">All Semesters</option>
+                                        {semesters.map(semester => (
+                                            <option key={semester} value={semester}>
+                                                {semester} Semester
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="text-xs italic font-normal text-zinc-500">School Year</span>
+                                    </label>
+                                    <select
+                                        value={selectedSchoolYear}
+                                        onChange={(e) => setSelectedSchoolYear(e.target.value)}
+                                        className="select select-bordered select-sm w-full max-w-xs text-xs martian-mono text-primary rounded-none"
+                                    >
+                                        <option value="all">All Years</option>
+                                        {schoolYears.map(year => (
+                                            <option key={year} value={year}>
+                                                {year}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="text-xs italic font-normal text-zinc-500">Actions</span>
+                                    </label>
+                                    <button
+                                        onClick={() => {
+                                            setSelectedSemester('all');
+                                            setSelectedSchoolYear('all');
+                                        }}
+                                        className="btn btn-outline btn-sm text-xs martian-mono text-primary rounded-none"
+                                    >
+                                        Clear Filters
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* GPA Summary Card */}
             <div className="card bg-white shadow-md mb-6">
                 <div className="card-body">
-                    <div className="flex items-center gap-3 mb-4">
+                    <div className="flex items-center justify-between mb-4">
                         <h2 className="martian-mono font-bold text-primary">Academic Summary</h2>
+                        {(selectedSemester !== 'all' || selectedSchoolYear !== 'all') && (
+                            <div className="text-xs text-gray-500 italic">
+                                Showing filtered results
+                            </div>
+                        )}
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -143,9 +239,14 @@ const StudentGrades = () => {
                             <div className="card-body">
                                 <div className="flex justify-between items-start mb-4">
                                     <div className="flex-1">
-                                        <h3 className="text-sm font-bold text-primary martian-mono mb-2">
-                                            {gradeData.subjectRecord.subjectName}
-                                        </h3>
+                                        <div className="flex items-center gap-8 mb-2">
+                                            <h3 className="text-sm font-bold text-primary martian-mono">
+                                                {gradeData.subjectRecord.subjectName} --
+                                            </h3>
+                                            <p className="text-primary text-xs font-bold martian-mono">
+                                                {gradeData.subjectRecord.teacherName}
+                                            </p>
+                                        </div>
                                         
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                                             <div>

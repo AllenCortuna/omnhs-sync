@@ -122,7 +122,7 @@ const StrandList: React.FC<StrandListProps> = ({
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-base-content">
+        <h3 className="text-lg font-semibold martian-mono text-primary">
           Academic Strands ({strands.length})
         </h3>
         <button
@@ -148,10 +148,10 @@ const StrandList: React.FC<StrandListProps> = ({
                   <HiAcademicCap className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-base-content">
+                  <h4 className="font-semibold martian-mono text-primary">
                     {strand.strandName}
                   </h4>
-                  <p className="text-xs text-base-content/60">
+                  <p className="text-base-content/60 font-normal text-xs italic">
                     ID: {strand.id}
                   </p>
                 </div>
@@ -170,7 +170,7 @@ const StrandList: React.FC<StrandListProps> = ({
             </div>
 
             {/* Description */}
-            <p className="text-sm text-base-content/70 line-clamp-3 mb-4">
+            <p className="text-base-content/70 line-clamp-3 mb-4 font-normal text-xs italic">
               {strand.strandDescription}
             </p>
 
@@ -180,7 +180,7 @@ const StrandList: React.FC<StrandListProps> = ({
                 {loadingSections.has(strand.id) ? (
                   <div className="flex items-center justify-center py-4">
                     <span className="loading loading-spinner loading-sm text-secondary"></span>
-                    <span className="ml-2 text-xs text-base-content/60">Loading sections...</span>
+                    <span className="ml-2 text-base-content/60 font-normal text-xs italic">Loading sections...</span>
                   </div>
                 ) : (
                   <SectionList

@@ -5,7 +5,7 @@ import { subjectRecordService } from '@/services/subjectRecordService';
 import { errorToast } from '@/config/toast';
 import type { SubjectRecord } from '@/interface/info';
 import type { Teacher, Student } from '@/interface/user';
-import { LoadingOverlay } from '@/components/common';
+import { LoadingOverlay, GradeChart } from '@/components/common';
 import {
     HiAcademicCap,
     HiCalendar,
@@ -362,6 +362,13 @@ const TeacherDashboard = () => {
                     </div>
                 </div>
             </div>
+
+
+            {/* Grade Chart */}
+            <GradeChart 
+                subjectRecords={subjectRecords}
+                studentsByClass={studentsByClass}
+            />
         </div>
     );
 };

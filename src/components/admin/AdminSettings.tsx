@@ -1,10 +1,11 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { HiCog, HiAcademicCap, HiArrowLeft } from 'react-icons/hi';
+import { HiCog, HiAcademicCap, HiArrowLeft, HiKey } from 'react-icons/hi';
 import { Strand } from '../../interface/info';
 import { strandService, CreateStrandData, UpdateStrandData } from '../../services/strandService';
 import StrandList from './StrandList';
 import StrandForm from './StrandForm';
+import ChangePassword from './ChangePassword';
 
 const AdminSettings: React.FC = () => {
   const [strands, setStrands] = useState<Strand[]>([]);
@@ -13,6 +14,7 @@ const AdminSettings: React.FC = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingStrand, setEditingStrand] = useState<Strand | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   // Fetch strands on component mount
   useEffect(() => {
@@ -84,6 +86,14 @@ const AdminSettings: React.FC = () => {
     setError(null);
   };
 
+  const handleToggleChangePassword = () => {
+    setShowChangePassword(!showChangePassword);
+  };
+
+  const handleCancelChangePassword = () => {
+    setShowChangePassword(false);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -103,8 +113,8 @@ const AdminSettings: React.FC = () => {
           <HiCog className="w-7 h-7 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-base-content">Admin Settings</h1>
-          <p className="text-base-content/60">Manage system configurations and academic data</p>
+          <h1 className="text-lg font-bold martian-mono text-primary">Admin Settings</h1>
+          <p className="text-base-content/60 font-normal text-xs italic">Manage system configurations and academic data</p>
         </div>
       </div>
 
@@ -143,8 +153,36 @@ const AdminSettings: React.FC = () => {
             mode={editingStrand?.id ? 'edit' : 'create'}
           />
         </div>
+      ) : showChangePassword ? (
+        <div className="space-y-4">
+          {/* Back Button */}
+          <button
+            onClick={handleCancelChangePassword}
+            className="btn btn-ghost btn-sm gap-2"
+          >
+            <HiArrowLeft className="w-4 h-4" />
+            Back to Settings
+          </button>
+
+          {/* Change Password Form */}
+          <ChangePassword
+            onCancel={handleCancelChangePassword}
+            loading={formLoading}
+          />
+        </div>
       ) : (
         <div className="space-y-8">
+          {/* Change Password Button */}
+          <div className="flex justify-end">
+            <button
+              onClick={handleToggleChangePassword}
+              className="btn btn-primary text-white martian-mono btn-sm gap-2"
+            >
+              <HiKey className="w-4 h-4" />
+              Change Password
+            </button>
+          </div>
+
           {/* Strands Section */}
           <div className="bg-base-100 rounded-xl border border-base-300 p-6">
             <div className="flex items-center gap-3 mb-6">
@@ -152,8 +190,8 @@ const AdminSettings: React.FC = () => {
                 <HiAcademicCap className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-base-content">Academic Strands</h2>
-                <p className="text-sm text-base-content/60">
+                <h2 className="text-xl font-semibold martian-mono text-primary">Academic Strands</h2>
+                <p className="text-sm text-base-content/60 font-normal italic">
                   Manage academic strands for the school curriculum
                 </p>
               </div>

@@ -1,6 +1,14 @@
 "use client";
-import React from "react";
-import { MdSchool, MdPerson, MdEmail, MdCalendarToday, MdAssignment, MdMessage, MdSettings } from "react-icons/md";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { MdSchool, MdPerson, MdCalendarToday, MdAssignment, MdGrade } from "react-icons/md";
+import { useSaveUserData } from '@/hooks';
+import { subjectRecordService } from '@/services/subjectRecordService';
+import { LoadingOverlay } from '@/components/common';
+import { errorToast } from '@/config/toast';
+import { formatDate } from '@/config/format';
+import type { SubjectRecord } from '@/interface/info';
+import type { Student } from '@/interface/user';
 
 /**
  * @file StudentDashboard.tsx - Student dashboard page
@@ -15,6 +23,82 @@ import { MdSchool, MdPerson, MdEmail, MdCalendarToday, MdAssignment, MdMessage, 
  */
 
 const StudentDashboard: React.FC = () => {
+    const router = useRouter();
+    const { userData, isLoading: userLoading } = useSaveUserData({ role: 'student' });
+    const [subjectRecords, setSubjectRecords] = useState<SubjectRecord[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    // Fetch student data
+    useEffect(() => {
+        const fetchStudentData = async () => {
+            if (!userData || userLoading) return;
+
+            if (!('studentId' in userData)) {
+                errorToast('User data is not a student');
+                return;
+            }
+
+            try {
+                setLoading(true);
+                const studentId = userData.studentId;
+                
+                // Get all subject records where student is enrolled
+                const records = await subjectRecordService.getSubjectRecordsByStudent(studentId);
+                setSubjectRecords(records);
+            } catch (error) {
+                console.error('Error fetching student data:', error);
+                errorToast('Failed to load student data');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchStudentData();
+    }, [userData, userLoading]);
+
+    // Calculate GPA
+    const calculateGPA = (): number => {
+        if (!userData || !('studentId' in userData)) return 0;
+        
+        const studentId = userData.studentId;
+        const validGrades = subjectRecords
+            .flatMap(record => record.studentGrades || [])
+            .filter(grade => grade.studentId === studentId && grade.finalGrade > 0);
+        
+        if (validGrades.length === 0) return 0;
+        
+        const totalGrade = validGrades.reduce((sum, grade) => sum + grade.finalGrade, 0);
+        return Math.round((totalGrade / validGrades.length) * 100) / 100;
+    };
+
+    // Navigation handlers
+    const handleNavigation = (path: string) => {
+        router.push(path);
+    };
+
+    if (userLoading || loading) {
+        return <LoadingOverlay />;
+    }
+
+    if (!userData || !('studentId' in userData)) {
+        return (
+            <div className="h-full p-8 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg">
+                <div className="max-w-6xl mx-auto text-center">
+                    <MdPerson className="w-16 h-16 text-error mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-600 mb-2">Access Denied</h3>
+                    <p className="text-gray-500">You must be logged in as a student to view this dashboard.</p>
+                </div>
+            </div>
+        );
+    }
+
+    const studentData = userData as Student;
+    const gpa = calculateGPA();
+    const enrolledSubjects = subjectRecords.length;
+    const gradedSubjects = subjectRecords
+        .flatMap(record => record.studentGrades || [])
+        .filter(grade => grade.studentId === studentData.studentId && grade.finalGrade > 0).length;
+
     return (
         <div className="h-full p-8 bg-gradient-to-br from-primary/5 to-secondary/5 rounded-lg">
             <div className="max-w-6xl mx-auto">
@@ -28,12 +112,14 @@ const StudentDashboard: React.FC = () => {
                         </div>
                         <div>
                             <h1 className="text-xl martian-mono font-bold text-primary">Student Dashboard</h1>
-                            <p className="text-xs text-zinc-500 italic">Welcome to your student portal</p>
+                            <p className="text-xs text-zinc-500 italic">
+                                Welcome back, {studentData.firstName} {studentData.lastName}
+                            </p>
                         </div>
                     </div>
                 </div>
 
-                {/* Welcome Card */}
+                {/* Student Info Card */}
                 <div className="card bg-base-100 shadow mb-6">
                     <div className="card-body">
                         <div className="flex items-center gap-4">
@@ -42,18 +128,20 @@ const StudentDashboard: React.FC = () => {
                                     <MdPerson className="text-xl text-white" />
                                 </div>
                             </div>
-                            <div>
-                                <h2 className="text-xl font-bold text-primary martian-mono">Welcome!</h2>
+                            <div className="flex-1">
+                                <h2 className="text-xl font-bold text-primary martian-mono">
+                                    {studentData.firstName} {studentData.lastName}
+                                </h2>
                                 <p className="text-xs text-zinc-500 italic">
-                                    Your profile has been completed successfully. You can now access all student features.
+                                    Student ID: {studentData.studentId} | {studentData.email}
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Quick Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                {/* Academic Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                     <div className="card bg-base-100 shadow-sm">
                         <div className="card-body">
                             <div className="flex items-center gap-3">
@@ -61,8 +149,8 @@ const StudentDashboard: React.FC = () => {
                                     <MdSchool className="text-primary text-xl" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-primary martian-mono">Student ID</h3>
-                                    <p className="text-xs text-zinc-500 italic">Your unique identifier</p>
+                                    <h3 className="font-bold text-primary martian-mono">{enrolledSubjects}</h3>
+                                    <p className="text-xs text-zinc-500 italic">Enrolled Subjects</p>
                                 </div>
                             </div>
                         </div>
@@ -72,11 +160,11 @@ const StudentDashboard: React.FC = () => {
                         <div className="card-body">
                             <div className="flex items-center gap-3">
                                 <div className="bg-secondary/20 p-3 rounded-lg">
-                                    <MdEmail className="text-secondary text-xl" />
+                                    <MdGrade className="text-secondary text-xl" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-primary martian-mono">Email</h3>
-                                    <p className="text-xs text-zinc-500 italic">Your registered email</p>
+                                    <h3 className="font-bold text-primary martian-mono">{gpa}</h3>
+                                    <p className="text-xs text-zinc-500 italic">Current GPA</p>
                                 </div>
                             </div>
                         </div>
@@ -86,11 +174,27 @@ const StudentDashboard: React.FC = () => {
                         <div className="card-body">
                             <div className="flex items-center gap-3">
                                 <div className="bg-accent/20 p-3 rounded-lg">
-                                    <MdCalendarToday className="text-accent text-xl" />
+                                    <MdAssignment className="text-accent text-xl" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-primary martian-mono">Account Created</h3>
-                                    <p className="text-xs text-zinc-500 italic">Your registration date</p>
+                                    <h3 className="font-bold text-primary martian-mono">{gradedSubjects}</h3>
+                                    <p className="text-xs text-zinc-500 italic">Graded Subjects</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="card bg-base-100 shadow-sm">
+                        <div className="card-body">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-info/20 p-3 rounded-lg">
+                                    <MdCalendarToday className="text-info text-xl" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-primary martian-mono">
+                                        {formatDate(studentData.createdAt)}
+                                    </h3>
+                                    <p className="text-xs text-zinc-500 italic">Member Since</p>
                                 </div>
                             </div>
                         </div>
@@ -98,9 +202,12 @@ const StudentDashboard: React.FC = () => {
                 </div>
 
                 {/* Features Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
 
-                    <div className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div 
+                        className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => handleNavigation('/students/settings')}
+                    >
                         <div className="card-body">
                             <div className="flex items-center gap-3">
                                 <div className="bg-primary/20 p-3 rounded-lg">
@@ -114,35 +221,61 @@ const StudentDashboard: React.FC = () => {
                         </div>
                     </div>
 
-                    <div className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div 
+                        className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => handleNavigation('/students/grades')}
+                    >
                         <div className="card-body">
                             <div className="flex items-center gap-3">
                                 <div className="bg-primary/20 p-3 rounded-lg">
-                                    <MdSchool className="text-primary text-xl" />
+                                    <MdGrade className="text-primary text-xl" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-primary martian-mono">Academic Records</h3>
-                                    <p className="text-xs text-zinc-500 italic">Access your academic records</p>
+                                    <h3 className="font-bold text-primary martian-mono">View Grades</h3>
+                                    <p className="text-xs text-zinc-500 italic">Check your academic performance</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div 
+                        className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => handleNavigation('/students/calendar')}
+                    >
                         <div className="card-body">
                             <div className="flex items-center gap-3">
                                 <div className="bg-primary/20 p-3 rounded-lg">
                                     <MdCalendarToday className="text-primary text-xl" />
                                 </div>
                                 <div>
-                                    <h3 className="font-bold text-primary martian-mono">Class Schedule</h3>
-                                    <p className="text-xs text-zinc-500 italic">View your class schedule</p>
+                                    <h3 className="font-bold text-primary martian-mono">Calendar</h3>
+                                    <p className="text-xs text-zinc-500 italic">View school events and schedule</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    <div 
+                        className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                        onClick={() => handleNavigation('/students/enrollment')}
+                    >
+                        <div className="card-body">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-primary/20 p-3 rounded-lg">
+                                    <MdSchool className="text-primary text-xl" />
+                                </div>
+                                <div>
+                                    <h3 className="font-bold text-primary martian-mono">Enrollment</h3>
+                                    <p className="text-xs text-zinc-500 italic">Manage your enrollment status</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* <div 
+                        className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer opacity-50"
+                        onClick={() => errorToast('Feature coming soon!')}
+                    >
                         <div className="card-body">
                             <div className="flex items-center gap-3">
                                 <div className="bg-primary/20 p-3 rounded-lg">
@@ -150,13 +283,16 @@ const StudentDashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-primary martian-mono">Assignments</h3>
-                                    <p className="text-xs text-zinc-500 italic">Check pending assignments</p>
+                                    <p className="text-xs text-zinc-500 italic">Check pending assignments (Coming Soon)</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> */}
 
-                    <div className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
+                    {/* <div 
+                        className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer opacity-50"
+                        onClick={() => errorToast('Feature coming soon!')}
+                    >
                         <div className="card-body">
                             <div className="flex items-center gap-3">
                                 <div className="bg-primary/20 p-3 rounded-lg">
@@ -164,25 +300,11 @@ const StudentDashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-primary martian-mono">Messages</h3>
-                                    <p className="text-xs text-zinc-500 italic">View messages from teachers</p>
+                                    <p className="text-xs text-zinc-500 italic">View messages from teachers (Coming Soon)</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <div className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer">
-                        <div className="card-body">
-                            <div className="flex items-center gap-3">
-                                <div className="bg-primary/20 p-3 rounded-lg">
-                                    <MdSettings className="text-primary text-xl" />
-                                </div>
-                                <div>
-                                    <h3 className="font-bold text-primary martian-mono">Settings</h3>
-                                    <p className="text-xs text-zinc-500 italic">Manage your account</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </div> */}
                 </div>
             </div>
         </div>

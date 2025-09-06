@@ -18,8 +18,8 @@ const SectionList: React.FC<SectionListProps> = ({
         <div className="w-12 h-12 bg-secondary/20 rounded-full flex items-center justify-center mx-auto mb-3">
           <HiAcademicCap className="w-6 h-6 text-secondary" />
         </div>
-        <h4 className="text-sm font-medium text-base-content mb-1">No Sections Found</h4>
-        <p className="text-xs text-base-content/60 mb-4">
+        <h4 className="text-sm font-medium martian-mono text-primary mb-1">No Sections Found</h4>
+        <p className="text-xs text-base-content/60 font-normal italic mb-4">
           Create sections for this strand
         </p>
         <button
@@ -37,7 +37,7 @@ const SectionList: React.FC<SectionListProps> = ({
     <div className="space-y-3">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold text-base-content">
+        <h4 className="text-sm font-semibold martian-mono text-primary">
           Sections ({sections.length})
         </h4>
         <button
@@ -59,15 +59,12 @@ const SectionList: React.FC<SectionListProps> = ({
             {/* Card Header */}
             <div className="flex items-start justify-between mb-3">
               <div className="flex items-center gap-2">
-                <div className="w-6 h-6 bg-secondary/20 rounded-lg flex items-center justify-center">
-                  <HiAcademicCap className="w-4 h-4 text-secondary" />
-                </div>
                 <div>
-                  <h5 className="font-medium text-sm text-base-content">
+                  <h5 className="font-bold text-sm martian-mono text-primary">
                     {section.sectionName}
                   </h5>
-                  <p className="text-xs text-base-content/60">
-                    ID: {section.id}
+                  <p className="text-base-content/60 font-normal text-xs">
+                    {section.id}
                   </p>
                 </div>
               </div>

@@ -3,7 +3,7 @@ import React, { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
-import { HiHome, HiAcademicCap, HiUserGroup, HiLogout, HiMenu, HiX, HiCalendar } from 'react-icons/hi';
+import { HiHome, HiAcademicCap, HiUserGroup, HiLogout, HiMenu, HiX, HiCalendar, HiCog } from 'react-icons/hi';
 import { auth } from '../../../firebase';
 
 // Types and Interfaces
@@ -40,6 +40,7 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
     { href: '/teachers/class-schedule', icon: HiAcademicCap, label: 'Class Schedule' },
     { href: '/teachers/students', icon: HiUserGroup, label: 'Students' },
     { href: '/teachers/calendar', icon: HiCalendar, label: 'Calendar' },
+    { href: '/teachers/settings', icon: HiCog, label: 'Settings' },
   ];
 
   // Close mobile menu when screen size changes to desktop
