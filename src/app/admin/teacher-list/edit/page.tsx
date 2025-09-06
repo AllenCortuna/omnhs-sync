@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { db } from "../../../../../firebase";
 import { FormInput, CreateButton, BackButton } from "@/components/common";
 import { successToast, errorToast } from "@/config/toast";
+import { logService } from "@/services/logService";
 import type { Teacher } from "@/interface/user";
 import {
     HiUser,
@@ -78,6 +79,13 @@ const EditTeacher: React.FC = () => {
                 ...form,
                 updatedAt: new Date().toISOString(),
             });
+
+            // Log the teacher update
+            await logService.logTeacherUpdated(
+                teacher.employeeId,
+                `${form.firstName || teacher.firstName} ${form.lastName || teacher.lastName}`,
+                'Admin'
+            );
 
             successToast("Teacher updated successfully!");
             router.push("/admin/teacher-list");

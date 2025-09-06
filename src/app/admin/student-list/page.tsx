@@ -26,6 +26,7 @@ import {
 
 // Toast imports
 import { errorToast } from "../../../config/toast";
+import { logService } from "../../../services/logService";
 import { Student } from "@/interface/user";
 import { ButtonXs } from "@/components/common/ButtonXs";
 
@@ -193,6 +194,13 @@ const StudentList: React.FC = () => {
             const querySnapshot = await getDocs(studentQuery);
             if (!querySnapshot.empty) {
                 await deleteDoc(querySnapshot.docs[0].ref);
+                
+                // Log the student deletion
+                await logService.logStudentDeleted(
+                    studentToDelete.studentId,
+                    `${studentToDelete.firstName} ${studentToDelete.lastName}`,
+                    'Admin'
+                );
             }
             
             // Remove from local state

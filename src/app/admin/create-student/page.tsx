@@ -13,6 +13,7 @@ import {
 
 // Toast imports
 import { successToast, errorToast } from "../../../config/toast";
+import { logService } from "../../../services/logService";
 
 // Icon imports from react-icons
 import { MdAdd } from "react-icons/md";
@@ -159,6 +160,13 @@ const CreateStudent: React.FC = () => {
                 address: formData.address,
                 createdAt: new Date().toISOString(),
             });
+
+            // Log the student creation
+            await logService.logStudentAdded(
+                formData.studentId.toUpperCase(),
+                `${formData.firstName} ${formData.lastName}`,
+                'Admin'
+            );
 
             successToast("Account created successfully!");
 

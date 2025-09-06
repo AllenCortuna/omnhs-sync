@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { HiAcademicCap, HiPencil, HiPlus } from 'react-icons/hi';
 import { Strand, Section } from '../../interface/info';
 import { sectionService, CreateSectionData, UpdateSectionData } from '../../services/sectionService';
+import { logService } from '../../services/logService';
 import SectionList from './SectionList';
 import SectionForm from './SectionForm';
 
@@ -51,6 +52,10 @@ const StrandList: React.FC<StrandListProps> = ({
     try {
       setFormLoading(true);
       await sectionService.createSection(data);
+      
+      // Log the action
+      await logService.logSectionCreated(data.sectionName, 'Admin');
+      
       setShowSectionForm(null);
       setEditingSection(null);
       // Reload sections for this strand with force refresh
@@ -70,6 +75,10 @@ const StrandList: React.FC<StrandListProps> = ({
     try {
       setFormLoading(true);
       await sectionService.updateSection(editingSection.id, data);
+      
+      // Log the action
+      await logService.logSectionUpdated(data.sectionName || editingSection.sectionName, 'Admin');
+      
       setShowSectionForm(null);
       setEditingSection(null);
       // Reload sections for this strand with force refresh

@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { db } from "../../../../../firebase";
 import { FormInput, CreateButton, BackButton } from "@/components/common";
 import { successToast, errorToast } from "@/config/toast";
+import { logService } from "@/services/logService";
 import type { Student } from "@/interface/user";
 import {
     HiUser,
@@ -83,6 +84,13 @@ const EditStudent: React.FC = () => {
                 ...form,
                 updatedAt: new Date().toISOString(),
             });
+
+            // Log the student update
+            await logService.logStudentUpdated(
+                student.studentId,
+                `${form.firstName || student.firstName} ${form.lastName || student.lastName}`,
+                'Admin'
+            );
 
             successToast("Student updated successfully!");
             router.push("/admin/student-list");

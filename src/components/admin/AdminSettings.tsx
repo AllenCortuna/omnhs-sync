@@ -1,11 +1,13 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { HiCog, HiAcademicCap, HiArrowLeft, HiKey } from 'react-icons/hi';
+import { HiCog, HiAcademicCap, HiArrowLeft, HiKey, HiDocumentText } from 'react-icons/hi';
 import { Strand } from '../../interface/info';
 import { strandService, CreateStrandData, UpdateStrandData } from '../../services/strandService';
+import { logService } from '../../services/logService';
 import StrandList from './StrandList';
 import StrandForm from './StrandForm';
 import ChangePassword from './ChangePassword';
+import Logs from './Logs';
 
 const AdminSettings: React.FC = () => {
   const [strands, setStrands] = useState<Strand[]>([]);
@@ -15,6 +17,7 @@ const AdminSettings: React.FC = () => {
   const [editingStrand, setEditingStrand] = useState<Strand | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showLogs, setShowLogs] = useState(false);
 
   // Fetch strands on component mount
   useEffect(() => {
@@ -40,6 +43,10 @@ const AdminSettings: React.FC = () => {
       setFormLoading(true);
       setError(null);
       await strandService.createStrand(data);
+      
+      // Log the action
+      await logService.logStrandCreated(data.strandName, 'Admin');
+      
       setShowForm(false);
       setEditingStrand(null);
       await fetchStrands();
@@ -58,6 +65,10 @@ const AdminSettings: React.FC = () => {
       setFormLoading(true);
       setError(null);
       await strandService.updateStrand(editingStrand.id, data);
+      
+      // Log the action
+      await logService.logStrandUpdated(data.strandName || editingStrand.strandName, 'Admin');
+      
       setShowForm(false);
       setEditingStrand(null);
       await fetchStrands();
@@ -92,6 +103,10 @@ const AdminSettings: React.FC = () => {
 
   const handleCancelChangePassword = () => {
     setShowChangePassword(false);
+  };
+
+  const handleToggleLogs = () => {
+    setShowLogs(!showLogs);
   };
 
   if (loading) {
@@ -132,7 +147,7 @@ const AdminSettings: React.FC = () => {
           {/* Back Button */}
           <button
             onClick={handleCancelForm}
-            className="btn btn-ghost btn-sm gap-2"
+            className="btn btn-ghost text-xs text-primary martian-mono btn-sm gap-2"
           >
             <HiArrowLeft className="w-4 h-4" />
             Back to Settings
@@ -170,10 +185,31 @@ const AdminSettings: React.FC = () => {
             loading={formLoading}
           />
         </div>
+      ) : showLogs ? (
+        <div className="space-y-4">
+          {/* Back Button */}
+          <button
+            onClick={() => setShowLogs(false)}
+            className="btn btn-ghost btn-sm gap-2"
+          >
+            <HiArrowLeft className="w-4 h-4" />
+            Back to Settings
+          </button>
+
+          {/* Logs Component */}
+          <Logs />
+        </div>
       ) : (
         <div className="space-y-8">
-          {/* Change Password Button */}
-          <div className="flex justify-end">
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-2">
+            <button
+              onClick={handleToggleLogs}
+              className="btn btn-outline btn-sm text-xs text-primary martian-mono gap-2"
+            >
+              <HiDocumentText className="w-4 h-4" />
+              View Logs
+            </button>
             <button
               onClick={handleToggleChangePassword}
               className="btn btn-primary text-white martian-mono btn-sm gap-2"

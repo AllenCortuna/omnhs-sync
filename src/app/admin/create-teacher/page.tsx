@@ -19,6 +19,7 @@ import {
 
 // Toast imports
 import { successToast, errorToast } from "../../../config/toast";
+import { logService } from "../../../services/logService";
 
 // Icon imports from react-icons
 import { MdAdd } from "react-icons/md";
@@ -192,6 +193,13 @@ const CreateTeacher: React.FC = () => {
                 lastLoginAt: "",
                 profileRef: "",
             });
+
+            // Log the teacher creation
+            await logService.logTeacherAdded(
+                formData.employeeId.toUpperCase(),
+                `${formData.firstName} ${formData.lastName}`,
+                'Admin'
+            );
 
             successToast("Teacher account created successfully!");
 

@@ -4,6 +4,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "../../../../../firebase";
 import { subjectRecordService } from "@/services/subjectRecordService";
+import { logService } from "@/services/logService";
 import { errorToast, successToast } from "@/config/toast";
 import type { SubjectRecord, StudentGrade } from "@/interface/info";
 import type { Student } from "@/interface/user";
@@ -205,6 +206,19 @@ const StudentGradePage: React.FC = () => {
             await subjectRecordService.updateSubjectRecord(subjectRecord.id, {
                 studentGrades: updatedGrades
             });
+
+            // Log grade updates for each student
+            for (const grade of updatedGrades) {
+                if (grade.finalGrade > 0) {
+                    await logService.logGradeUpdated(
+                        grade.studentId,
+                        grade.studentName,
+                        grade.subjectName,
+                        grade.finalGrade,
+                        subjectRecord.teacherId || 'Teacher'
+                    );
+                }
+            }
 
             // Update local state
             setSubjectRecord(prev => prev ? {

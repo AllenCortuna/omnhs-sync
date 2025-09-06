@@ -12,6 +12,7 @@ import type { Strand } from "@/interface/info";
 import { ViewEnrollmentModal } from "@/components/admin/ViewEnrollmentModal";
 import { RejectEnrollmentModal } from "@/components/admin/RejectEnrollmentModal";
 import { useNotifyEnrollmentStatus } from "@/hooks/useNotifyEnrollmentStatus";
+import { logService } from "@/services/logService";
 
 const PAGE_SIZE = 10;
 
@@ -77,6 +78,14 @@ const EnrolleeListPage = () => {
     setLoading(true);
     const ref = doc(db, "enrollment", selectedEnrollment.id);
     await updateDoc(ref, { status: "approved", sectionId });
+    
+    // Log the enrollment approval
+    await logService.logEnrollmentApproved(
+      selectedEnrollment.studentId,
+      selectedEnrollment.studentName,
+      'Admin'
+    );
+    
     setModalOpen(false);
     setSelectedEnrollment(null);
     // notify student that they are approved
@@ -106,6 +115,14 @@ const EnrolleeListPage = () => {
     setLoading(true);
     const ref = doc(db, "enrollment", rejectEnrollment.id);
     await updateDoc(ref, { status: "rejected", rejectionReason: `${reason}. Please resubmit your enrollment.` });
+    
+    // Log the enrollment rejection
+    await logService.logEnrollmentRejected(
+      rejectEnrollment.studentId,
+      rejectEnrollment.studentName,
+      'Admin'
+    );
+    
     setRejectModalOpen(false);
     setRejectEnrollment(null);
     // Refresh enrollments

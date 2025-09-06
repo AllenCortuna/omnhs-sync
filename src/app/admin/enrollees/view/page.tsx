@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { HiCheckCircle, HiXCircle, HiEye, HiDownload } from "react-icons/hi";
 import { formatDate } from "@/config/format";
 import { errorToast, successToast } from "@/config/toast";
+import { logService } from "@/services/logService";
 
 export default function EnrolleeViewPage() {
   const searchParams = useSearchParams();
@@ -29,20 +30,36 @@ export default function EnrolleeViewPage() {
   }, [id]);
 
   async function handleApprove() {
-    if (!id) return;
+    if (!id || !enrollment) return;
     setIsSubmitting(true);
     const docRef = doc(db, "enrollment", id);
     await updateDoc(docRef, { status: "approved" });
+    
+    // Log the enrollment approval
+    await logService.logEnrollmentApproved(
+      enrollment.studentId,
+      enrollment.studentName,
+      'Admin'
+    );
+    
     successToast("Enrollment approved");
     setEnrollment(prev => prev ? { ...prev, status: "approved" } : prev);
     setIsSubmitting(false);
   }
 
   async function handleReject() {
-    if (!id) return;
+    if (!id || !enrollment) return;
     setIsSubmitting(true);
     const docRef = doc(db, "enrollment", id);
     await updateDoc(docRef, { status: "rejected" });
+    
+    // Log the enrollment rejection
+    await logService.logEnrollmentRejected(
+      enrollment.studentId,
+      enrollment.studentName,
+      'Admin'
+    );
+    
     successToast("Enrollment rejected");
     setEnrollment(prev => prev ? { ...prev, status: "rejected" } : prev);
     setIsSubmitting(false);
