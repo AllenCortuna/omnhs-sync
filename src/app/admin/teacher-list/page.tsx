@@ -19,7 +19,6 @@ import { ConfirmDeleteModal, Pagination } from "../../../components/common";
 // Icon imports from react-icons
 import {
     MdPerson,
-    MdEmail,
     MdRefresh,
     MdWork,
 } from "react-icons/md";
@@ -269,7 +268,7 @@ const TeacherList: React.FC = () => {
             <div className="max-w-7xl mx-auto">
                 <button
                     onClick={() => router.push("/admin/create-teacher")}
-                    className="btn btn-primary shadow-lg text-white fixed bottom-10 right-10"
+                    className="btn btn-primary shadow-lg text-white fixed bottom-10 right-10 martian-mono text-xs"
                 >
                     Create Teacher
                 </button>
@@ -278,19 +277,19 @@ const TeacherList: React.FC = () => {
                     <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                             <div className="avatar placeholder">
-                                <div className="bg-primary text-primary-content rounded-lg w-8 h-8 flex items-center justify-center">
-                                    <MdWork className="text-lg" />
+                                <div className="bg-primary text-primary-content rounded-lg w-10 h-10 flex items-center justify-center">
+                                    <MdWork className="text-xl" />
                                 </div>
                             </div>
-                            <div>
-                                <h1 className="text-lg font-bold">Teacher List</h1>
-                                <p className="text-xs text-base-content/60">Manage teacher accounts</p>
+                            <div className="flex flex-col">
+                                <h1 className="text-lg font-bold martian-mono text-primary">Teacher List</h1>
+                                <p className="text-xs text-base-content/60 font-normal italic">Manage teacher accounts</p>
                             </div>
                         </div>
                         
                         <button
                             onClick={() => fetchTeachers()}
-                            className="btn btn-outline btn-xs"
+                            className="btn btn-outline btn-xs martian-mono text-xs text-primary"
                             disabled={loading}
                         >
                             <MdRefresh className="text-sm" />
@@ -308,7 +307,7 @@ const TeacherList: React.FC = () => {
                                 <select
                                     value={searchField}
                                     onChange={handleSearchFieldChange}
-                                    className="select select-bordered select-sm join-item"
+                                    className="select select-bordered select-sm join-item martian-mono text-xs text-primary"
                                     disabled={loading || isSearching}
                                 >
                                     <option value="firstName">First Name</option>
@@ -355,12 +354,12 @@ const TeacherList: React.FC = () => {
                         {currentTeachers.length === 0 ? (
                             <div className="p-4 text-center">
                                 <MdPerson className="text-4xl text-base-content/20 mx-auto mb-2" />
-                                <h3 className="text-sm font-semibold mb-1">
+                                <h3 className="text-sm font-semibold mb-1 martian-mono text-primary">
                                     {searchTerm
                                         ? "No teachers found"
                                         : "No teachers loaded"}
                                 </h3>
-                                <p className="text-xs text-base-content/60">
+                                <p className="text-xs text-base-content/60 font-normal italic">
                                     {searchTerm
                                         ? "Try adjusting your search"
                                         : "Latest 10 teachers will appear here"}
@@ -384,16 +383,9 @@ const TeacherList: React.FC = () => {
                                                 <tr key={teacher.employeeId} className="hover">
                                                     <td>
                                                         <div className="flex items-center gap-2">
-                                                            <div className="avatar placeholder">
-                                                                <div className="bg-primary text-primary-content rounded-lg w-7 h-7">
-                                                                    <span className="text-xs">
-                                                                        {teacher.firstName?.charAt(0)}
-                                                                        {teacher.lastName?.charAt(0)}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
+                                                            <div className="font-bold martian-mono text-primary text-xs"></div>
                                                             <div>
-                                                                <div className="font-medium">{getFullName(teacher)}</div>
+                                                                <div className="font-bold martian-mono text-primary text-xs">{getFullName(teacher)}</div>
                                                                 <div className="text-xs text-base-content/60">
                                                                     ID: {teacher.employeeId}
                                                                 </div>
@@ -402,22 +394,21 @@ const TeacherList: React.FC = () => {
                                                     </td>
                                                     <td>
                                                         <div className="flex items-center gap-1">
-                                                            <MdEmail className="text-base-content/60 text-xs" />
-                                                            <span className="text-xs">{teacher.email}</span>
+                                                            <span className="text-xs font-normal italic">{teacher.email}</span>
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div className="text-xs text-base-content/60">
+                                                        <div className="text-xs text-base-content/60 font-normal italic">
                                                             {teacher.designation || "N/A"}
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div className="text-xs text-base-content/60">
+                                                        <div className="text-xs text-base-content/60 font-normal italic">
                                                             {formatDate(teacher.createdAt)}
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div className="text-xs text-base-content/60">
+                                                        <div className="text-xs text-base-content/60 font-normal italic">
                                                             <ButtonXs
                                                                 variant="primary"
                                                                 onClick={() =>

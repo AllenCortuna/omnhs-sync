@@ -4,7 +4,7 @@ import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db } from "../../../../firebase";
 import { Enrollment } from "@/interface/info";
 import { formatDate } from "@/config/format";
-import { HiAcademicCap, HiCalendar, HiChevronLeft, HiChevronRight, HiClock, HiSearch } from "react-icons/hi";
+import { HiAcademicCap, HiCalendar, HiChevronLeft, HiChevronRight, HiClock } from "react-icons/hi";
 import ApproveEnrollmentModal from "@/components/admin/ApproveEnrollmentModal";
 import { doc, updateDoc } from "firebase/firestore";
 import { strandService } from "@/services/strandService";
@@ -152,10 +152,9 @@ const EnrolleeListPage = () => {
           </select>
         </div>
         <div className="flex items-center gap-2 ml-auto">
-          <HiSearch className="w-5 h-5 text-zinc-400" />
           <input
             type="text"
-            className="input input-bordered input-sm w-48"
+            className="input input-bordered input-sm w-64 martian-mono text-xs text-primary rounded-none"
             placeholder="Search by student name"
             value={search}
             onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}

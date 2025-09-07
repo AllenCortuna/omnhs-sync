@@ -77,7 +77,7 @@ const CreateEventPage = () => {
                 >
                     <div>
                         <label className="label">
-                            <span className="label-text font-semibold">
+                            <span className="text-xs font-semibold martian-mono text-primary">
                                 Recipient
                             </span>
                         </label>
@@ -96,7 +96,7 @@ const CreateEventPage = () => {
                         </select>
 
                         <label className="label">
-                            <span className="label-text font-semibold">
+                            <span className="text-xs font-semibold martian-mono text-primary">
                                 Title
                             </span>
                         </label>
@@ -112,7 +112,7 @@ const CreateEventPage = () => {
                     </div>
                     <div>
                         <label className="label">
-                            <span className="label-text font-semibold">
+                            <span className="text-xs font-semibold martian-mono text-primary">
                                 Description
                             </span>
                         </label>
@@ -128,7 +128,7 @@ const CreateEventPage = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label className="label">
-                                <span className="label-text font-semibold">
+                                <span className="text-xs font-semibold martian-mono text-primary">
                                     Start Date
                                 </span>
                             </label>
@@ -144,7 +144,7 @@ const CreateEventPage = () => {
                         </div>
                         <div>
                             <label className="label">
-                                <span className="label-text font-semibold">
+                                <span className="text-xs font-semibold martian-mono text-primary">
                                     End Date
                                 </span>
                             </label>
@@ -162,7 +162,7 @@ const CreateEventPage = () => {
                     <div className="flex justify-end">
                         <button
                             type="submit"
-                            className="btn btn-primary"
+                            className="btn btn-primary martian-mono text-xs text-white"
                             disabled={isSubmitting}
                         >
                             {isSubmitting ? "Creating..." : "Create Event"}

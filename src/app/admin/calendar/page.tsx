@@ -59,8 +59,8 @@ const AdminCalendarPage = () => {
             <div className="ma mx-auto">
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h1 className="text-2xl font-bold">School Calendar</h1>
-                        <p className="text-sm text-base-content/60">
+                        <h1 className="text-2xl font-bold martian-mono text-primary">School Calendar</h1>
+                        <p className="text-sm text-base-content/60 font-normal italic">
                             View and manage school events
                         </p>
                     </div>
@@ -68,7 +68,7 @@ const AdminCalendarPage = () => {
                         onClick={() =>
                             router.push("/admin/calendar/create-event")
                         }
-                        className="w-auto px-4 cursor-pointer"
+                        className="w-auto px-4 cursor-pointer martian-mono text-xs text-primary"
                     >
                         <CreateButton
                             loading={false}
@@ -79,7 +79,7 @@ const AdminCalendarPage = () => {
                 </div>
                 <div className="rounded-lg p-4 flex flex-col md:flex-row gap-8">
                     <div className="mt-8">
-                        <h2 className="text-lg font-semibold text-primary mb-2">
+                        <h2 className="text-lg font-semibold text-primary mb-2 martian-mono">
                             Events <br /> <span className="text-base-content/60 text-sm">{formatDate(selectedDate || "")}</span>
                         </h2>
                         {isLoading ? (
@@ -93,10 +93,10 @@ const AdminCalendarPage = () => {
                                     eventsByDate[selectedDate].map((event) => (
                                         <li
                                             key={event.id}
-                                            className="card bg-base-100 shadow p-4 flex flex-col gap-1"
+                                            className="card bg-base-100 shadow border p-4 flex flex-col gap-1"
                                         >
                                             <div className="flex items-center justify-between">
-                                                <span className="font-bold">
+                                                <span className="font-bold martian-mono text-primary text-xs">
                                                     {event.title}
                                                 </span>
                                                 <button
@@ -110,12 +110,12 @@ const AdminCalendarPage = () => {
                                                     Edit
                                                 </button>
                                             </div>
-                                            <span className="text-xs text-base-content/60">
+                                            <span className="text-xs text-base-content/60 font-normal italic">
                                                 {event.startDate} to{" "}
                                                 {event.endDate}
                                             </span>
                                             {event.description && (
-                                                <span className="text-sm">
+                                                <span className="text-xs font-normal text-zinc-600">
                                                     {event.description}
                                                 </span>
                                             )}

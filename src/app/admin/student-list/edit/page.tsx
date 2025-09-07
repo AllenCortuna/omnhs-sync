@@ -134,10 +134,10 @@ const EditStudent: React.FC = () => {
                 <div className="flex items-center gap-4 mb-4">
                     <BackButton />
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-800">
+                        <h1 className="text-2xl font-bold text-primary martian-mono">
                             Edit Student
                         </h1>
-                        <p className="text-gray-600">
+                        <p className="text-gray-600 text-xs font-normal italic">
                             Update student information and details
                         </p>
                     </div>
@@ -147,25 +147,16 @@ const EditStudent: React.FC = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Basic Information Section */}
                 <div className="card bg-white shadow-md">
+                    <div className="flex flex-col p-8">
+                        <p className="text-xs font-normal text-zinc-500 italic">Student ID</p>
+                        <h2 className="card-title text-lg font-semibold flex items-center gap-2 martian-mono text-primary">{student.studentId}</h2>
+                    </div>
                     <div className="card-body">
-                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2">
-                            <HiIdentification className="w-5 h-5 text-primary" />
+                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2 martian-mono text-primary">
                             Basic Information
                         </h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                            <FormInput
-                                id="studentId"
-                                name="studentId"
-                                type="text"
-                                icon={<HiIdentification className="absolute left-3 top-1/2 transform -translate-y-1/2 text-base-content/60 text-base" />}
-                                value={form.studentId || ""}
-                                onChange={handleChange}
-                                placeholder="Student ID"
-                                disabled={loading}
-                                required
-                            />
-
                             <FormInput
                                 id="email"
                                 name="email"
@@ -229,16 +220,12 @@ const EditStudent: React.FC = () => {
                 {/* Personal Information Section */}
                 <div className="card bg-white shadow-md">
                     <div className="card-body">
-                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2">
-                            <HiUser className="w-5 h-5 text-primary" />
+                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2 martian-mono text-primary">
                             Personal Information
                         </h2>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <div>
-                                <label className="block text-xs mb-1 text-gray-600">
-                                    Sex
-                                </label>
                                 <select
                                     name="sex"
                                     value={form.sex || ""}
@@ -276,9 +263,6 @@ const EditStudent: React.FC = () => {
                             />
 
                             <div>
-                                <label className="block text-xs mb-1 text-gray-600">
-                                    Civil Status
-                                </label>
                                 <select
                                     name="civilStatus"
                                     value={form.civilStatus || ""}

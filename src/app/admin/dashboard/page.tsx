@@ -6,6 +6,7 @@ import { strandService } from '../../../services/strandService';
 import { sectionService } from '../../../services/sectionService';
 import { teacherService } from '../../../services/teacherService';
 import { studentService } from '../../../services/studentService';
+import EnrollmentChart from '../../../components/admin/EnrollmentChart';
 import Link from 'next/link';
 
 const AdminDashboard = () => {
@@ -138,6 +139,11 @@ const AdminDashboard = () => {
         </div>
       </div>
 
+
+      {/* Enrollment Chart */}
+      <EnrollmentChart />
+
+      
       {/* Quick Actions */}
       <div className="bg-base-100 rounded-xl border border-base-300 p-6 martian-mono text-primary">
         <h2 className="font-semibold text-primary text-sm mb-4">Quick Actions</h2>
@@ -312,6 +318,7 @@ const AdminDashboard = () => {
           )}
         </div>
       </div>
+
 
       {/* System Overview */}
       <div className="bg-base-100 rounded-xl border border-base-300 p-6">

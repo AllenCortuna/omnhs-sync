@@ -19,7 +19,6 @@ import { ConfirmDeleteModal, Pagination } from "../../../components/common";
 // Icon imports from react-icons
 import {
     MdPerson,
-    MdEmail,
     MdSchool,
     MdRefresh,
 } from "react-icons/md";
@@ -261,7 +260,7 @@ const StudentList: React.FC = () => {
             <div className="max-w-7xl mx-auto">
                 <button
                     onClick={() => router.push("/admin/create-student")}
-                    className="btn btn-primary shadow-lg text-white fixed bottom-10 right-10"
+                    className="btn btn-primary shadow-lg text-white fixed bottom-10 right-10 martian-mono text-xs"
                 >
                     Create Student
                 </button>
@@ -270,15 +269,15 @@ const StudentList: React.FC = () => {
                     <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2">
                             <div className="avatar placeholder">
-                                <div className="bg-primary text-primary-content rounded-lg w-8 h-8 flex items-center justify-center">
-                                    <MdSchool className="text-lg" />
+                                <div className="bg-primary text-primary-content rounded-lg w-10 h-10 flex items-center justify-center">
+                                    <MdSchool className="text-xl" />
                                 </div>
                             </div>
-                            <div>
-                                <h1 className="text-lg font-bold">
+                            <div className="flex flex-col">
+                                <h1 className="text-lg font-bold martian-mono text-primary">
                                     Student List
                                 </h1>
-                                <p className="text-xs text-base-content/60">
+                                <p className="text-xs text-base-content/60 font-normal italic">
                                     Manage student accounts
                                 </p>
                             </div>
@@ -286,7 +285,7 @@ const StudentList: React.FC = () => {
 
                         <button
                             onClick={() => fetchStudents()}
-                            className="btn btn-outline btn-xs"
+                            className="btn btn-outline btn-xs martian-mono text-xs text-primary"
                             disabled={loading}
                         >
                             <MdRefresh className="text-sm" />
@@ -304,7 +303,7 @@ const StudentList: React.FC = () => {
                                 <select
                                     value={searchField}
                                     onChange={handleSearchFieldChange}
-                                    className="select select-bordered select-sm join-item"
+                                    className="select select-bordered select-sm join-item martian-mono text-xs text-primary"
                                     disabled={loading || isSearching}
                                 >
                                     <option value="firstName">First Name</option>
@@ -396,40 +395,26 @@ const StudentList: React.FC = () => {
                                                 >
                                                     <td>
                                                         <div className="flex items-center gap-2">
-                                                            <div className="avatar placeholder">
-                                                                <div className="bg-primary text-primary-content rounded-lg w-7 h-7">
-                                                                    <span className="text-xs">
-                                                                        {student.firstName?.charAt(0)}
-                                                                        {student.lastName?.charAt(0)}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
                                                             <div>
-                                                                <div className="font-medium">
+                                                                <div className="font-bold martian-mono text-primary text-xs">
                                                                     {getFullName(student)}
                                                                 </div>
-                                                                <div className="text-xs text-base-content/60">
-                                                                    ID:{" "}
+                                                                <div className="text-xs text-base-content/60 font-normal italic">
                                                                     {student.studentId}
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div className="flex items-center gap-1">
-                                                            <MdEmail className="text-base-content/60 text-xs" />
-                                                            <span className="text-xs">
-                                                                {student.email}
-                                                            </span>
-                                                        </div>
+                                                        <span className="text-xs font-normal italic">
+                                                            {student.email}
+                                                        </span>
                                                     </td>
                                                     <td>
                                                         <div className="space-y-0.5">
-                                                            <div className="flex items-center gap-1">
-                                                                <span className="text-xs">
-                                                                    {student.sex}
-                                                                </span>
-                                                            </div>
+                                                            <span className="text-xs font-normal">
+                                                                {student.sex}
+                                                            </span>
                                                         </div>
                                                     </td>
                                                     <td>
