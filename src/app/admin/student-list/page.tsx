@@ -21,13 +21,13 @@ import {
     MdPerson,
     MdSchool,
     MdRefresh,
+    MdMoreHoriz,
 } from "react-icons/md";
 
 // Toast imports
 import { errorToast } from "../../../config/toast";
 import { logService } from "../../../services/logService";
 import { Student } from "@/interface/user";
-import { ButtonXs } from "@/components/common/ButtonXs";
 
 /**
  * @file StudentList.tsx - Admin page for displaying list of students
@@ -399,14 +399,14 @@ const StudentList: React.FC = () => {
                                                                 <div className="font-bold martian-mono text-primary text-xs">
                                                                     {getFullName(student)}
                                                                 </div>
-                                                                <div className="text-xs text-base-content/60 font-normal italic">
+                                                                <div className="text-[10px] text-base-content/60 font-normal">
                                                                     {student.studentId}
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <span className="text-xs font-normal italic">
+                                                        <span className="text-xs font-normal text-primary">
                                                             {student.email}
                                                         </span>
                                                     </td>
@@ -419,35 +419,45 @@ const StudentList: React.FC = () => {
                                                     </td>
                                                     <td>
                                                         <div className="text-xs text-base-content/60">
-                                                            <ButtonXs
-                                                                variant="primary"
-                                                                onClick={() =>
-                                                                    router.push(
-                                                                        `/admin/student-list/view-student?id=${student.id}`
-                                                                    )
-                                                                }
-                                                            >
-                                                                View
-                                                            </ButtonXs>
-                                                            <ButtonXs
-                                                                variant="secondary"
-                                                                onClick={() =>
-                                                                    router.push(
-                                                                        `/admin/student-list/edit?id=${student.id}`
-                                                                    )
-                                                                }
-                                                            >
-                                                                Edit
-                                                            </ButtonXs>
-                                                            <ButtonXs
-                                                                variant="error"
-                                                                onClick={() =>
-                                                                    handleDeleteClick(student)
-                                                                }
-                                                                className="text-white"
-                                                            >
-                                                                Delete
-                                                            </ButtonXs>
+                                                            <div className="dropdown dropdown-end">
+                                                                <button tabIndex={0} className="btn btn-ghost btn-xs">
+                                                                    <span className="text-lg"><MdMoreHoriz/></span>
+                                                                </button>
+                                                                <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-32 border border-base-300" style={{zIndex: 9999, position: 'fixed', marginRight: '40px'}}>
+                                                                    <li>
+                                                                        <button
+                                                                            className="text-primary hover:bg-base-200"
+                                                                            onClick={() =>
+                                                                                router.push(
+                                                                                    `/admin/student-list/view-student?id=${student.id}`
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            View
+                                                                        </button>
+                                                                    </li>
+                                                                    <li>
+                                                                        <button
+                                                                            className="text-secondary hover:bg-base-200"
+                                                                            onClick={() =>
+                                                                                router.push(
+                                                                                    `/admin/student-list/edit?id=${student.id}`
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            Edit
+                                                                        </button>
+                                                                    </li>
+                                                                    <li>
+                                                                        <button
+                                                                            className="text-error hover:bg-base-200"
+                                                                            onClick={() => handleDeleteClick(student)}
+                                                                        >
+                                                                            Delete
+                                                                        </button>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>

@@ -20,6 +20,7 @@ export interface Teacher {
     profileRef: string; // reference to the teacher's profile in storage
     contactNumber?: string;
     address?: string;
+    activeStatus?: boolean;
     designatedSectionId?: string; // reference to the teacher's designated section
 }
 

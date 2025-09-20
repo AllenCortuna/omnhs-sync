@@ -4,7 +4,6 @@ import { HiAcademicCap, HiPencil, HiPlus } from 'react-icons/hi';
 import { Strand, Section } from '../../interface/info';
 import { sectionService, CreateSectionData, UpdateSectionData } from '../../services/sectionService';
 import { logService } from '../../services/logService';
-import SectionList from './SectionList';
 import SectionForm from './SectionForm';
 
 interface StrandListProps {
@@ -143,64 +142,122 @@ const StrandList: React.FC<StrandListProps> = ({
         </button>
       </div>
 
-      {/* Strand Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {strands.map((strand) => (
-          <div
-            key={strand.id}
-            className="bg-base-100 rounded-xl border border-base-300 p-6 hover:shadow-md transition-shadow"
-          >
-            {/* Card Header */}
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-primary/20 rounded-xl flex items-center justify-center">
-                  <HiAcademicCap className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <h4 className="font-semibold martian-mono text-primary">
-                    {strand.strandName}
-                  </h4>
-                  <p className="text-base-content/60 font-normal text-xs italic">
-                    ID: {strand.id}
-                  </p>
-                </div>
-              </div>
-              
-              {/* Action Buttons */}
-              <div className="flex gap-1">
-                <button
-                  onClick={() => onEditStrand(strand)}
-                  className="btn btn-ghost btn-xs text-primary hover:bg-primary/10"
-                  title="Edit strand"
-                >
-                  <HiPencil className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            {/* Description */}
-            <p className="text-base-content/70 line-clamp-3 mb-4 font-normal text-xs italic">
-              {strand.strandDescription}
-            </p>
-
-            {/* Sections Section */}
-            <div className="border-t border-base-200 pt-4">
-              <div className="space-y-3">
-                {loadingSections.has(strand.id) ? (
-                  <div className="flex items-center justify-center py-4">
-                    <span className="loading loading-spinner loading-sm text-secondary"></span>
-                    <span className="ml-2 text-base-content/60 font-normal text-xs italic">Loading sections...</span>
+      {/* Strands Table */}
+      <div className="overflow-x-auto bg-base-100 border border-base-200">
+        <table className="table w-full">
+          <thead className="bg-base-200">
+            <tr>
+              <th className="text-primary font-semibold">Strand Name</th>
+              <th className="text-primary font-semibold hidden md:table-cell">Description</th>
+              <th className="text-primary font-semibold">Sections & Management</th>
+              <th className="text-primary font-semibold">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {strands.map((strand) => (
+              <tr key={strand.id} className="hover:bg-base-200">
+                <td>
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center">
+                      <HiAcademicCap className="w-4 h-4 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="font-semibold text-primary">
+                        {strand.strandName}
+                      </div>
+                      <div className="text-[10px] text-base-content/60">
+                        {strand.id}
+                      </div>
+                      {/* Mobile description tooltip */}
+                      <div className="md:hidden mt-1">
+                        <div className="tooltip tooltip-right" data-tip={strand.strandDescription}>
+                          <p className="text-xs text-base-content/70 line-clamp-1 cursor-help">
+                            {strand.strandDescription}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                ) : (
-                  <SectionList
-                    sections={sections[strand.id] || []}
-                    onEditSection={(section) => handleEditSection(section, strand.id)}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        ))}
+                </td>
+                <td className="hidden md:table-cell">
+                  <div className="max-w-xs">
+                    <p className="text-xs text-primary line-clamp-2">
+                      {strand.strandDescription}
+                    </p>
+                  </div>
+                </td>
+                <td>
+                  <div className="space-y-2">
+                    {loadingSections.has(strand.id) ? (
+                      <div className="flex items-center gap-2">
+                        <span className="loading loading-spinner loading-xs text-secondary"></span>
+                        <span className="text-xs text-base-content/60">Loading sections...</span>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <span className="badge badge-outline badge-sm">
+                            {sections[strand.id]?.length || 0} sections
+                          </span>
+                          <button
+                            onClick={() => handleEditSection({} as Section, strand.id)}
+                            className="btn btn-ghost btn-xs text-primary hover:bg-primary/10"
+                            title="Add new section"
+                          >
+                            <HiPlus className="w-3 h-3" />
+                          </button>
+                        </div>
+                        
+                        {/* Sections List */}
+                        {sections[strand.id] && sections[strand.id].length > 0 ? (
+                          <div className="space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-transparent">
+                            {sections[strand.id].map((section) => (
+                              <div
+                                key={section.id}
+                                className="flex items-center justify-between bg-base-200 rounded-lg px-2 py-1 text-xs hover:bg-base-300 transition-colors"
+                              >
+                                <span className="text-base-content/80 truncate flex-1 text-primary text-xs">
+                                  {section.sectionName}
+                                </span>
+                                <button
+                                  onClick={() => handleEditSection(section, strand.id)}
+                                  className="btn btn-ghost btn-xs text-primary hover:bg-primary/10 ml-2"
+                                  title="Edit section"
+                                >
+                                  <HiPencil className="w-3 h-3" />
+                                </button>
+                              </div>
+                            ))}
+                            {sections[strand.id].length > 4 && (
+                              <div className="text-xs text-base-content/50 text-center py-1">
+                                Scroll for more...
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-xs text-base-content/60 italic py-2">
+                            No sections yet
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => onEditStrand(strand)}
+                      className="btn btn-ghost btn-xs text-primary hover:bg-primary/10"
+                      title="Edit strand"
+                    >
+                      <HiPencil className="w-4 h-4" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
       {/* Section Form Modal */}

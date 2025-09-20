@@ -139,10 +139,6 @@ const AdminDashboard = () => {
         </div>
       </div>
 
-
-      {/* Enrollment Chart */}
-      <EnrollmentChart />
-
       
       {/* Quick Actions */}
       <div className="bg-base-100 rounded-xl border border-base-300 p-6 martian-mono text-primary">
@@ -185,6 +181,11 @@ const AdminDashboard = () => {
           </Link>
         </div>
       </div>
+
+      {/* Enrollment Chart */}
+      <EnrollmentChart />
+
+
 
       {/* Strands and Sections Overview */}
       <div className="grid gap-6 lg:grid-cols-2">

@@ -36,6 +36,7 @@ interface TeacherFormData {
     contactNumber: string;
     address: string;
     designatedSectionId: string;
+    activeStatus: boolean;
 }
 
 /**
@@ -76,6 +77,7 @@ const CreateTeacher: React.FC = () => {
         contactNumber: "",
         address: "",
         designatedSectionId: "",
+        activeStatus: true,
     });
 
     // Loading state for async operations
@@ -189,6 +191,7 @@ const CreateTeacher: React.FC = () => {
                 contactNumber: formData.contactNumber,
                 address: formData.address,
                 designatedSectionId: formData.designatedSectionId || "",
+                activeStatus: formData.activeStatus,
                 createdAt: new Date().toISOString(),
                 lastLoginAt: "",
                 profileRef: "",
@@ -212,6 +215,7 @@ const CreateTeacher: React.FC = () => {
                 contactNumber: "",
                 address: "",
                 designatedSectionId: "",
+                activeStatus: true,
             });
         } catch (error) {
             console.error("Error creating teacher account:", error);
@@ -395,6 +399,25 @@ const CreateTeacher: React.FC = () => {
                                 placeholder="Select a section (optional)"
                                 disabled={loading}
                             />
+                        </div>
+
+                        {/* Active Status Toggle */}
+                        <div className="form-control">
+                            <label className="label cursor-pointer">
+                                <span className="text-xs text-zinc-700">
+                                    Active Status
+                                </span>
+                                <input
+                                    type="checkbox"
+                                    className="toggle toggle-primary"
+                                    checked={formData.activeStatus}
+                                    onChange={(e) => setFormData(prev => ({ ...prev, activeStatus: e.target.checked }))}
+                                    disabled={loading}
+                                />
+                            </label>
+                            <div className="text-xs text-base-content/60 ml-0">
+                                {formData.activeStatus ? "Teacher account will be active" : "Teacher account will be inactive"}
+                            </div>
                         </div>
 
                         {/* Submit Button */}

@@ -251,91 +251,98 @@ const ClassSchedule: React.FC = () => {
                     </button>
                 </div>
             ) : (
-                <div className="grid gap-4">
-                    {subjectRecords.map((record) => (
-                        <div
-                            key={record.id}
-                            className="card bg-white shadow rounded-none hover:shadow-lg transition-shadow"
-                        >
-                            <div className="card-body">
-                                <div className="flex justify-between items-start">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <h3 className="italic font-bold text-primary">
-                                                {record.subjectName}
-                                            </h3>
-                                            <div className="text-xs text-gray-500 flex items-center gap-1 italic ml-5">
-                                                {record.studentList?.length || 0} Students
-                                            </div>
+                <div className="overflow-x-auto">
+                    <table className="table w-full">
+                        <thead>
+                            <tr>
+                                <th className="text-primary font-bold hidden sm:table-cell">Subject</th>
+                                <th className="text-primary font-bold">Section</th>
+                                <th className="text-primary font-bold hidden md:table-cell">Grade Level</th>
+                                <th className="text-primary font-bold hidden lg:table-cell">Semester</th>
+                                <th className="text-primary font-bold hidden lg:table-cell">School Year</th>
+                                <th className="text-primary font-bold">Students</th>
+                                <th className="text-primary font-bold hidden xl:table-cell">Created</th>
+                                <th className="text-primary font-bold">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {subjectRecords.map((record) => (
+                                <tr key={record.id} className="hover">
+                                    <td className="hidden sm:table-cell">
+                                        <div className="font-bold w-28 text-primary text-xs">
+                                            {record.subjectName}
                                         </div>
-
-                                        <div className="font-medium martian-mono text-xs grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-gray-600">
-                                                    {record.sectionName}
-                                                </span>
-                                            </div>
-
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-gray-600">
-                                                    {record.gradeLevel} Level
-                                                </span>
-                                            </div>
-
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-gray-600">
-                                                    {record.semester} Semester
-                                                </span>
-                                            </div>
-
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-gray-600">
-                                                    {record.schoolYear}
-                                                </span>
-                                            </div>
-
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-gray-500 text-[10px] italic">
-                                                    {
-                                                        formatDate(record.createdAt)
-                                                    }
-                                                </span>
-                                            </div>
+                                    </td>
+                                    <td>
+                                        <div className="font-medium text-xs text-primary">
+                                            {record.sectionName}
                                         </div>
-                                    </div>
-
-                                    <div className="flex flex-col gap-2">
-                                        <Link
-                                            className="btn btn-xs btn-outline btn-secondary rounded-none"
-                                            title="Edit class"
-                                            href={`/teachers/class-schedule/add-student?subjectRecordId=${record.id}`}
-                                        >
-                                            <HiPencil className="w-4 h-4" />
-                                            Edit Students
-                                        </Link>
-                                        <Link
-                                            className="btn btn-xs btn-outline btn-accent rounded-none"
-                                            title="Manage grades"
-                                            href={`/teachers/class-schedule/student-grade?subjectRecordId=${record.id}`}
-                                        >
-                                            <HiDocumentText className="w-4 h-4" />
-                                            Grades
-                                        </Link>
-                                        <button
-                                            onClick={() =>
-                                                handleDeleteClass(record.id)
-                                            }
-                                            className="btn btn-xs btn-outline btn-error rounded-none"
-                                            title="Delete class"
-                                        >
-                                            <HiTrash className="w-4 h-4" />
-                                            Delete
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    ))}
+                                        <div className="text-xs text-gray-500 sm:hidden">
+                                            {record.subjectName}
+                                        </div>
+                                    </td>
+                                    <td className="hidden md:table-cell">
+                                        <div className="font-medium text-xs text-zinc-600">
+                                            {record.gradeLevel}
+                                        </div>
+                                    </td>
+                                    <td className="hidden lg:table-cell">
+                                        <div className="font-medium text-xs text-zinc-600">
+                                            {record.semester}
+                                        </div>
+                                    </td>
+                                    <td className="hidden lg:table-cell">
+                                        <div className="font-medium text-xs text-zinc-600">
+                                            {record.schoolYear}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div className="badge badge-neutral badge-xs text-white text-[9px] p-2 rounded-full">
+                                            {record.studentList?.length || 0}
+                                        </div>
+                                        <div className="text-xs text-gray-500 sm:hidden mt-1">
+                                            {record.gradeLevel} • {record.semester}
+                                        </div>
+                                    </td>
+                                    <td className="hidden xl:table-cell">
+                                        <div className="text-xs text-gray-500 italic">
+                                            {formatDate(record.createdAt)}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div className="flex flex-col gap-1">
+                                            <Link
+                                                className="btn btn-xs btn-outline btn-secondary rounded-none"
+                                                title="Edit class"
+                                                href={`/teachers/class-schedule/add-student?subjectRecordId=${record.id}`}
+                                            >
+                                                <HiPencil className="w-3 h-3" />
+                                                <span className="hidden sm:inline">Edit</span>
+                                            </Link>
+                                            <Link
+                                                className="btn btn-xs btn-outline btn-accent rounded-none"
+                                                title="Manage grades"
+                                                href={`/teachers/class-schedule/student-grade?subjectRecordId=${record.id}`}
+                                            >
+                                                <HiDocumentText className="w-3 h-3" />
+                                                <span className="hidden sm:inline">Grades</span>
+                                            </Link>
+                                            <button
+                                                onClick={() =>
+                                                    handleDeleteClass(record.id)
+                                                }
+                                                className="btn btn-xs btn-outline btn-error rounded-none"
+                                                title="Delete class"
+                                            >
+                                                <HiTrash className="w-3 h-3" />
+                                                <span className="hidden sm:inline">Delete</span>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
 

@@ -21,13 +21,13 @@ import {
     MdPerson,
     MdRefresh,
     MdWork,
+    MdMoreHoriz,
 } from "react-icons/md";
 
 // Toast imports
 import { errorToast } from "../../../config/toast";
 import { logService } from "../../../services/logService";
 import { Teacher } from "@/interface/user";
-import { ButtonXs } from "@/components/common/ButtonXs";
 
 /**
  * @file TeacherList.tsx - Admin page for displaying list of teachers
@@ -70,6 +70,7 @@ const TeacherList: React.FC = () => {
     const [isDeleting, setIsDeleting] = useState<boolean>(false);
     const [isSearching, setIsSearching] = useState<boolean>(false);
     const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
+    const [activeFilter, setActiveFilter] = useState<string>("all");
 
     /**
      * Debounced search function
@@ -88,7 +89,7 @@ const TeacherList: React.FC = () => {
     /**
      * Fetches teachers from Firestore with pagination and search
      */
-    const fetchTeachers = async (searchQuery?: string, searchBy?: string): Promise<void> => {
+    const fetchTeachers = async (searchQuery?: string, searchBy?: string, activeStatus?: string): Promise<void> => {
         try {
             setLoading(true);
             const teachersRef = collection(db, "teachers");
@@ -113,10 +114,16 @@ const TeacherList: React.FC = () => {
             }
             
             const querySnapshot = await getDocs(q);
-            const teachersData: Teacher[] = [];
+            let teachersData: Teacher[] = [];
             querySnapshot.forEach((doc) => {
                 teachersData.push({ id: doc.id, ...doc.data() } as unknown as Teacher);
             });
+
+            // Apply active status filter
+            if (activeStatus && activeStatus !== "all") {
+                const isActive = activeStatus === "active";
+                teachersData = teachersData.filter(teacher => (teacher.activeStatus ?? true) === isActive);
+            }
 
             setTeachers(teachersData);
             setFilteredTeachers(teachersData);
@@ -150,11 +157,21 @@ const TeacherList: React.FC = () => {
     };
 
     /**
+     * Handles active status filter changes
+     */
+    const handleActiveFilterChange = (
+        e: React.ChangeEvent<HTMLSelectElement>
+    ): void => {
+        setActiveFilter(e.target.value);
+    };
+
+    /**
      * Clears search and resets to show all teachers
      */
     const clearSearch = async (): Promise<void> => {
         setSearchTerm("");
         setSearchField("firstName");
+        setActiveFilter("all");
         setIsSearching(true);
         try {
             await fetchTeachers();
@@ -251,17 +268,17 @@ const TeacherList: React.FC = () => {
     useEffect(() => {
         if (debouncedSearchTerm.trim()) {
             setIsSearching(true);
-            fetchTeachers(debouncedSearchTerm, searchField).finally(() => {
+            fetchTeachers(debouncedSearchTerm, searchField, activeFilter).finally(() => {
                 setIsSearching(false);
             });
         } else {
             setIsSearching(true);
-            fetchTeachers().finally(() => {
+            fetchTeachers(undefined, undefined, activeFilter).finally(() => {
                 setIsSearching(false);
             });
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [debouncedSearchTerm, searchField]);
+    }, [debouncedSearchTerm, searchField, activeFilter]);
 
     return (
         <div className="min-h-screen text-zinc-700">
@@ -321,7 +338,17 @@ const TeacherList: React.FC = () => {
                                     value={searchTerm}
                                     onChange={handleSearchChange}
                                 />
-                                {(searchTerm || isSearching) && (
+                                <select
+                                    value={activeFilter}
+                                    onChange={handleActiveFilterChange}
+                                    className="select select-bordered select-sm join-item martian-mono text-xs text-primary"
+                                    disabled={loading || isSearching}
+                                >
+                                    <option value="all">All Status</option>
+                                    <option value="active">Active Only</option>
+                                    <option value="inactive">Inactive Only</option>
+                                </select>
+                                {(searchTerm || isSearching || activeFilter !== "all") && (
                                     <button
                                         type="button"
                                         onClick={clearSearch}
@@ -374,6 +401,7 @@ const TeacherList: React.FC = () => {
                                                 <th className="bg-base-200 text-xs">Teacher</th>
                                                 <th className="bg-base-200 text-xs">Contact</th>
                                                 <th className="bg-base-200 text-xs">Position</th>
+                                                <th className="bg-base-200 text-xs">Status</th>
                                                 <th className="bg-base-200 text-xs">Created</th>
                                                 <th className="bg-base-200 text-xs">Actions</th>
                                             </tr>
@@ -403,41 +431,58 @@ const TeacherList: React.FC = () => {
                                                         </div>
                                                     </td>
                                                     <td>
+                                                        <div className="flex items-center gap-1">
+                                                            <div className={`badge badge-xs p-2 text-[9px] text-white ${(teacher.activeStatus ?? true) ? 'badge-success' : 'badge-error'}`}>
+                                                                {(teacher.activeStatus ?? true) ? 'Active' : 'Inactive'}
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
                                                         <div className="text-xs text-base-content/60 font-normal italic">
                                                             {formatDate(teacher.createdAt)}
                                                         </div>
                                                     </td>
                                                     <td>
-                                                        <div className="text-xs text-base-content/60 font-normal italic">
-                                                            <ButtonXs
-                                                                variant="primary"
-                                                                onClick={() =>
-                                                                    router.push(
-                                                                            `/admin/teacher-list/view-teacher?id=${teacher.id}`
-                                                                    )
-                                                                }
-                                                            >
-                                                                View
-                                                            </ButtonXs>
-                                                            <ButtonXs
-                                                                variant="secondary"
-                                                                onClick={() =>
-                                                                    router.push(
-                                                                        `/admin/teacher-list/edit?id=${teacher.id}`
-                                                                    )
-                                                                }
-                                                            >
-                                                                Edit
-                                                            </ButtonXs>
-                                                            <ButtonXs
-                                                                variant="error"
-                                                                onClick={() =>
-                                                                    handleDeleteClick(teacher)
-                                                                }
-                                                                className="text-white"
-                                                            >
-                                                                Delete
-                                                            </ButtonXs>
+                                                        <div className="text-xs text-base-content/60">
+                                                            <div className="dropdown dropdown-end">
+                                                                <button tabIndex={0} className="btn btn-ghost btn-xs">
+                                                                    <span className="text-lg"><MdMoreHoriz/></span>
+                                                                </button>
+                                                                <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-32 border border-base-300" style={{zIndex: 9999, position: 'fixed', marginRight: '40px'}}>
+                                                                    <li>
+                                                                        <button
+                                                                            className="text-primary hover:bg-base-200"
+                                                                            onClick={() =>
+                                                                                router.push(
+                                                                                    `/admin/teacher-list/view-teacher?id=${teacher.id}`
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            View
+                                                                        </button>
+                                                                    </li>
+                                                                    <li>
+                                                                        <button
+                                                                            className="text-secondary hover:bg-base-200"
+                                                                            onClick={() =>
+                                                                                router.push(
+                                                                                    `/admin/teacher-list/edit?id=${teacher.id}`
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            Edit
+                                                                        </button>
+                                                                    </li>
+                                                                    <li>
+                                                                        <button
+                                                                            className="text-error hover:bg-base-200"
+                                                                            onClick={() => handleDeleteClick(teacher)}
+                                                                        >
+                                                                            Delete
+                                                                        </button>
+                                                                    </li>
+                                                                </ul>
+                                                            </div>
                                                         </div>
                                                     </td>
                                                 </tr>

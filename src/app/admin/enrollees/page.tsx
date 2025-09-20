@@ -4,7 +4,8 @@ import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db } from "../../../../firebase";
 import { Enrollment } from "@/interface/info";
 import { formatDate } from "@/config/format";
-import { HiAcademicCap, HiCalendar, HiChevronLeft, HiChevronRight, HiClock } from "react-icons/hi";
+import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import { MdMoreHoriz, MdPerson } from "react-icons/md";
 import ApproveEnrollmentModal from "@/components/admin/ApproveEnrollmentModal";
 import { doc, updateDoc } from "firebase/firestore";
 import { strandService } from "@/services/strandService";
@@ -164,63 +165,126 @@ const EnrolleeListPage = () => {
       {loading ? (
         <div className="text-center py-12 text-zinc-400">Loading...</div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {paginated.length === 0 ? (
-            <div className="text-center py-12 text-zinc-400">No enrollments found.</div>
-          ) : paginated.map(enrollment => {
-            const strand = strands.find(s => s.id === enrollment.strandId);
-            return (
-              <div
-                key={enrollment.id}
-                className="group relative flex flex-col justify-between rounded-lg border border-zinc-200 bg-white shadow-sm hover:shadow-md transition-shadow duration-150 p-3 min-h-[120px]"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-1 mb-1">
-                    <span className="font-semibold text-sm text-primary transition-colors martian-mono">{enrollment.studentName}</span>
-                  </div>
-                  <div className="flex flex-col gap-1 mt-1">
-                    <div className="flex items-center gap-1 text-xs text-zinc-600">
-                      <HiAcademicCap className="w-3.5 h-3.5 text-primary/60" />
-                      <span>Strand: <span className="font-medium text-zinc-800">{strand ? strand.strandName : enrollment.strandId}</span></span>
-                    </div>
-                    <div className="flex items-center gap-1 text-xs text-zinc-600">
-                      <HiCalendar className="w-3.5 h-3.5 text-primary/60" />
-                      <span>{enrollment.semester} sem | {enrollment.schoolYear}</span>
-                    </div>
-                    <div className="flex items-center gap-1 text-[11px] text-zinc-400 mt-0.5">
-                      <HiClock className="w-3 h-3" />
-                      <span>Submitted: {formatDate(enrollment.createdAt)}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 items-stretch sm:items-center justify-end mt-3">
-                  <button
-                    className="btn btn-outline btn-xs font-medium rounded transition-colors hover:bg-primary/10 hover:border-primary min-h-0 h-7 px-3"
-                    onClick={() => { setViewEnrollment(enrollment); setViewModalOpen(true); }}
-                  >
-                    View
-                  </button>
-                  {enrollment.status === "pending" && (
-                    <>
-                      <button
-                        className="btn btn-error btn-xs text-white font-medium rounded shadow-sm transition-colors hover:bg-error/90 min-h-0 h-7 px-3"
-                        onClick={() => { setRejectEnrollment(enrollment); setRejectModalOpen(true); }}
-                        type="button"
-                      >
-                        Reject
-                      </button>
-                      <button
-                        className="btn btn-primary btn-xs text-white font-medium rounded shadow-sm transition-colors hover:bg-primary/90 min-h-0 h-7 px-3"
-                        onClick={() => { setSelectedEnrollment(enrollment); setModalOpen(true); }}
-                      >
-                        Approve
-                      </button>
-                    </>
-                  )}
-                </div>
+        <div className="card bg-base-100 shadow-sm">
+          <div className="card-body p-0">
+            {paginated.length === 0 ? (
+              <div className="p-4 text-center">
+                <MdPerson className="text-4xl text-base-content/20 mx-auto mb-2" />
+                <h3 className="text-sm font-semibold mb-1">
+                  No enrollments found
+                </h3>
+                <p className="text-xs text-base-content/60">
+                  Try adjusting your filters or search
+                </p>
               </div>
-            );
-          })}
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="table table-zebra table-sm w-full">
+                    <thead>
+                      <tr>
+                        <th className="bg-base-200 text-xs">Student</th>
+                        <th className="bg-base-200 text-xs">Strand</th>
+                        <th className="bg-base-200 text-xs">Semester/Year</th>
+                        <th className="bg-base-200 text-xs">Status</th>
+                        <th className="bg-base-200 text-xs">Submitted</th>
+                        <th className="bg-base-200 text-xs">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="text-xs">
+                      {paginated.map(enrollment => {
+                        const strand = strands.find(s => s.id === enrollment.strandId);
+                        return (
+                          <tr key={enrollment.id} className="hover">
+                            <td>
+                              <div className="flex items-center gap-2">
+                                <div>
+                                  <div className="font-bold martian-mono text-primary text-xs">
+                                    {enrollment.studentName}
+                                  </div>
+                                  <div className="text-[10px] text-base-content/60 font-normal">
+                                    ID: {enrollment.studentId}
+                                  </div>
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <span className="text-xs font-normal text-primary">
+                                {strand ? strand.strandName : enrollment.strandId}
+                              </span>
+                            </td>
+                            <td>
+                              <div className="space-y-0.5">
+                                <span className="text-xs font-normal">
+                                  {enrollment.semester} sem
+                                </span>
+                                <div className="text-[10px] text-base-content/60">
+                                  {enrollment.schoolYear}
+                                </div>
+                              </div>
+                            </td>
+                            <td>
+                              <span className={`badge badge-xs text-[9px] p-2 martian-mono ${
+                                enrollment.status === 'pending' ? 'badge-neutral text-white' :
+                                enrollment.status === 'approved' ? 'badge-success text-white' :
+                                'badge-error text-white'
+                              }`}>
+                                {enrollment.status}
+                              </span>
+                            </td>
+                            <td>
+                              <span className="text-xs font-normal text-base-content/60">
+                                {formatDate(enrollment.createdAt)}
+                              </span>
+                            </td>
+                            <td>
+                              <div className="text-xs text-base-content/60">
+                                <div className="dropdown dropdown-end">
+                                  <button tabIndex={0} className="btn btn-ghost btn-xs">
+                                    <span className="text-lg"><MdMoreHoriz/></span>
+                                  </button>
+                                  <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-32 border border-base-300" style={{zIndex: 9999, position: 'fixed', marginRight: '40px'}}>
+                                    <li>
+                                      <button
+                                        className="text-primary hover:bg-base-200"
+                                        onClick={() => { setViewEnrollment(enrollment); setViewModalOpen(true); }}
+                                      >
+                                        View
+                                      </button>
+                                    </li>
+                                    {enrollment.status === "pending" && (
+                                      <>
+                                        <li>
+                                          <button
+                                            className="text-error hover:bg-base-200"
+                                            onClick={() => { setRejectEnrollment(enrollment); setRejectModalOpen(true); }}
+                                          >
+                                            Reject
+                                          </button>
+                                        </li>
+                                        <li>
+                                          <button
+                                            className="text-success hover:bg-base-200"
+                                            onClick={() => { setSelectedEnrollment(enrollment); setModalOpen(true); }}
+                                          >
+                                            Approve
+                                          </button>
+                                        </li>
+                                      </>
+                                    )}
+                                  </ul>
+                                </div>
+                              </div>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       )}
       {/* Pagination Controls */}

@@ -6,6 +6,8 @@ import { signOut } from 'firebase/auth';
 import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX, HiCog, HiCalendar } from 'react-icons/hi';
 import { auth } from '../../../firebase';
 import { usePendingEnrollmentCount } from "@/hooks/usePendingEnrollmentCount";
+import { FaUserGroup } from "react-icons/fa6";
+
 
 // Types and Interfaces
 interface AdminLayoutProps {
@@ -43,6 +45,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { href: '/admin/teacher-list', icon: HiUserGroup, label: 'Teacher List' },
     { href: '/admin/calendar', icon: HiCalendar, label: 'Calendar' },
     { href: '/admin/enrollees', icon: HiUserAdd, label: 'Enrollee', showNotification: true, notificationCount: pendingCount, loading: pendingLoading },
+    { href: '/admin/strands', icon: FaUserGroup, label: 'Strands' },
     { href: '/admin/settings', icon: HiCog, label: 'Settings' },
   ];
 
@@ -107,7 +110,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               </div>
             )}
           </div>
-          <span className={`truncate font-normal ${isActive ? 'text-white martian-mono' : 'text-primary group-hover:text-primary-dark'}`}>{label}</span>
+          <span className={`truncate font-normal text-xs ${isActive ? 'text-white martian-mono' : 'text-primary group-hover:text-primary-dark'}`}>{label}</span>
         </Link>
       </li>
     );
@@ -162,7 +165,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors group-hover:text-white bg-primary/20 group-hover:bg-primary-dark">
               <HiLogout className="w-5 h-5" />
             </div>
-            <span className="truncate font-normal text-primary group-hover:text-white">Logout</span>
+            <span className="truncate font-normal text-xs text-primary group-hover:text-white">Logout</span>
           </button>
         </div>
       </div>

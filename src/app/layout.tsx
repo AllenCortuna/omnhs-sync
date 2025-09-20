@@ -1,15 +1,15 @@
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
-import { Montserrat } from "next/font/google";
+import { Martian_Mono } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 
-const font = Montserrat({
+const font = Martian_Mono({
   subsets: ["latin"],
-  weight: ["200", "400", "500", "600", "700"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata = {
-  title: "OMNHSYNC",
+  title: "OMNHSYNC", 
   description: "Occidental Mindoro National High School Sync",
 };
 

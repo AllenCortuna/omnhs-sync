@@ -176,7 +176,7 @@ const Logs: React.FC = () => {
                           {formatDate(log.date)}
                         </span>
                       </div>
-                      <p className="text-xs font-normal italic text-base-content/80 mb-2">
+                      <p className="text-xs font-normal text-zinc-500 mb-2">
                         {log.description}
                       </p>
   

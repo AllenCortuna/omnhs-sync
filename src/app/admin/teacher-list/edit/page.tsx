@@ -129,10 +129,10 @@ const EditTeacher: React.FC = () => {
                 <div className="flex items-center gap-4 mb-4">
                     <BackButton />
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-800">
+                        <h1 className="text-2xl font-bold text-primary martian-mono">
                             Edit Teacher
                         </h1>
-                        <p className="text-gray-600">
+                        <p className="text-gray-600 text-xs">
                             Update teacher information and details
                         </p>
                     </div>
@@ -143,7 +143,7 @@ const EditTeacher: React.FC = () => {
                 {/* Basic Information Section */}
                 <div className="card bg-white shadow-md">
                     <div className="card-body">
-                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2">
+                        <h2 className="card-title text-sm font-semibold mb-4 flex items-center gap-2 text-primary">
                             <HiIdentification className="w-5 h-5 text-accent" />
                             Basic Information
                         </h2>
@@ -225,7 +225,7 @@ const EditTeacher: React.FC = () => {
                 {/* Contact Information Section */}
                 <div className="card bg-white shadow-md">
                     <div className="card-body">
-                        <h2 className="card-title text-lg font-semibold mb-4 flex items-center gap-2">
+                        <h2 className="card-title text-sm font-semibold mb-4 flex items-center gap-2 text-primary">
                             <HiPhone className="w-5 h-5 text-accent" />
                             Contact Information
                         </h2>
@@ -252,6 +252,33 @@ const EditTeacher: React.FC = () => {
                                 placeholder="Complete Address"
                                 disabled={loading}
                             />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Status Section */}
+                <div className="card bg-white shadow-md">
+                    <div className="card-body">
+                        <h2 className="card-title text-sm font-semibold mb-4 flex items-center gap-2 text-primary">
+                            <HiAcademicCap className="w-5 h-5 text-accent" />
+                            Account Status
+                        </h2>
+
+                        <div className="flex items-center gap-4">
+                            <div className="form-control">
+                                <label className="label cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        className="toggle toggle-primary border-2"
+                                        checked={form.activeStatus ?? true}
+                                        onChange={(e) => setForm(prev => ({ ...prev, activeStatus: e.target.checked }))}
+                                        disabled={loading}
+                                    />
+                                </label>
+                            </div>
+                            <div className="text-xs text-base-content/60">
+                                {form.activeStatus ? "Teacher status is active" : "Teacher status is inactive"}
+                            </div>
                         </div>
                     </div>
                 </div>

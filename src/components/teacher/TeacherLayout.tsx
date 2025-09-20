@@ -104,7 +104,7 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
               </div>
             )}
           </div>
-          <span className={`truncate font-normal ${isActive ? 'text-white martian-mono' : 'text-primary group-hover:text-primary-dark'}`}>{label}</span>
+          <span className={`truncate font-normal text-xs ${isActive ? 'text-white martian-mono' : 'text-primary group-hover:text-primary-dark'}`}>{label}</span>
         </Link>
       </li>
     );
@@ -159,7 +159,7 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
             <div className="w-8 h-8 rounded-lg flex items-center justify-center transition-colors group-hover:text-white bg-primary/20 group-hover:bg-primary-dark">
               <HiLogout className="w-5 h-5" />
             </div>
-            <span className="truncate font-normal text-primary group-hover:text-white">Logout</span>
+            <span className="truncate font-normal text-xs text-primary group-hover:text-white">Logout</span>
           </button>
         </div>
       </div>
