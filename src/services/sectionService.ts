@@ -87,6 +87,26 @@ export const sectionService = {
     }
   },
 
+
+  /**
+   * Get a single section by adviserId
+   */
+  async getSectionByAdviserId(adviserId: string): Promise<Section | null> {
+    try {
+      const docRef = collection(db, COLLECTION_NAME);
+      const q = query(docRef, where('adviserId', '==', adviserId));
+
+      const docSnap = await getDocs(q);
+      if (docSnap.docs.length > 0) {
+        return { id: docSnap.docs[0].id, ...docSnap.docs[0].data() } as Section;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching section by adviserId:', error);
+      throw new Error('Failed to fetch section');
+    }
+  },
+
   /**
    * Check if section name already exists for a strand
    */

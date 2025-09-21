@@ -66,7 +66,7 @@ const SectionsPage = () => {
       if (!teacher) return;
 
       await sectionService.updateSection(sectionToAssign.id, {
-        adviserId: teacherId,
+        adviserId: teacher.employeeId,
         adviserName: `${teacher.firstName} ${teacher.lastName}`,
         adviserEmail: teacher.email
       });
@@ -75,7 +75,7 @@ const SectionsPage = () => {
         section.id === sectionToAssign.id 
           ? { 
               ...section, 
-              adviserId: teacherId,
+              adviserId: teacher.employeeId,
               adviserName: `${teacher.firstName} ${teacher.lastName}`,
               adviserEmail: teacher.email
             }

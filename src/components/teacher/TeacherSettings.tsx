@@ -89,7 +89,7 @@ const TeacherSettings: React.FC<TeacherSettingsProps> = ({ teacherId }) => {
               </div>
               <div>
                 <h2 className="text-xl font-semibold martian-mono text-primary">Account Settings</h2>
-                <p className="text-sm text-base-content/60 font-normal italic">
+                <p className="text-xs text-base-content/60 font-normal italic">
                   Manage your teacher account preferences and security settings
                 </p>
               </div>
@@ -105,7 +105,7 @@ const TeacherSettings: React.FC<TeacherSettingsProps> = ({ teacherId }) => {
                     </div>
                     <div>
                       <h3 className="text-sm martian-mono font-bold text-primary">Password Security</h3>
-                      <p className="text-sm font-normal italic text-base-content/60">Update your account password for better security</p>
+                      <p className="text-xs font-normal italic text-base-content/60">Update your account password for better security</p>
                     </div>
                   </div>
                   <button
@@ -125,7 +125,7 @@ const TeacherSettings: React.FC<TeacherSettingsProps> = ({ teacherId }) => {
                     </div>
                     <div>
                       <h3 className="text-sm martian-mono font-bold text-primary">Activity Logs</h3>
-                      <p className="text-sm font-normal italic text-base-content/60">View your teaching activities and actions</p>
+                      <p className="text-xs font-normal italic text-base-content/60">View your teaching activities and actions</p>
                     </div>
                   </div>
                   <button
