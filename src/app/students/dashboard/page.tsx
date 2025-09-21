@@ -4,11 +4,14 @@ import { useRouter } from "next/navigation";
 import { MdSchool, MdPerson, MdCalendarToday, MdAssignment, MdGrade } from "react-icons/md";
 import { useSaveUserData } from '@/hooks';
 import { subjectRecordService } from '@/services/subjectRecordService';
+import { sectionService } from '@/services/sectionService';
+import { strandService } from '@/services/strandService';
 import { LoadingOverlay } from '@/components/common';
 import { errorToast } from '@/config/toast';
 import { formatDate } from '@/config/format';
-import type { SubjectRecord } from '@/interface/info';
+import type { SubjectRecord, Section, Strand } from '@/interface/info';
 import type { Student } from '@/interface/user';
+import { FaAddressCard, FaBook } from "react-icons/fa6";
 
 /**
  * @file StudentDashboard.tsx - Student dashboard page
@@ -26,6 +29,8 @@ const StudentDashboard: React.FC = () => {
     const router = useRouter();
     const { userData, isLoading: userLoading } = useSaveUserData({ role: 'student' });
     const [subjectRecords, setSubjectRecords] = useState<SubjectRecord[]>([]);
+    const [section, setSection] = useState<Section | null>(null);
+    const [strand, setStrand] = useState<Strand | null>(null);
     const [loading, setLoading] = useState(true);
 
     // Fetch student data
@@ -45,6 +50,19 @@ const StudentDashboard: React.FC = () => {
                 // Get all subject records where student is enrolled
                 const records = await subjectRecordService.getSubjectRecordsByStudent(studentId);
                 setSubjectRecords(records);
+
+                // Get section and strand information if student is enrolled in a section
+                if (userData.enrolledForSectionId) {
+                    const sectionData = await sectionService.getSectionById(userData.enrolledForSectionId);
+                    if (sectionData) {
+                        setSection(sectionData);
+                        // Get strand information
+                        const strandData = await strandService.getStrandById(sectionData.strandId);
+                        if (strandData) {
+                            setStrand(strandData);
+                        }
+                    }
+                }
             } catch (error) {
                 console.error('Error fetching student data:', error);
                 errorToast('Failed to load student data');
@@ -135,10 +153,80 @@ const StudentDashboard: React.FC = () => {
                                 <p className="text-xs text-zinc-500 italic">
                                     Student ID: {studentData.studentId} | {studentData.email}
                                 </p>
+                                {section && strand && (
+                                    <div className="mt-2 flex items-center gap-2">
+                                        <div className="badge badge-primary badge-sm">
+                                            {section.sectionName}
+                                        </div>
+                                        <span className="text-xs text-zinc-500">•</span>
+                                        <span className="text-xs text-zinc-500">{strand.strandName}</span>
+                                        {section.adviserName && (
+                                            <>
+                                                <span className="text-xs text-zinc-500">•</span>
+                                                <span className="text-xs text-zinc-500">Adviser: {section.adviserName}</span>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {/* Section Information Card */}
+                {section && strand && (
+                    <div className="card bg-white border border-primary/20 mb-6">
+                        <div className="card-body">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-primary/20 p-3 rounded-lg">
+                                    <FaBook className="text-primary text-xl" />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-bold text-primary martian-mono">
+                                        Current Section
+                                    </h3>
+                                    <div className="flex items-center gap-4 mt-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-medium text-zinc-500">Section:</span>
+                                            <span className="badge badge-primary badge-xs p-2 text-white">{section.sectionName}</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-xs font-medium text-zinc-500">Strand:</span>
+                                            <span className="text-sm text-primary font-bold">{strand.strandName}</span>
+                                        </div>
+                                        {section.adviserName && (
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-sm font-medium text-base-content">Adviser:</span>
+                                                <span className="text-sm text-base-content/80">{section.adviserName}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* No Section Assigned Message */}
+                {!section && studentData.enrolledForSectionId === undefined && (
+                    <div className="card bg-warning/10 border border-warning/20 mb-6">
+                        <div className="card-body">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-warning/20 p-3 rounded-lg">
+                                    <MdSchool className="text-warning text-xl" />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-bold text-warning martian-mono">
+                                        No Section Assigned
+                                    </h3>
+                                    <p className="text-sm text-base-content/80 mt-1">
+                                        You haven&apos;t been assigned to a section yet. Please contact your administrator or complete your enrollment.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Academic Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
@@ -228,7 +316,7 @@ const StudentDashboard: React.FC = () => {
                         <div className="card-body">
                             <div className="flex items-center gap-3">
                                 <div className="bg-primary/20 p-3 rounded-lg">
-                                    <MdGrade className="text-primary text-xl" />
+                                    <FaAddressCard className="text-primary text-xl" />
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-primary martian-mono">View Grades</h3>

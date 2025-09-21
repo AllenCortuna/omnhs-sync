@@ -60,6 +60,7 @@ const StudentList: React.FC = () => {
     const [loading, setLoading] = useState<boolean>(true);
     const [searchTerm, setSearchTerm] = useState<string>("");
     const [searchField, setSearchField] = useState<string>("firstName");
+    const [statusFilter, setStatusFilter] = useState<string>("all");
     const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [studentsPerPage] = useState<number>(10);
@@ -148,6 +149,49 @@ const StudentList: React.FC = () => {
         setSearchField(e.target.value);
     };
 
+    /**
+     * Handles status filter changes
+     */
+    const handleStatusFilterChange = (
+        e: React.ChangeEvent<HTMLSelectElement>
+    ): void => {
+        setStatusFilter(e.target.value);
+        setCurrentPage(1); // Reset to first page when filter changes
+    };
+
+    /**
+     * Filters students based on search term and status
+     */
+    const filterStudents = (): void => {
+        let filtered = [...students];
+
+        // Filter by search term
+        if (debouncedSearchTerm.trim()) {
+            const searchLower = debouncedSearchTerm.toLowerCase();
+            filtered = filtered.filter((student) => {
+                const searchValue = searchField === "firstName" 
+                    ? student.firstName?.toLowerCase() || ""
+                    : searchField === "lastName"
+                    ? student.lastName?.toLowerCase() || ""
+                    : student.studentId?.toLowerCase() || "";
+                
+                return searchValue.includes(searchLower);
+            });
+        }
+
+        // Filter by status
+        if (statusFilter !== "all") {
+            filtered = filtered.filter((student) => {
+                if (statusFilter === "not-set") {
+                    return !student.status;
+                }
+                return student.status === statusFilter;
+            });
+        }
+
+        setFilteredStudents(filtered);
+    };
+
 
 
     /**
@@ -156,6 +200,7 @@ const StudentList: React.FC = () => {
     const clearSearch = async (): Promise<void> => {
         setSearchTerm("");
         setSearchField("firstName");
+        setStatusFilter("all");
         setIsSearching(true);
         try {
             await fetchStudents();
@@ -253,6 +298,12 @@ const StudentList: React.FC = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [debouncedSearchTerm, searchField]);
 
+    // Filter students when status filter changes or when students data changes
+    useEffect(() => {
+        filterStudents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [statusFilter, students, debouncedSearchTerm, searchField]);
+
     // Remove the old useEffect that called filterStudents
 
     return (
@@ -296,37 +347,58 @@ const StudentList: React.FC = () => {
 
                 {/* Search and Stats */}
                 <div className="card bg-base-100 shadow-sm mb-4 p-3">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                        {/* Search Form */}
-                        <div className="flex-1">
-                            <div className="join w-full">
-                                <select
-                                    value={searchField}
-                                    onChange={handleSearchFieldChange}
-                                    className="select select-bordered select-sm join-item martian-mono text-xs text-primary"
-                                    disabled={loading || isSearching}
-                                >
-                                    <option value="firstName">First Name</option>
-                                    <option value="lastName">Last Name</option>
-                                    <option value="studentId">Student ID</option>
-                                </select>
-                                <input
-                                    type="text"
-                                    placeholder={`Search by ${searchField}...`}
-                                    className="input input-sm input-bordered join-item w-full"
-                                    value={searchTerm}
-                                    onChange={handleSearchChange}
-                                />
-                                {(searchTerm || isSearching) && (
-                                    <button
-                                        type="button"
-                                        onClick={clearSearch}
-                                        className="btn btn-outline btn-sm join-item"
+                    <div className="flex flex-col gap-3">
+                        {/* Search and Filter Row */}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                            {/* Search Form */}
+                            <div className="flex-1">
+                                <div className="join w-full">
+                                    <select
+                                        value={searchField}
+                                        onChange={handleSearchFieldChange}
+                                        className="select select-bordered select-sm join-item martian-mono text-xs text-primary"
                                         disabled={loading || isSearching}
                                     >
-                                        Clear
-                                    </button>
-                                )}
+                                        <option value="firstName">First Name</option>
+                                        <option value="lastName">Last Name</option>
+                                        <option value="studentId">Student ID</option>
+                                    </select>
+                                    <input
+                                        type="text"
+                                        placeholder={`Search by ${searchField}...`}
+                                        className="input input-sm input-bordered join-item w-full"
+                                        value={searchTerm}
+                                        onChange={handleSearchChange}
+                                    />
+                                    {(searchTerm || isSearching) && (
+                                        <button
+                                            type="button"
+                                            onClick={clearSearch}
+                                            className="btn btn-outline btn-sm join-item"
+                                            disabled={loading || isSearching}
+                                        >
+                                            Clear
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Status Filter */}
+                            <div className="sm:w-48">
+                                <select
+                                    value={statusFilter}
+                                    onChange={handleStatusFilterChange}
+                                    className="select select-bordered select-sm w-full martian-mono text-xs text-primary"
+                                    disabled={loading || isSearching}
+                                >
+                                    <option value="all">All Status</option>
+                                    <option value="enrolled">Enrolled</option>
+                                    <option value="transfer-in">Transfer In</option>
+                                    <option value="transfer-out">Transfer Out</option>
+                                    <option value="incomplete">Incomplete</option>
+                                    <option value="graduated">Graduated</option>
+                                    <option value="not-set">Not Set</option>
+                                </select>
                             </div>
                         </div>
 
@@ -346,6 +418,16 @@ const StudentList: React.FC = () => {
                                     {filteredStudents.length}
                                 </div>
                             </div>
+                            {statusFilter !== "all" && (
+                                <div className="stat py-1 px-2">
+                                    <div className="stat-title text-xs">
+                                        {statusFilter === "not-set" ? "Not Set" : statusFilter.charAt(0).toUpperCase() + statusFilter.slice(1).replace("-", " ")}
+                                    </div>
+                                    <div className="stat-value text-sm">
+                                        {filteredStudents.length}
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -377,6 +459,9 @@ const StudentList: React.FC = () => {
                                                     Student
                                                 </th>
                                                 <th className="bg-base-200 text-xs">
+                                                    Status
+                                                </th>
+                                                <th className="bg-base-200 text-xs">
                                                     Contact
                                                 </th>
                                                 <th className="bg-base-200 text-xs">
@@ -388,80 +473,109 @@ const StudentList: React.FC = () => {
                                             </tr>
                                         </thead>
                                         <tbody className="text-xs">
-                                            {currentStudents.map((student) => (
-                                                <tr
-                                                    key={student.studentId}
-                                                    className="hover"
-                                                >
-                                                    <td>
-                                                        <div className="flex items-center gap-2">
-                                                            <div>
-                                                                <div className="font-bold martian-mono text-primary text-xs">
-                                                                    {getFullName(student)}
-                                                                </div>
-                                                                <div className="text-[10px] text-base-content/60 font-normal">
-                                                                    {student.studentId}
+                                            {currentStudents.map((student) => {
+                                                const getStatusColor = (status?: string) => {
+                                                    switch (status) {
+                                                        case "enrolled": return "badge-success";
+                                                        case "transfer-in": return "badge-info";
+                                                        case "transfer-out": return "badge-warning";
+                                                        case "incomplete": return "badge-warning";
+                                                        case "graduated": return "badge-primary";
+                                                        default: return "badge-neutral";
+                                                    }
+                                                };
+
+                                                const getStatusLabel = (status?: string) => {
+                                                    switch (status) {
+                                                        case "enrolled": return "Enrolled";
+                                                        case "transfer-in": return "Transfer In";
+                                                        case "transfer-out": return "Transfer Out";
+                                                        case "incomplete": return "Incomplete";
+                                                        case "graduated": return "Graduated";
+                                                        default: return "Not Set";
+                                                    }
+                                                };
+
+                                                return (
+                                                    <tr
+                                                        key={student.studentId}
+                                                        className="hover"
+                                                    >
+                                                        <td>
+                                                            <div className="flex items-center gap-2">
+                                                                <div>
+                                                                    <div className="font-bold martian-mono text-primary text-xs">
+                                                                        {getFullName(student)}
+                                                                    </div>
+                                                                    <div className="text-[10px] text-base-content/60 font-normal">
+                                                                        {student.studentId}
+                                                                    </div>
                                                                 </div>
                                                             </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <span className="text-xs font-normal text-primary">
-                                                            {student.email}
-                                                        </span>
-                                                    </td>
-                                                    <td>
-                                                        <div className="space-y-0.5">
-                                                            <span className="text-xs font-normal">
-                                                                {student.sex}
+                                                        </td>
+                                                        <td>
+                                                            <span className={`badge badge-xs p-2 text-white text-[10px] ${getStatusColor(student.status)}`}>
+                                                                {getStatusLabel(student.status)}
                                                             </span>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div className="text-xs text-base-content/60">
-                                                            <div className="dropdown dropdown-end">
-                                                                <button tabIndex={0} className="btn btn-ghost btn-xs">
-                                                                    <span className="text-lg"><MdMoreHoriz/></span>
-                                                                </button>
-                                                                <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-32 border border-base-300" style={{zIndex: 9999, position: 'fixed', marginRight: '40px'}}>
-                                                                    <li>
-                                                                        <button
-                                                                            className="text-primary hover:bg-base-200"
-                                                                            onClick={() =>
-                                                                                router.push(
-                                                                                    `/admin/student-list/view-student?id=${student.id}`
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            View
-                                                                        </button>
-                                                                    </li>
-                                                                    <li>
-                                                                        <button
-                                                                            className="text-secondary hover:bg-base-200"
-                                                                            onClick={() =>
-                                                                                router.push(
-                                                                                    `/admin/student-list/edit?id=${student.id}`
-                                                                                )
-                                                                            }
-                                                                        >
-                                                                            Edit
-                                                                        </button>
-                                                                    </li>
-                                                                    <li>
-                                                                        <button
-                                                                            className="text-error hover:bg-base-200"
-                                                                            onClick={() => handleDeleteClick(student)}
-                                                                        >
-                                                                            Delete
-                                                                        </button>
-                                                                    </li>
-                                                                </ul>
+                                                        </td>
+                                                        <td>
+                                                            <span className="text-xs font-normal text-primary">
+                                                                {student.email}
+                                                            </span>
+                                                        </td>
+                                                        <td>
+                                                            <div className="space-y-0.5">
+                                                                <span className="text-xs font-normal">
+                                                                    {student.sex}
+                                                                </span>
                                                             </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))}
+                                                        </td>
+                                                        <td>
+                                                            <div className="text-xs text-base-content/60">
+                                                                <div className="dropdown dropdown-end">
+                                                                    <button tabIndex={0} className="btn btn-ghost btn-xs">
+                                                                        <span className="text-lg"><MdMoreHoriz/></span>
+                                                                    </button>
+                                                                    <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-32 border border-base-300" style={{zIndex: 9999, position: 'fixed', marginRight: '40px'}}>
+                                                                        <li>
+                                                                            <button
+                                                                                className="text-primary hover:bg-base-200"
+                                                                                onClick={() =>
+                                                                                    router.push(
+                                                                                        `/admin/student-list/view-student?id=${student.id}`
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                View
+                                                                            </button>
+                                                                        </li>
+                                                                        <li>
+                                                                            <button
+                                                                                className="text-secondary hover:bg-base-200"
+                                                                                onClick={() =>
+                                                                                    router.push(
+                                                                                        `/admin/student-list/edit?id=${student.id}`
+                                                                                    )
+                                                                                }
+                                                                            >
+                                                                                Edit
+                                                                            </button>
+                                                                        </li>
+                                                                        <li>
+                                                                            <button
+                                                                                className="text-error hover:bg-base-200"
+                                                                                onClick={() => handleDeleteClick(student)}
+                                                                            >
+                                                                                Delete
+                                                                            </button>
+                                                                        </li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
                                         </tbody>
                                     </table>
                                 </div>

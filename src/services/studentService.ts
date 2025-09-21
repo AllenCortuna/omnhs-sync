@@ -1,4 +1,4 @@
-import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { collection, getDocs, query, orderBy, doc, updateDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import { Student } from '../interface/user';
 
@@ -34,6 +34,33 @@ export const studentService = {
     } catch (error) {
       console.error('Error fetching student count:', error);
       throw new Error('Failed to fetch student count');
+    }
+  },
+
+  /**
+   * Update student status
+   */
+  async updateStudentStatus(studentId: string, status: string): Promise<void> {
+    try {
+      const studentRef = doc(db, COLLECTION_NAME, studentId);
+      
+      // Prepare update data
+      const updateData: Partial<Student> = {
+        status: status as Student['status'],
+        updatedAt: new Date().toISOString()
+      };
+
+      // If status is transfer-out or graduated, clear enrollment data
+      if (status === "transfer-out" || status === "graduated") {
+        updateData.enrolledForSchoolYear = "";
+        updateData.enrolledForSemester = "";
+        updateData.enrolledForSectionId = "";
+      }
+
+      await updateDoc(studentRef, updateData);
+    } catch (error) {
+      console.error('Error updating student status:', error);
+      throw new Error('Failed to update student status');
     }
   }
 };

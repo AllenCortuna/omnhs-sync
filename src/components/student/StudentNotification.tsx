@@ -93,7 +93,7 @@ export function StudentNotification({ open, onClose }: StudentNotificationProps)
                 <div className="flex items-center gap-2">
                   <span className="text-xs text-zinc-500 ml-1">{notif.createdAt?.toDate ? notif.createdAt.toDate().toLocaleString() : ''}</span>
                 </div>
-                <div className="text-sm text-zinc-700">
+                <div className="text-[10px] text-zinc-500">
                   {notif.title === 'Enrollment Approved' ? 'Your enrollment was approved.' : 'Your enrollment was rejected.'}
                   {notif.description && <span> Reason: <span className="italic">{notif.description}</span></span>}
                 </div>

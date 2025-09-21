@@ -30,6 +30,7 @@ export interface Student {
     enrolledForSchoolYear?: string;
     enrolledForSemester?: string;
     enrolledForSectionId?: string;
+    status?: "enrolled" | "transfer-in" | "transfer-out" | "incomplete" | "graduated";
     email?: string;
     createdAt: string;
     lastLoginAt?: string;

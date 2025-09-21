@@ -105,7 +105,8 @@ const EnrolleeListPage = () => {
       await updateDoc(studentDoc.ref, { 
         enrolledForSemester: selectedEnrollment.semester,
         enrolledForSchoolYear: selectedEnrollment.schoolYear,
-        enrolledForSectionId: sectionId
+        enrolledForSectionId: sectionId,
+        status: "enrolled"
       });
     }
     setLoading(false);

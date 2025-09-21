@@ -7,6 +7,7 @@ import { strandService } from "@/services/strandService";
 import { sectionService } from "@/services/sectionService";
 import { teacherService } from "@/services/teacherService";
 import { logService } from "@/services/logService";
+import { errorToast } from "@/config/toast";
 import { FaClipboardList } from "react-icons/fa6";
 
 const SectionsPage = () => {
@@ -58,12 +59,27 @@ const SectionsPage = () => {
     return fullName.includes(searchTerm) || teacher.employeeId?.toLowerCase().includes(searchTerm);
   });
 
+  // Check if a teacher is already assigned to a section
+  const isTeacherAssigned = (teacherId: string) => {
+    return sections.some(section => section.adviserId === teachers.find(t => t.id === teacherId)?.employeeId);
+  };
+
   const handleAssignTeacher = async (teacherId: string) => {
     if (!sectionToAssign) return;
     
     try {
       const teacher = teachers.find(t => t.id === teacherId);
       if (!teacher) return;
+
+      // Check if teacher is already assigned to another section
+      const isAlreadyAssigned = sections.some(section => 
+        section.adviserId === teacher.employeeId && section.id !== sectionToAssign.id
+      );
+
+      if (isAlreadyAssigned) {
+        errorToast(`${teacher.firstName} ${teacher.lastName} is already assigned to another section. A teacher can only be assigned to one section.`);
+        return;
+      }
 
       await sectionService.updateSection(sectionToAssign.id, {
         adviserId: teacher.employeeId,
@@ -197,32 +213,34 @@ const SectionsPage = () => {
                       </div>
                       
                       <div className="flex items-center gap-2">
-                        {section.adviserName ? (
-                          <div className="flex items-center gap-2 text-xs">
-                            <HiUsers className="w-4 h-4 text-primary" />
-                            <span className="text-primary font-medium mr-8">
-                              {section.adviserName}
-                            </span>
-                            <button
-                              onClick={() => handleRemoveTeacher(section.id)}
-                              className="btn btn-ghost btn-sm text-error"
-                              title="Remove teacher"
-                            >
-                              <HiTrash className="w-5 h-5" />
-                            </button>
-                          </div>
-                        ) : (
-                          <button
-                            onClick={() => {
-                              setSectionToAssign(section);
-                              setAssignTeacherModalOpen(true);
-                            }}
-                            className="btn btn-outline btn-sm text-xs text-primary"
-                          >
-                            <HiUsers className="w-4 h-4" />
-                            Assign Teacher
-                          </button>
-                        )}
+                         {section.adviserName ? (
+                           <div className="flex items-center gap-2 text-xs">
+                             <HiUsers className="w-4 h-4 text-primary" />
+                             <span className="text-primary font-medium mr-8">
+                               {section.adviserName}
+                             </span>
+                             <button
+                               onClick={() => handleRemoveTeacher(section.id)}
+                               className="btn btn-ghost btn-sm text-error"
+                               title="Remove teacher"
+                             >
+                               <HiTrash className="w-5 h-5" />
+                             </button>
+                           </div>
+                         ) : (
+                           <div className="flex items-center gap-2">
+                             <button
+                               onClick={() => {
+                                 setSectionToAssign(section);
+                                 setAssignTeacherModalOpen(true);
+                               }}
+                               className="btn btn-outline btn-sm text-xs text-primary"
+                             >
+                               <HiUsers className="w-4 h-4" />
+                               Assign Teacher
+                             </button>
+                           </div>
+                         )}
                       </div>
                     </div>
                   </div>
@@ -260,24 +278,45 @@ const SectionsPage = () => {
               </div>
               
               <div className="space-y-2 max-h-60 overflow-y-auto">
-                {filteredTeachers.length === 0 ? (
-                  <div className="text-center py-4 text-zinc-400 text-xs">
-                    {teacherSearch ? "No teachers found matching your search" : "No teachers available"}
-                  </div>
-                ) : (
-                  filteredTeachers.map(teacher => (
-                    <button
-                      key={teacher.id}
-                      onClick={() => handleAssignTeacher(teacher.id!)}
-                      className="btn btn-outline rounded-none w-full justify-start text-xs hover:bg-primary hover:text-white group"
-                    >
-                      <div className="text-left">
-                        <div className="font-medium text-primary text-xs hover:text-white group-hover:text-white">{teacher.firstName} {teacher.lastName}</div>
-                        <div className="text-[9px] text-zinc-500 group-hover:text-zinc-300">{teacher.employeeId}</div>
-                      </div>
-                    </button>
-                  ))
-                )}
+                 {filteredTeachers.length === 0 ? (
+                   <div className="text-center py-4 text-zinc-400 text-xs">
+                     {teacherSearch ? "No teachers found matching your search" : "No teachers available"}
+                   </div>
+                 ) : (
+                   filteredTeachers.map(teacher => {
+                     const isAssigned = isTeacherAssigned(teacher.id!);
+                     return (
+                       <button
+                         key={teacher.id}
+                         onClick={() => !isAssigned && handleAssignTeacher(teacher.id!)}
+                         disabled={isAssigned}
+                         className={`btn rounded-none w-full justify-start text-xs group ${
+                           isAssigned 
+                             ? 'btn-disabled opacity-50 cursor-not-allowed' 
+                             : 'btn-outline hover:bg-primary hover:text-white'
+                         }`}
+                       >
+                         <div className="text-left">
+                           <div className={`font-medium text-xs ${
+                             isAssigned 
+                               ? 'text-zinc-400' 
+                               : 'text-primary group-hover:text-white'
+                           }`}>
+                             {teacher.firstName} {teacher.lastName}
+                             {isAssigned && ' (Already Assigned)'}
+                           </div>
+                           <div className={`text-[9px] ${
+                             isAssigned 
+                               ? 'text-zinc-400' 
+                               : 'text-zinc-500 group-hover:text-zinc-300'
+                           }`}>
+                             {teacher.employeeId}
+                           </div>
+                         </div>
+                       </button>
+                     );
+                   })
+                 )}
               </div>
               <div className="card-actions justify-end">
                 <button
