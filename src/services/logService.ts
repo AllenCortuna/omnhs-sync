@@ -22,33 +22,6 @@ class LogService {
     }
   }
 
-  // Section-related logs
-  async logSectionCreated(sectionName: string, adminName: string): Promise<void> {
-    await this.createLog({
-      studentId: 'SYSTEM',
-      name: 'Section Created',
-      description: `Section "${sectionName}" was created`,
-      logsBy: adminName,
-    });
-  }
-
-  async logSectionUpdated(sectionName: string, adminName: string): Promise<void> {
-    await this.createLog({
-      studentId: 'SYSTEM',
-      name: 'Section Updated',
-      description: `Section "${sectionName}" was updated`,
-      logsBy: adminName,
-    });
-  }
-
-  async logSectionDeleted(sectionName: string, adminName: string): Promise<void> {
-    await this.createLog({
-      studentId: 'SYSTEM',
-      name: 'Section Deleted',
-      description: `Section "${sectionName}" was deleted`,
-      logsBy: adminName,
-    });
-  }
 
   // Strand-related logs
   async logStrandCreated(strandName: string, adminName: string): Promise<void> {
@@ -212,6 +185,74 @@ class LogService {
       studentId: 'SYSTEM',
       name: 'Teacher Deleted',
       description: `Teacher ${teacherName} was deleted from the system`,
+      logsBy: performedBy,
+    });
+  }
+
+  // Section logs
+  async logSectionCreated(
+    sectionId: string,
+    sectionName: string,
+    performedBy: string
+  ): Promise<void> {
+    await this.createLog({
+      studentId: 'SYSTEM',
+      name: 'Section Created',
+      description: `Section "${sectionName}" was created`,
+      logsBy: performedBy,
+    });
+  }
+
+  async logSectionUpdated(
+    sectionId: string,
+    sectionName: string,
+    performedBy: string
+  ): Promise<void> {
+    await this.createLog({
+      studentId: 'SYSTEM',
+      name: 'Section Updated',
+      description: `Section "${sectionName}" information was updated`,
+      logsBy: performedBy,
+    });
+  }
+
+  async logSectionDeleted(
+    sectionId: string,
+    sectionName: string,
+    performedBy: string
+  ): Promise<void> {
+    await this.createLog({
+      studentId: 'SYSTEM',
+      name: 'Section Deleted',
+      description: `Section "${sectionName}" was deleted from the system`,
+      logsBy: performedBy,
+    });
+  }
+
+  async logTeacherAssignedToSection(
+    sectionId: string,
+    sectionName: string,
+    teacherId: string,
+    teacherName: string,
+    performedBy: string
+  ): Promise<void> {
+    await this.createLog({
+      studentId: 'SYSTEM',
+      name: 'Teacher Assigned to Section',
+      description: `Teacher ${teacherName} was assigned to section "${sectionName}"`,
+      logsBy: performedBy,
+    });
+  }
+
+  async logTeacherRemovedFromSection(
+    sectionId: string,
+    sectionName: string,
+    performedBy: string
+  ): Promise<void> {
+    await this.createLog({
+      studentId: 'SYSTEM',
+      name: 'Teacher Removed from Section',
+      description: `Teacher was removed from section "${sectionName}"`,
       logsBy: performedBy,
     });
   }

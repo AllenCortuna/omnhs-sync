@@ -6,7 +6,7 @@ import { signOut } from 'firebase/auth';
 import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX, HiCog, HiCalendar } from 'react-icons/hi';
 import { auth } from '../../../firebase';
 import { usePendingEnrollmentCount } from "@/hooks/usePendingEnrollmentCount";
-import { FaUserGroup } from "react-icons/fa6";
+import { FaClipboard, FaUserGroup } from "react-icons/fa6";
 
 
 // Types and Interfaces
@@ -46,6 +46,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     { href: '/admin/calendar', icon: HiCalendar, label: 'Calendar' },
     { href: '/admin/enrollees', icon: HiUserAdd, label: 'Enrollee', showNotification: true, notificationCount: pendingCount, loading: pendingLoading },
     { href: '/admin/strands', icon: FaUserGroup, label: 'Strands' },
+    { href: '/admin/sections', icon: FaClipboard, label: 'Sections' },
     { href: '/admin/settings', icon: HiCog, label: 'Settings' },
   ];
 

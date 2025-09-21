@@ -18,13 +18,14 @@ const COLLECTION_NAME = 'sections';
 
 export interface CreateSectionData {
   sectionName: string;
-  sectionDescription: string;
   strandId: string;
 }
 
 export interface UpdateSectionData {
   sectionName?: string;
-  sectionDescription?: string;
+  adviserId?: string;
+  adviserName?: string;
+  adviserEmail?: string;
 }
 
 export const sectionService = {

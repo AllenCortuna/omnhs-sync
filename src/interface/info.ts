@@ -8,6 +8,11 @@ export interface Section {
     id: string;
     sectionName: string;
     strandId: string; // reference to the strand
+    adviserId?: string; // reference to the teacher
+    adviserName?: string; // reference to the teacher name
+    adviserEmail?: string; // reference to the teacher email
+    createdAt?: string;
+    updatedAt?: string;
 }
 
 export interface Subject {

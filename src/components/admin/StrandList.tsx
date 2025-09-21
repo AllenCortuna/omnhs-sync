@@ -53,7 +53,7 @@ const StrandList: React.FC<StrandListProps> = ({
       await sectionService.createSection(data);
       
       // Log the action
-      await logService.logSectionCreated(data.sectionName, 'Admin');
+      await logService.logSectionCreated(data.sectionName, 'Admin', "Admin");
       
       setShowSectionForm(null);
       setEditingSection(null);
@@ -76,7 +76,7 @@ const StrandList: React.FC<StrandListProps> = ({
       await sectionService.updateSection(editingSection.id, data);
       
       // Log the action
-      await logService.logSectionUpdated(data.sectionName || editingSection.sectionName, 'Admin');
+      await logService.logSectionUpdated(data.sectionName || editingSection.sectionName, 'Admin', "Admin");
       
       setShowSectionForm(null);
       setEditingSection(null);
