@@ -174,7 +174,6 @@ const StudentList: React.FC = () => {
                     : searchField === "lastName"
                     ? student.lastName?.toLowerCase() || ""
                     : student.studentId?.toLowerCase() || "";
-                
                 return searchValue.includes(searchLower);
             });
         }
