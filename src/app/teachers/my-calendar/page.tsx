@@ -8,6 +8,11 @@ import { db } from "../../../../firebase";
 import { collection, getDocs, query, where, or } from "firebase/firestore";
 import { CalendarEvent } from "@/interface/calendar";
 import UpcomingEvents from '@/components/student/UpcomingEvents';
+import { CreateButton } from "@/components/common";
+import { useRouter } from "next/navigation";
+import { useSaveUserData } from "@/hooks";
+import { Teacher } from "@/interface/user";
+import { errorToast } from "@/config/toast";
 interface EventModalProps {
   event: CalendarEvent | null;
   onClose: () => void;
@@ -32,30 +37,47 @@ function EventModal({ event, onClose }: EventModalProps) {
 }
 
 const TeachersCalendarPage = () => {
+  const router = useRouter();
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [modalEvent, setModalEvent] = useState<CalendarEvent | null>(null);
-
+  const { userData, isLoading: userLoading } = useSaveUserData({
+    role: "teacher",
+  });
   useEffect(() => {
     async function fetchEvents() {
-      setIsLoading(true);
-      const eventsRef = collection(db, "events");
-      const q = query(
-        eventsRef,
-        or(
-          where("recipient", "==", "all"),
-          where("recipient", "==", "teachers")
+      if (!userData || userLoading) return;
 
-        )
-      );
-      const snapshot = await getDocs(q);
-      const data: CalendarEvent[] = snapshot.docs
-        .map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
-      setEvents(data);
-      setIsLoading(false);
+      // Type guard to ensure userData is a Teacher
+      if (!("employeeId" in userData)) {
+        errorToast("Invalid user data. Please try again.");
+        return;
+      }
+
+      const teacherData = userData as Teacher;
+
+      try {
+        setIsLoading(true);
+        const eventsRef = collection(db, "events");
+        const q = query(
+          eventsRef,
+          or(
+            where("teacherId", "==", teacherData.employeeId)
+          )
+        );
+        const snapshot = await getDocs(q);
+        const data: CalendarEvent[] = snapshot.docs
+          .map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
+        setEvents(data);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        errorToast("Failed to fetch events");
+      } finally {
+        setIsLoading(false);
+      }
     }
     fetchEvents();
-  }, []);
+  }, [userData, userLoading]);
 
   function handleEventClick(arg: EventClickArg) {
     const event = events.find(e => e.id === arg.event.id);
@@ -70,9 +92,36 @@ const TeachersCalendarPage = () => {
     description: event.description,
   }));
 
+  if (userLoading) {
+    return (
+      <div className="min-h-screen text-zinc-600 flex items-center justify-center">
+        <div className="text-center">
+          <div className="loading loading-spinner loading-lg text-primary"></div>
+          <p className="mt-4 text-sm">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen text-zinc-700">
       <div className="ma mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold mb-4 text-primary martian-mono">Teachers&apos; Calendar</h1>
+            <p className="text-sm text-base-content/60 font-normal italic">
+              View and manage school events
+            </p>
+          </div>
+          <div
+            onClick={() =>
+              router.push("/teachers/my-calendar/create-event")
+            }
+            className="w-auto px-4 cursor-pointer martian-mono text-xs text-primary"
+          >
+            <CreateButton loading={false} buttonText={"Create Event"} className="w-auto" />
+          </div>
+        </div>
         <div className="mb-8">
           <h2 className="text-lg font-bold mb-2 text-primary martian-mono">Upcoming Events</h2>
           <UpcomingEvents events={events} />

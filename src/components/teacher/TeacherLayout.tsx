@@ -41,6 +41,7 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
     { href: '/teachers/class-schedule', icon: HiCalendar, label: 'Class Schedule' },
     { href: '/teachers/students', icon: HiUserGroup, label: 'Students' },
     { href: '/teachers/calendar', icon: HiCalendar, label: 'Calendar' },
+    { href: '/teachers/my-calendar', icon: HiCalendar, label: 'My Calendar' },
     { href: '/teachers/settings', icon: HiCog, label: 'Settings' },
   ];
 

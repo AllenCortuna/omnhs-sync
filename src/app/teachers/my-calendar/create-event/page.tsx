@@ -5,7 +5,8 @@ import { BackButton } from "@/components/common";
 import { db } from "../../../../../firebase";
 import { addDoc, collection } from "firebase/firestore";
 import { successToast, errorToast } from "@/config/toast";
-
+import { useSaveUserData } from "@/hooks";
+import { Teacher } from "@/interface/user";
 interface FormState {
     title: string;
     description: string;
@@ -16,6 +17,9 @@ interface FormState {
 
 const CreateEventPage = () => {
     const router = useRouter();
+    const { userData, isLoading: userLoading } = useSaveUserData({
+        role: "teacher",
+    });
     const [form, setForm] = useState<FormState>({
         recipient: "",
         title: "",
@@ -36,25 +40,53 @@ const CreateEventPage = () => {
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
+        
+        if (!userData || userLoading) {
+            errorToast("User data not available. Please try again.");
+            return;
+        }
+
+        // Type guard to ensure userData is a Teacher
+        if (!("employeeId" in userData)) {
+            errorToast("Invalid user data. Please try again.");
+            return;
+        }
+
+        const teacherData = userData as Teacher;
+        
         setIsSubmitting(true);
+        console.log("teacherData ===>", teacherData);
         try {
             await addDoc(collection(db, "events"), {
-                recipient: form.recipient,
+                recipient: "students",
                 title: form.title,
-                createdBy: "admin",
+                createdBy: "teacher",
+                teacherId: teacherData.employeeId,
+                fromTeacher: teacherData.firstName + " " + teacherData.lastName,
                 description: form.description,
                 startDate: form.startDate,
                 endDate: form.endDate,
                 createdAt: new Date().toISOString(),
             });
             successToast("Event created successfully!");
-            router.push("/admin/calendar");
+            router.push("/teachers/my-calendar");
         } catch (error) {
             console.error(error);
             errorToast("Failed to create event. Please try again.");
         } finally {
             setIsSubmitting(false);
         }
+    }
+
+    if (userLoading) {
+        return (
+            <div className="min-h-screen text-zinc-600 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="loading loading-spinner loading-lg text-primary"></div>
+                    <p className="mt-4 text-sm">Loading...</p>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -77,25 +109,6 @@ const CreateEventPage = () => {
                     onSubmit={handleSubmit}
                 >
                     <div>
-                        <label className="label">
-                            <span className="text-xs font-semibold martian-mono text-primary">
-                                Recipient
-                            </span>
-                        </label>
-                        <select
-                            name="recipient"
-                            id="recipient"
-                            className="select select-bordered w-full"
-                            value={form.recipient}
-                            onChange={handleChange}
-                            required
-                            disabled={isSubmitting}
-                        >
-                            <option value="all">All</option>
-                            <option value="students">Students</option>
-                            <option value="teachers">Teachers</option>
-                        </select>
-
                         <label className="label">
                             <span className="text-xs font-semibold martian-mono text-primary">
                                 Title
@@ -164,7 +177,7 @@ const CreateEventPage = () => {
                         <button
                             type="submit"
                             className="btn btn-primary martian-mono text-xs text-white"
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || userLoading || !userData}
                         >
                             {isSubmitting ? "Creating..." : "Create Event"}
                         </button>

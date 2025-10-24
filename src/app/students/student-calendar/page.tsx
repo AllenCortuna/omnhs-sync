@@ -8,6 +8,7 @@ import { db } from "../../../../firebase";
 import { collection, getDocs, query, where, or } from "firebase/firestore";
 import { CalendarEvent } from "@/interface/calendar";
 import UpcomingEvents from '@/components/student/UpcomingEvents';
+
 interface EventModalProps {
   event: CalendarEvent | null;
   onClose: () => void;
@@ -17,21 +18,21 @@ function EventModal({ event, onClose }: EventModalProps) {
   if (!event) return null;
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-base-100 shadow-xl p-6 w-full max-w-md relative">
-        <button className="absolute top-2 right-2 btn btn-xs btn-primary text-white rounded-none martian-mono text-xs font-medium" onClick={onClose}>
-          close
+      <div className="bg-base-100 rounded-lg shadow-xl p-6 w-full max-w-md relative">
+        <button className="absolute top-2 right-2 btn btn-xs btn-circle" onClick={onClose}>
+          ✕
         </button>
-        <h2 className="text-xl font-bold text-primary martian-mono">{event.title}</h2>
-        <div className="text-xs text-zinc-500 italic mb-5">
+        <h2 className="text-xl font-bold mb-2">{event.title}</h2>
+        <div className="text-sm text-base-content/60 mb-2">
           {event.startDate} to {event.endDate}
         </div>
-        {event.description && <div className="mb-2 text-zinc-600 italic">{event.description}</div>}
+        {event.description && <div className="mb-2">{event.description}</div>}
       </div>
     </div>
   );
 }
 
-const TeachersCalendarPage = () => {
+const StudentsCalendarPage = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [modalEvent, setModalEvent] = useState<CalendarEvent | null>(null);
@@ -44,8 +45,8 @@ const TeachersCalendarPage = () => {
         eventsRef,
         or(
           where("recipient", "==", "all"),
-          where("recipient", "==", "teachers")
-
+          where("createdBy", "==", "admin"),
+          where("recipient", "==", "students")
         )
       );
       const snapshot = await getDocs(q);
@@ -73,8 +74,9 @@ const TeachersCalendarPage = () => {
   return (
     <div className="min-h-screen text-zinc-700">
       <div className="ma mx-auto">
+        <h1 className="text-2xl font-bold mb-4">School Calendar</h1>
         <div className="mb-8">
-          <h2 className="text-lg font-bold mb-2 text-primary martian-mono">Upcoming Events</h2>
+          <h2 className="text-lg font-semibold mb-2">Upcoming Events</h2>
           <UpcomingEvents events={events} />
         </div>
         <div className="calendar-contain bg-base-100 shadow-xl rounded-lg p-4">
@@ -101,4 +103,4 @@ const TeachersCalendarPage = () => {
   );
 }
 
-export default TeachersCalendarPage; 
+export default StudentsCalendarPage; 
