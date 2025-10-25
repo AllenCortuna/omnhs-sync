@@ -28,6 +28,7 @@ const config: Config = {
           "success": "#28a745",         // Success messages color
           "warning": "#ffc107",         // Warning messages color
           "error": "#dc3545",           // Error messages color
+          // Dark theme inspired by the image
         },
       },
     ],
