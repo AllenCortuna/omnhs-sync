@@ -11,7 +11,8 @@ import { db } from "../../../../firebase";
 import LoadingOverlay from "@/components/common/LoadingOverlay";
 import { FaClipboardList } from "react-icons/fa6";
 import UpdateStudentStatusModal from "@/components/teacher/UpdateStudentStatusModal";
-import { HiPencil } from "react-icons/hi";
+import { getDefaultSchoolYear } from "@/config/school";
+// import { HiPencil } from "react-icons/hi";  // No longer needed since actions column is removed
 
 const TeacherSectionsPage = () => {
   const { userData, isLoading: userLoading } = useSaveUserData({ role: "teacher" });
@@ -50,11 +51,15 @@ const TeacherSectionsPage = () => {
         }
         setSection(sectionData);
 
+        // Get current school year
+        const currentSchoolYear = getDefaultSchoolYear();
+        console.log('currentSchoolYear ===>', currentSchoolYear)
 
-        // Fetch students enrolled in this section
+        // Fetch students enrolled in this section for the current school year
         const studentsQuery = query(
           collection(db, "students"),
           where("enrolledForSectionId", "==", sectionData.id),
+          where("enrolledForSchoolYear", "==", currentSchoolYear),
           orderBy("lastName", "asc")
         );
         const studentsSnapshot = await getDocs(studentsQuery);
@@ -104,11 +109,6 @@ const TeacherSectionsPage = () => {
       console.error("Error updating student status:", error);
       throw error;
     }
-  };
-
-  const handleOpenStatusModal = (student: Student) => {
-    setSelectedStudent(student);
-    setStatusModalOpen(true);
   };
 
   const handleCloseStatusModal = () => {
@@ -214,7 +214,6 @@ const TeacherSectionsPage = () => {
                     <th className="bg-base-200 text-xs font-medium">Status</th>
                     <th className="bg-base-200 text-xs font-medium">Contact</th>
                     <th className="bg-base-200 text-xs font-medium">Enrollment</th>
-                    <th className="bg-base-200 text-xs font-medium">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -282,15 +281,7 @@ const TeacherSectionsPage = () => {
                             </div>
                           </div>
                         </td>
-                        <td>
-                          <button
-                            onClick={() => handleOpenStatusModal(student)}
-                            className="btn btn-ghost btn-xs text-primary hover:bg-primary hover:text-white"
-                            title="Update Status"
-                          >
-                            <HiPencil className="w-4 h-4" />
-                          </button>
-                        </td>
+                        {/* Actions column removed */}
                       </tr>
                     );
                   })}
