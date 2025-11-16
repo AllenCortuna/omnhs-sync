@@ -66,12 +66,19 @@ export const subjectRecordService = {
   /**
    * Get subject records by teacher ID
    */
-  async getSubjectRecordsByTeacher(teacherId: string): Promise<SubjectRecord[]> {
+  async getSubjectRecordsByTeacher(teacherId: string, schoolYear?: string): Promise<SubjectRecord[]> {
     try {
+      const conditions = [where('teacherId', '==', teacherId)];
+      
+      if (schoolYear) {
+        conditions.push(where('schoolYear', '==', schoolYear));
+      }
+      
+      // conditions.push(orderBy('createdAt', 'desc'));
+      
       const q = query(
         collection(db, COLLECTION_NAME), 
-        where('teacherId', '==', teacherId),
-        orderBy('createdAt', 'desc')
+        ...conditions
       );
       const querySnapshot = await getDocs(q);
       

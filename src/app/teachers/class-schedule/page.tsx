@@ -16,7 +16,7 @@ import {
     HiTrash,
 } from "react-icons/hi";
 import { formatDate } from "@/config/format";
-import { getSchoolYearOptions, SEMESTER_OPTIONS } from "@/config/school";
+import { getSchoolYearOptions, getDefaultSchoolYear, SEMESTER_OPTIONS } from "@/config/school";
 import Link from "next/link";
 
 const ClassSchedule: React.FC = () => {
@@ -77,9 +77,11 @@ const ClassSchedule: React.FC = () => {
             try {
                 setLoading(true);
                 const teacherData = userData as Teacher;
+                const currentSchoolYear = getDefaultSchoolYear();
                 const records =
                     await subjectRecordService.getSubjectRecordsByTeacher(
-                        teacherData.employeeId
+                        teacherData.employeeId,
+                        currentSchoolYear
                     );
                 setSubjectRecords(records);
             } catch (error) {
