@@ -28,6 +28,7 @@ import {
 import { errorToast } from "../../../config/toast";
 import { logService } from "../../../services/logService";
 import { Student } from "@/interface/user";
+import { useCurrentAdmin } from "@/hooks";
 
 /**
  * @file StudentList.tsx - Admin page for displaying list of students
@@ -55,6 +56,7 @@ import { Student } from "@/interface/user";
  */
 const StudentList: React.FC = () => {
     const router = useRouter();
+    const { admin } = useCurrentAdmin();
     // State for students data
     const [students, setStudents] = useState<Student[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -242,7 +244,8 @@ const StudentList: React.FC = () => {
                 await logService.logStudentDeleted(
                     studentToDelete.studentId,
                     `${studentToDelete.firstName} ${studentToDelete.lastName}`,
-                    'Admin'
+                    'Admin',
+                    admin?.name || 'Admin'
                 );
             }
             

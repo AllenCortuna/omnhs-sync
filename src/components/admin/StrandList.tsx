@@ -5,6 +5,7 @@ import { Strand, Section } from '../../interface/info';
 import { sectionService, CreateSectionData, UpdateSectionData } from '../../services/sectionService';
 import { logService } from '../../services/logService';
 import SectionForm from './SectionForm';
+import { useCurrentAdmin } from '@/hooks';
 
 interface StrandListProps {
   strands: Strand[];
@@ -15,6 +16,7 @@ const StrandList: React.FC<StrandListProps> = ({
   strands,
   onEditStrand
 }) => {
+  const { admin } = useCurrentAdmin();
   const [sections, setSections] = useState<{ [strandId: string]: Section[] }>({});
   const [loadingSections, setLoadingSections] = useState<Set<string>>(new Set());
   const [showSectionForm, setShowSectionForm] = useState<string | null>(null);
@@ -53,7 +55,7 @@ const StrandList: React.FC<StrandListProps> = ({
       await sectionService.createSection(data);
       
       // Log the action
-      await logService.logSectionCreated(data.sectionName, 'Admin', "Admin");
+      await logService.logSectionCreated(data.sectionName, admin?.name || 'Admin', admin?.name || 'Admin');
       
       setShowSectionForm(null);
       setEditingSection(null);
@@ -76,7 +78,7 @@ const StrandList: React.FC<StrandListProps> = ({
       await sectionService.updateSection(editingSection.id, data);
       
       // Log the action
-      await logService.logSectionUpdated(data.sectionName || editingSection.sectionName, 'Admin', "Admin");
+      await logService.logSectionUpdated(data.sectionName || editingSection.sectionName, admin?.name || 'Admin', 'Admin', admin?.name || 'Admin');
       
       setShowSectionForm(null);
       setEditingSection(null);

@@ -172,7 +172,7 @@ const Logs: React.FC = () => {
                           {log.name}
                         </h3>
                         <span className="badge badge-primary badge-sm">
-                          {log.logsBy}
+                          {log.createdBy}
                         </span>
                         <span className="text-xs text-base-content/60 italic">
                           {formatDate(log.date)}

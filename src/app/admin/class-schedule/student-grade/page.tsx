@@ -215,7 +215,8 @@ const StudentGradePage: React.FC = () => {
                         grade.studentName,
                         grade.subjectName,
                         grade.finalGrade,
-                        subjectRecord.teacherId || 'Teacher'
+                        subjectRecord.teacherId || 'Teacher',
+                        subjectRecord.teacherName || 'Teacher'
                     );
                 }
             }

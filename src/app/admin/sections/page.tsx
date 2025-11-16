@@ -9,8 +9,10 @@ import { teacherService } from "@/services/teacherService";
 import { logService } from "@/services/logService";
 import { errorToast } from "@/config/toast";
 import { FaClipboardList } from "react-icons/fa6";
+import { useCurrentAdmin } from "@/hooks";
 
 const SectionsPage = () => {
+  const { admin } = useCurrentAdmin();
   const [strands, setStrands] = useState<Strand[]>([]);
   const [sections, setSections] = useState<Section[]>([]);
   const [teachers, setTeachers] = useState<Teacher[]>([]);
@@ -108,7 +110,8 @@ const SectionsPage = () => {
         sectionToAssign.sectionName,
         teacherId,
         `${teacher.firstName} ${teacher.lastName}`,
-        'Admin'
+        'Admin',
+        admin?.name || 'Admin'
       );
     } catch (error) {
       console.error("Error assigning teacher:", error);
@@ -140,7 +143,9 @@ const SectionsPage = () => {
         await logService.logTeacherRemovedFromSection(
           sectionId,
           section.sectionName,
-          'Admin'
+          'Admin',
+          admin?.name || 'Admin'
+
         );
       }
     } catch (error) {

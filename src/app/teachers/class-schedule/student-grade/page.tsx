@@ -32,7 +32,6 @@ const StudentGradePage: React.FC = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
     const subjectRecordId = searchParams.get("subjectRecordId");
-
     const [subjectRecord, setSubjectRecord] = useState<SubjectRecord | null>(null);
     const [students, setStudents] = useState<Student[]>([]);
     const [existingGrades, setExistingGrades] = useState<StudentGrade[]>([]);
@@ -286,7 +285,8 @@ const StudentGradePage: React.FC = () => {
                         grade.studentName,
                         grade.subjectName,
                         grade.finalGrade,
-                        subjectRecord.teacherId || 'Teacher'
+                        subjectRecord.teacherId || 'Teacher',
+                        subjectRecord.teacherName || 'Teacher'
                     );
                 }
             }

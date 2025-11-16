@@ -27,6 +27,7 @@ import { MdAdd } from "react-icons/md";
 // Service imports
 import { sectionService } from "../../../services/sectionService";
 import { Section } from "../../../interface/info";
+import { useCurrentAdmin } from "@/hooks";
 
 interface TeacherFormData {
     employeeId: string;
@@ -68,6 +69,7 @@ interface TeacherFormData {
  * @returns {JSX.Element} The rendered CreateTeacher component
  */
 const CreateTeacher: React.FC = () => {
+    const { admin } = useCurrentAdmin();
     // Form data state containing teacher details and credentials
     const [formData, setFormData] = useState<TeacherFormData>({
         employeeId: "",
@@ -201,7 +203,7 @@ const CreateTeacher: React.FC = () => {
             await logService.logTeacherAdded(
                 formData.employeeId.toUpperCase(),
                 `${formData.firstName} ${formData.lastName}`,
-                'Admin'
+                admin?.name || 'Admin',
             );
 
             successToast("Teacher account created successfully!");

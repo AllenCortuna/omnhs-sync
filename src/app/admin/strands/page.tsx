@@ -6,8 +6,10 @@ import { strandService, CreateStrandData, UpdateStrandData } from '@/services/st
 import { logService } from '@/services/logService';
 import StrandList from '@/components/admin/StrandList';
 import StrandForm from '@/components/admin/StrandForm';
+import { useCurrentAdmin } from '@/hooks';
 
 const AdminStrandsPage: React.FC = () => {
+  const { admin } = useCurrentAdmin();
   const [strands, setStrands] = useState<Strand[]>([]);
   const [loading, setLoading] = useState(true);
   const [formLoading, setFormLoading] = useState(false);
@@ -41,7 +43,7 @@ const AdminStrandsPage: React.FC = () => {
       await strandService.createStrand(data);
       
       // Log the action
-      await logService.logStrandCreated(data.strandName, 'Admin');
+      await logService.logStrandCreated(data.strandName, admin?.name || 'Admin');
       
       setShowForm(false);
       setEditingStrand(null);
@@ -63,7 +65,7 @@ const AdminStrandsPage: React.FC = () => {
       await strandService.updateStrand(editingStrand.id, data);
       
       // Log the action
-      await logService.logStrandUpdated(data.strandName || editingStrand.strandName, 'Admin');
+      await logService.logStrandUpdated(data.strandName || editingStrand.strandName, admin?.name || 'Admin');
       
       setShowForm(false);
       setEditingStrand(null);

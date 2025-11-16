@@ -3,6 +3,7 @@ import { useLogsStore } from '../store/useLogStore';
 interface LogData {
   studentId: string;
   name: string;
+  createdBy?: string;
   description: string;
   logsBy: string;
 }
@@ -30,6 +31,7 @@ class LogService {
       name: 'Strand Created',
       description: `Strand "${strandName}" was created`,
       logsBy: adminName,
+      createdBy: adminName,
     });
   }
 
@@ -39,6 +41,7 @@ class LogService {
       name: 'Strand Updated',
       description: `Strand "${strandName}" was updated`,
       logsBy: adminName,
+      createdBy: adminName,
     });
   }
 
@@ -48,6 +51,7 @@ class LogService {
       name: 'Strand Deleted',
       description: `Strand "${strandName}" was deleted`,
       logsBy: adminName,
+      createdBy: adminName,
     });
   }
 
@@ -57,13 +61,15 @@ class LogService {
     studentName: string,
     subjectName: string,
     grade: number,
-    performedBy: string
+    performedBy: string,
+    createdBy: string
   ): Promise<void> {
     await this.createLog({
       studentId,
       name: 'Grade Updated',
       description: `Grade for ${studentName} in ${subjectName} was updated to ${grade}`,
       logsBy: performedBy,
+      createdBy: createdBy,
     });
   }
 
@@ -72,13 +78,15 @@ class LogService {
     studentName: string,
     subjectName: string,
     grade: number,
-    performedBy: string
+    performedBy: string,
+    createdBy: string
   ): Promise<void> {
     await this.createLog({
       studentId,
       name: 'Grade Added',
       description: `Grade for ${studentName} in ${subjectName} was added: ${grade}`,
       logsBy: performedBy,
+      createdBy: createdBy,
     });
   }
 
@@ -93,6 +101,7 @@ class LogService {
       name: 'Enrollment Approved',
       description: `Enrollment for ${studentName} was approved`,
       logsBy: performedBy,
+      createdBy: performedBy,
     });
   }
 
@@ -106,6 +115,7 @@ class LogService {
       name: 'Enrollment Rejected',
       description: `Enrollment for ${studentName} was rejected`,
       logsBy: performedBy,
+      createdBy: performedBy,
     });
   }
 
@@ -120,6 +130,7 @@ class LogService {
       name: 'Student Added',
       description: `Student ${studentName} was added to the system`,
       logsBy: performedBy,
+      createdBy: performedBy,
     });
   }
 
@@ -133,99 +144,111 @@ class LogService {
       name: 'Student Updated',
       description: `Student ${studentName} information was updated`,
       logsBy: performedBy,
+      createdBy: performedBy,
     });
   }
 
   async logStudentDeleted(
     studentId: string,
     studentName: string,
-    performedBy: string
+    performedBy: string,
+    createdBy: string
   ): Promise<void> {
     await this.createLog({
       studentId,
       name: 'Student Deleted',
       description: `Student ${studentName} was deleted from the system`,
       logsBy: performedBy,
+      createdBy: createdBy,
     });
   }
 
   // Teacher management logs
   async logTeacherAdded(
-    teacherId: string,
     teacherName: string,
-    performedBy: string
+    performedBy: string,
+    createdBy: string
   ): Promise<void> {
     await this.createLog({
       studentId: 'SYSTEM',
       name: 'Teacher Added',
       description: `Teacher ${teacherName} was added to the system`,
       logsBy: performedBy,
+      createdBy: createdBy,
     });
   }
 
   async logTeacherUpdated(
-    teacherId: string,
     teacherName: string,
-    performedBy: string
+    performedBy: string,
+    createdBy: string
   ): Promise<void> {
     await this.createLog({
       studentId: 'SYSTEM',
       name: 'Teacher Updated',
       description: `Teacher ${teacherName} information was updated`,
       logsBy: performedBy,
+      createdBy: createdBy,
     });
   }
 
   async logTeacherDeleted(
     teacherId: string,
     teacherName: string,
-    performedBy: string
+    performedBy: string,
+    createdBy: string
   ): Promise<void> {
     await this.createLog({
       studentId: 'SYSTEM',
       name: 'Teacher Deleted',
       description: `Teacher ${teacherName} was deleted from the system`,
       logsBy: performedBy,
+      createdBy: createdBy,
     });
   }
 
   // Section logs
   async logSectionCreated(
-    sectionId: string,
     sectionName: string,
-    performedBy: string
+    performedBy: string,
+    createdBy: string
   ): Promise<void> {
     await this.createLog({
       studentId: 'SYSTEM',
       name: 'Section Created',
       description: `Section "${sectionName}" was created`,
       logsBy: performedBy,
+      createdBy: createdBy,
     });
   }
 
   async logSectionUpdated(
     sectionId: string,
     sectionName: string,
-    performedBy: string
+    performedBy: string,
+    createdBy: string
   ): Promise<void> {
     await this.createLog({
       studentId: 'SYSTEM',
       name: 'Section Updated',
       description: `Section "${sectionName}" information was updated`,
       logsBy: performedBy,
-    });
+      createdBy: createdBy,
+      });
   }
 
   async logSectionDeleted(
     sectionId: string,
     sectionName: string,
-    performedBy: string
+    performedBy: string,
+    createdBy: string
   ): Promise<void> {
     await this.createLog({
       studentId: 'SYSTEM',
       name: 'Section Deleted',
       description: `Section "${sectionName}" was deleted from the system`,
       logsBy: performedBy,
+      createdBy: createdBy,
     });
   }
 
@@ -234,26 +257,30 @@ class LogService {
     sectionName: string,
     teacherId: string,
     teacherName: string,
-    performedBy: string
+    performedBy: string,
+    createdBy: string
   ): Promise<void> {
     await this.createLog({
       studentId: 'SYSTEM',
       name: 'Teacher Assigned to Section',
       description: `Teacher ${teacherName} was assigned to section "${sectionName}"`,
       logsBy: performedBy,
+      createdBy: createdBy
     });
   }
 
   async logTeacherRemovedFromSection(
     sectionId: string,
     sectionName: string,
-    performedBy: string
+    performedBy: string,
+    createdBy: string
   ): Promise<void> {
     await this.createLog({
       studentId: 'SYSTEM',
       name: 'Teacher Removed from Section',
       description: `Teacher was removed from section "${sectionName}"`,
       logsBy: performedBy,
+      createdBy: createdBy
     });
   }
 
@@ -261,13 +288,15 @@ class LogService {
   async logSystemAction(
     action: string,
     description: string,
-    performedBy: string
+    performedBy: string,
+    createdBy: string
   ): Promise<void> {
     await this.createLog({
       studentId: 'SYSTEM',
       name: action,
       description,
       logsBy: performedBy,
+      createdBy: createdBy,
     });
   }
 }
