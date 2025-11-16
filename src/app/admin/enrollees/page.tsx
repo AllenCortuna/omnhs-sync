@@ -5,7 +5,7 @@ import { db } from "../../../../firebase";
 import { Enrollment } from "@/interface/info";
 import { formatDate } from "@/config/format";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
-import { MdMoreHoriz, MdPerson } from "react-icons/md";
+import { MdPerson } from "react-icons/md";
 import ApproveEnrollmentModal from "@/components/admin/ApproveEnrollmentModal";
 import { doc, updateDoc } from "firebase/firestore";
 import { strandService } from "@/services/strandService";
@@ -32,6 +32,8 @@ const EnrolleeListPage = () => {
   const [viewEnrollment, setViewEnrollment] = useState<Enrollment | null>(null);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
   const [rejectEnrollment, setRejectEnrollment] = useState<Enrollment | null>(null);
+  const [openActionsMenu, setOpenActionsMenu] = useState<string | null>(null);
+  const [actionsMenuPosition, setActionsMenuPosition] = useState<{ x: number; y: number } | null>(null);
   const { notifyEnrollmentStatus } = useNotifyEnrollmentStatus();
 
   useEffect(() => {
@@ -189,14 +191,21 @@ const EnrolleeListPage = () => {
                         <th className="bg-base-200 text-xs">Semester/Year</th>
                         <th className="bg-base-200 text-xs">Status</th>
                         <th className="bg-base-200 text-xs">Submitted</th>
-                        <th className="bg-base-200 text-xs">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="text-xs">
                       {paginated.map(enrollment => {
                         const strand = strands.find(s => s.id === enrollment.strandId);
                         return (
-                          <tr key={enrollment.id} className="hover">
+                          <tr 
+                            key={enrollment.id} 
+                            className="hover cursor-pointer"
+                            onDoubleClick={(e) => {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setActionsMenuPosition({ x: rect.right - 150, y: rect.bottom });
+                              setOpenActionsMenu(enrollment.id);
+                            }}
+                          >
                             <td>
                               <div className="flex items-center gap-2">
                                 <div>
@@ -238,45 +247,6 @@ const EnrolleeListPage = () => {
                                 {formatDate(enrollment.createdAt)}
                               </span>
                             </td>
-                            <td>
-                              <div className="text-xs text-base-content/60">
-                                <div className="dropdown dropdown-end">
-                                  <button tabIndex={0} className="btn btn-ghost btn-xs">
-                                    <span className="text-lg"><MdMoreHoriz/></span>
-                                  </button>
-                                  <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-32 border border-base-300" style={{zIndex: 9999, position: 'fixed', marginRight: '40px'}}>
-                                    <li>
-                                      <button
-                                        className="text-primary hover:bg-base-200"
-                                        onClick={() => { setViewEnrollment(enrollment); setViewModalOpen(true); }}
-                                      >
-                                        View
-                                      </button>
-                                    </li>
-                                    {enrollment.status === "pending" && (
-                                      <>
-                                        <li>
-                                          <button
-                                            className="text-error hover:bg-base-200"
-                                            onClick={() => { setRejectEnrollment(enrollment); setRejectModalOpen(true); }}
-                                          >
-                                            Reject
-                                          </button>
-                                        </li>
-                                        <li>
-                                          <button
-                                            className="text-success hover:bg-base-200"
-                                            onClick={() => { setSelectedEnrollment(enrollment); setModalOpen(true); }}
-                                          >
-                                            Approve
-                                          </button>
-                                        </li>
-                                      </>
-                                    )}
-                                  </ul>
-                                </div>
-                              </div>
-                            </td>
                           </tr>
                         );
                       })}
@@ -287,6 +257,77 @@ const EnrolleeListPage = () => {
             )}
           </div>
         </div>
+      )}
+      {/* Actions Menu - appears on double click */}
+      {openActionsMenu && actionsMenuPosition && (
+        <>
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => {
+              setOpenActionsMenu(null);
+              setActionsMenuPosition(null);
+            }}
+          />
+          <ul 
+            className="fixed z-50 menu p-2 shadow-lg bg-base-100 rounded-box w-32 border border-base-300"
+            style={{
+              left: `${actionsMenuPosition.x}px`,
+              top: `${actionsMenuPosition.y}px`,
+            }}
+          >
+            {(() => {
+              const enrollment = paginated.find(e => e.id === openActionsMenu);
+              if (!enrollment) return null;
+              return (
+                <>
+                  <li>
+                    <button
+                      className="text-primary hover:bg-base-200"
+                      onClick={() => { 
+                        setViewEnrollment(enrollment); 
+                        setViewModalOpen(true);
+                        setOpenActionsMenu(null);
+                        setActionsMenuPosition(null);
+                      }}
+                    >
+                      View
+                    </button>
+                  </li>
+                  {enrollment.status === "pending" && (
+                    <>
+                      <li>
+                        <button
+                          className="text-error hover:bg-base-200"
+                          onClick={() => { 
+                            setRejectEnrollment(enrollment); 
+                            setRejectModalOpen(true);
+                            setOpenActionsMenu(null);
+                            setActionsMenuPosition(null);
+                          }}
+                        >
+                          Reject
+                        </button>
+                      </li>
+                      <li>
+                        <button
+                          className="text-success hover:bg-base-200"
+                          onClick={() => { 
+                            setSelectedEnrollment(enrollment); 
+                            setModalOpen(true);
+                            setOpenActionsMenu(null);
+                            setActionsMenuPosition(null);
+                          }}
+                        >
+                          Approve
+                        </button>
+                      </li>
+                    </>
+                  )}
+                </>
+              );
+            })()}
+          </ul>
+        </>
       )}
       {/* Pagination Controls */}
       {totalPages > 1 && (

@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { HiAcademicCap, HiUsers, HiClipboardList, HiPlus, HiPencil, HiArrowRight, HiUserGroup } from 'react-icons/hi';
+import { HiAcademicCap, HiUsers, HiClipboardList, HiPlus, HiPencil, HiArrowRight, HiUserGroup, HiArrowCircleDown, HiArrowCircleUp } from 'react-icons/hi';
 import { Strand, Section } from '../../../interface/info';
 import { strandService } from '../../../services/strandService';
 import { sectionService } from '../../../services/sectionService';
@@ -14,6 +14,8 @@ const AdminDashboard = () => {
   const [sections, setSections] = useState<Section[]>([]);
   const [teacherCount, setTeacherCount] = useState<number>(0);
   const [studentCount, setStudentCount] = useState<number>(0);
+  const [transferInCount, setTransferInCount] = useState<number>(0);
+  const [transferOutCount, setTransferOutCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,17 +28,21 @@ const AdminDashboard = () => {
       setLoading(true);
       setError(null);
       
-      const [fetchedStrands, fetchedSections, fetchedTeacherCount, fetchedStudentCount] = await Promise.all([
+      const [fetchedStrands, fetchedSections, fetchedTeacherCount, fetchedStudentCount, fetchedTransferInCount, fetchedTransferOutCount] = await Promise.all([
         strandService.getAllStrands(),
         sectionService.getAllSections(),
         teacherService.getTeacherCount(),
-        studentService.getStudentCount()
+        studentService.getStudentCount(),
+        studentService.getStudentCountByStatus('transfer-in'),
+        studentService.getStudentCountByStatus('transfer-out')
       ]);
       
       setStrands(fetchedStrands);
       setSections(fetchedSections);
       setTeacherCount(fetchedTeacherCount);
       setStudentCount(fetchedStudentCount);
+      setTransferInCount(fetchedTransferInCount);
+      setTransferOutCount(fetchedTransferOutCount);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError('Failed to load dashboard data. Please try again.');
@@ -136,6 +142,26 @@ const AdminDashboard = () => {
               sections.some(section => section.strandId === strand.id)
             ).length}
           </div>
+        </div>
+
+        <div className="stat">
+          <div className="stat-figure text-success">
+            <div className="w-10 h-10 bg-success/20 rounded-xl flex items-center justify-center">
+              <HiArrowCircleDown className="w-6 h-6 text-success" />
+            </div>
+          </div>
+          <div className="stat-title text-xs italic text-zinc-500">Transferred In</div>
+          <div className="stat-value text-success text-2xl martian-mono">{transferInCount}</div>
+        </div>
+
+        <div className="stat">
+          <div className="stat-figure text-warning">
+            <div className="w-10 h-10 bg-warning/20 rounded-xl flex items-center justify-center">
+              <HiArrowCircleUp className="w-6 h-6 text-warning" />
+            </div>
+          </div>
+          <div className="stat-title text-xs italic text-zinc-500">Transferred Out</div>
+          <div className="stat-value text-warning text-2xl martian-mono">{transferOutCount}</div>
         </div>
       </div>
 
@@ -359,6 +385,16 @@ const AdminDashboard = () => {
           <div className="stat">
             <div className="stat-title text-xs italic text-zinc-500">Total Students</div>
             <div className="stat-value text-secondary text-xl martian-mono">{studentCount}</div>
+          </div>
+
+          <div className="stat">
+            <div className="stat-title text-xs italic text-zinc-500">Transferred In</div>
+            <div className="stat-value text-success text-xl martian-mono">{transferInCount}</div>
+          </div>
+
+          <div className="stat">
+            <div className="stat-title text-xs italic text-zinc-500">Transferred Out</div>
+            <div className="stat-value text-warning text-xl martian-mono">{transferOutCount}</div>
           </div>
         </div>
       </div>

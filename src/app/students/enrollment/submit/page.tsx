@@ -10,7 +10,7 @@ import { successToast, errorToast } from "@/config/toast";
 import type { Enrollment } from "@/interface/info";
 import { useStudentByEmail } from "@/hooks/useStudentByEmail";
 import { useRouter } from "next/navigation";
-import { getSchoolYearOptions, SEMESTER_OPTIONS } from "@/config/school";
+import { getDefaultSchoolYear, SEMESTER_OPTIONS } from "@/config/school";
 
 function getFileExtension(filename: string): string {
     return filename.split(".").pop() || "";
@@ -123,6 +123,13 @@ const StudentEnrollment: React.FC = () => {
                 console.error('Error fetching strands:', error);
                 setStrands([]);
             });
+        
+        // Auto-select school year based on current date
+        const defaultSchoolYear = getDefaultSchoolYear();
+        setForm((prev) => ({
+            ...prev,
+            schoolYear: defaultSchoolYear,
+        }));
     }, []);
 
     function handleChange(
@@ -323,6 +330,15 @@ const StudentEnrollment: React.FC = () => {
                     placeholder="Student ID"
                     disabled={true}
                 />
+                <FormInput
+                    id="schoolYear"
+                    name="schoolYear"
+                    type="text"
+                    value={form.schoolYear || ""}
+                    onChange={() => {}}
+                    placeholder="School Year"
+                    disabled={true}
+                />
                 <FormSelect
                     id="strandId"
                     name="strandId"
@@ -346,16 +362,7 @@ const StudentEnrollment: React.FC = () => {
                     required
                     disabled={loading}
                 />
-                <FormSelect
-                    id="schoolYear"
-                    name="schoolYear"
-                    value={form.schoolYear || ""}
-                    onChange={handleChange}
-                    options={getSchoolYearOptions()}
-                    placeholder="Select School Year"
-                    required
-                    disabled={loading}
-                />
+
                 <FormSelect
                     id="semester"
                     name="semester"
