@@ -258,7 +258,8 @@ const ClassSchedule: React.FC = () => {
                         <thead>
                             <tr>
                                 <th className="text-primary font-bold hidden sm:table-cell">Subject</th>
-                                <th className="text-primary font-bold">Section/Grade Level</th>
+                                <th className="text-primary font-bold">Section</th>
+                                <th className="text-primary font-bold hidden md:table-cell">Grade Level</th>
                                 <th className="text-primary font-bold hidden lg:table-cell">Semester</th>
                                 <th className="text-primary font-bold hidden lg:table-cell">School Year</th>
                                 <th className="text-primary font-bold">Students</th>
@@ -280,6 +281,11 @@ const ClassSchedule: React.FC = () => {
                                         </div>
                                         <div className="text-xs text-gray-500 sm:hidden">
                                             {record.subjectName}
+                                        </div>
+                                    </td>
+                                    <td className="hidden md:table-cell">
+                                        <div className="font-medium text-xs text-zinc-600">
+                                            {record.gradeLevel}
                                         </div>
                                     </td>
                                     <td className="hidden lg:table-cell">
