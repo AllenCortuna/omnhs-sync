@@ -20,6 +20,7 @@ interface Log {
   studentId: string;
   date: string;
   name: string;
+  createdBy?: string;
   description: string;
   logsBy: string;
 }

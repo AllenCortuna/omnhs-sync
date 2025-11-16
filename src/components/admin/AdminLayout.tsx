@@ -1,11 +1,12 @@
 "use client"
-import React, { ReactNode, useState, useEffect } from 'react';
+import React, { ReactNode, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
-import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX, HiCog, HiCalendar, HiArchive } from 'react-icons/hi';
+import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX, HiCog, HiCalendar, HiArchive, HiUser } from 'react-icons/hi';
 import { auth } from '../../../firebase';
 import { usePendingEnrollmentCount } from "@/hooks/usePendingEnrollmentCount";
+import { useCurrentAdmin } from "@/hooks/useCurrentAdmin";
 import { FaClipboard, FaUserGroup } from "react-icons/fa6";
 
 
@@ -39,18 +40,32 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { count: pendingCount, loading: pendingLoading } = usePendingEnrollmentCount();
-  const primaryNavItems: NavigationItemProps[] = [
-    { href: '/admin/dashboard', icon: HiHome, label: 'Dashboard' },
-    { href: '/admin/student-list', icon: HiAcademicCap, label: 'Student List' },
-    { href: '/admin/class-schedule', icon: HiCalendar, label: 'Class Schedule' },
-    { href: '/admin/teacher-list', icon: HiUserGroup, label: 'Teacher List' },
-    { href: '/admin/calendar', icon: HiCalendar, label: 'Calendar' },
-    { href: '/admin/enrollees', icon: HiUserAdd, label: 'Enrollee', showNotification: true, notificationCount: pendingCount, loading: pendingLoading },
-    { href: '/admin/records', icon: HiArchive, label: 'Records' },
-    { href: '/admin/strands', icon: FaUserGroup, label: 'Strands' },
-    { href: '/admin/sections', icon: FaClipboard, label: 'Sections' },
-    { href: '/admin/settings', icon: HiCog, label: 'Settings' },
-  ];
+  const { admin, loading: adminLoading } = useCurrentAdmin();
+  
+  // Filter navigation items based on admin role
+  const filteredNavItems = useMemo(() => {
+    const primaryNavItems: NavigationItemProps[] = [
+      { href: '/admin/dashboard', icon: HiHome, label: 'Dashboard' },
+      { href: '/admin/student-list', icon: HiAcademicCap, label: 'Student List' },
+      { href: '/admin/class-schedule', icon: HiCalendar, label: 'Class Schedule' },
+      { href: '/admin/teacher-list', icon: HiUserGroup, label: 'Teacher List' },
+      { href: '/admin/calendar', icon: HiCalendar, label: 'Calendar' },
+      { href: '/admin/enrollees', icon: HiUserAdd, label: 'Enrollee', showNotification: true, notificationCount: pendingCount, loading: pendingLoading },
+      { href: '/admin/records', icon: HiArchive, label: 'Records' },
+      { href: '/admin/strands', icon: FaUserGroup, label: 'Strands' },
+      { href: '/admin/sections', icon: FaClipboard, label: 'Sections' },
+      { href: '/admin/account', icon: HiUser, label: 'Account' },
+      { href: '/admin/settings', icon: HiCog, label: 'Settings' },
+    ];
+
+    return primaryNavItems.filter(item => {
+      // Hide Account menu if admin role is not "admin"
+      if (item.href === '/admin/account') {
+        return admin?.role === 'admin';
+      }
+      return true;
+    });
+  }, [admin?.role, pendingCount, pendingLoading]);
 
   // Close mobile menu when screen size changes to desktop
   useEffect(() => {
@@ -146,6 +161,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
             <div>
               <h2 className="text-xl font-bold text-primary martian-mono">OMNHSYNC</h2>
               <p className="text-primary text-sm">Dashboard</p>
+              {admin && !adminLoading && (
+                <p className="text-primary text-xs mt-1 opacity-75">{admin.name || admin.email}</p>
+              )}
             </div>
           </div>
         </div>
@@ -153,7 +171,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
         {/* Navigation Menu */}
         <div className="flex-1 overflow-y-auto p-4 text-white">
           <ul className="menu p-0 w-full space-y-2">
-            {primaryNavItems.map((item) => (
+            {filteredNavItems.map((item) => (
               <NavigationItem key={item.href} {...item} />
             ))}
           </ul>

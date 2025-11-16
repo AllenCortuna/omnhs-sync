@@ -3,8 +3,10 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { HiDocumentText, HiSearch, HiTrash } from 'react-icons/hi';
 import { useLogsStore } from '../../store/useLogStore';
 import { formatDate } from '../../config/format';
+import { useCurrentAdmin } from '@/hooks';
 
 const Logs: React.FC = () => {
+  const { admin } = useCurrentAdmin();
   const { logs, loadingLogs, hasMore, fetchLogsByAdmin, deleteLog, resetPagination } = useLogsStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -181,6 +183,7 @@ const Logs: React.FC = () => {
                       </p>
   
                     </div>
+                    {admin?.role === 'admin' && (
                     <button
                       onClick={() => handleDeleteLog(log.id)}
                       className="btn btn-ghost btn-xs text-error hover:bg-error/10"
@@ -188,6 +191,7 @@ const Logs: React.FC = () => {
                     >
                       <HiTrash className="w-4 h-4" />
                     </button>
+                    )}
                   </div>
                 </div>
               </div>
