@@ -13,6 +13,7 @@ import {
     HiUserGroup,
     HiX,
     HiPencil,
+    HiExclamation,
 } from "react-icons/hi";
 import Link from "next/link";
 import { IoSave } from "react-icons/io5";
@@ -38,6 +39,7 @@ const StudentGradePage: React.FC = () => {
     const [gradeForms, setGradeForms] = useState<GradeFormData[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
     // const [editingStudentId, setEditingStudentId] = useState<string | null>(null);
 
     // Fetch subject record and students
@@ -116,8 +118,36 @@ const StudentGradePage: React.FC = () => {
         return "";
     };
 
-    // Handle grade input changes
+    // Check if a field is submitted (has a value in existingGrades)
+    const isFieldSubmitted = (studentId: string, field: 'firstQuarterGrade' | 'secondQuarterGrade' | 'remarks'): boolean => {
+        const existingGrade = existingGrades.find(g => g.studentId === studentId);
+        if (!existingGrade) return false;
+        
+        if (field === 'firstQuarterGrade') {
+            return existingGrade.firstQuarterGrade > 0;
+        }
+        if (field === 'secondQuarterGrade') {
+            return existingGrade.secondQuarterGrade > 0;
+        }
+        if (field === 'remarks') {
+            return existingGrade.remarks !== "";
+        }
+        return false;
+    };
+
+    // Handle grade input changes - only allow editing empty fields
     const handleGradeChange = (studentId: string, field: keyof GradeFormData, value: string | number) => {
+        // Prevent editing submitted fields
+        if (field === 'firstQuarterGrade' && isFieldSubmitted(studentId, 'firstQuarterGrade')) {
+            return;
+        }
+        if (field === 'secondQuarterGrade' && isFieldSubmitted(studentId, 'secondQuarterGrade')) {
+            return;
+        }
+        if (field === 'remarks' && isFieldSubmitted(studentId, 'remarks')) {
+            return;
+        }
+        
         setGradeForms(prev => prev.map(form => {
             if (form.studentId === studentId) {
                 const updatedForm = { ...form, [field]: value };
@@ -161,8 +191,8 @@ const StudentGradePage: React.FC = () => {
         }
     };
 
-    // Handle save grades
-    const handleSaveGrades = async () => {
+    // Handle save grades - show confirmation modal first
+    const handleSaveClick = () => {
         if (!subjectRecord) return;
 
         // Validate all grades
@@ -177,39 +207,80 @@ const StudentGradePage: React.FC = () => {
             return;
         }
 
+        // Check if there are any new grades to save
+        const hasNewGrades = gradeForms.some(form => {
+            const existingGrade = existingGrades.find(g => g.studentId === form.studentId);
+            const hasNewFirstQuarter = form.firstQuarterGrade !== "" && (!existingGrade || existingGrade.firstQuarterGrade === 0);
+            const hasNewSecondQuarter = form.secondQuarterGrade !== "" && (!existingGrade || existingGrade.secondQuarterGrade === 0);
+            const hasNewRemarks = form.remarks !== "" && (!existingGrade || existingGrade.remarks === "");
+            return hasNewFirstQuarter || hasNewSecondQuarter || hasNewRemarks;
+        });
+
+        if (!hasNewGrades) {
+            errorToast("No new grades to save");
+            return;
+        }
+
+        setShowConfirmModal(true);
+    };
+
+    // Handle confirmed save
+    const handleSaveGrades = async () => {
+        if (!subjectRecord) return;
+
+        setShowConfirmModal(false);
+
         try {
             setSaving(true);
 
-            // Convert grade forms to StudentGrade objects
+            // Merge existing grades with new grades (only update empty fields)
             const updatedGrades: StudentGrade[] = gradeForms
                 .filter(form => form.firstQuarterGrade !== "" || form.secondQuarterGrade !== "")
-                .map(form => ({
-                    id: existingGrades.find(g => g.studentId === form.studentId)?.id || `grade_${form.studentId}`,
-                    studentId: form.studentId,
-                    studentName: form.studentName,
-                    firstQuarterGrade: Number(form.firstQuarterGrade) || 0,
-                    secondQuarterGrade: Number(form.secondQuarterGrade) || 0,
-                    finalGrade: Number(form.finalGrade) || 0,
-                    rating: form.rating,
-                    remarks: form.remarks,
-                    subjectRecordId: subjectRecord.id,
-                    subjectName: subjectRecord.subjectName,
-                    gradeLevel: subjectRecord.gradeLevel,
-                    semester: subjectRecord.semester,
-                    schoolYear: subjectRecord.schoolYear,
-                    teacherId: subjectRecord.teacherId,
-                    teacherName: subjectRecord.teacherName,
-                    createdAt: new Date().toISOString(),
-                }));
+                .map(form => {
+                    const existingGrade = existingGrades.find(g => g.studentId === form.studentId);
+                    
+                    // Use existing values if they exist, otherwise use new values
+                    return {
+                        id: existingGrade?.id || `grade_${form.studentId}`,
+                        studentId: form.studentId,
+                        studentName: form.studentName,
+                        firstQuarterGrade: existingGrade && existingGrade.firstQuarterGrade > 0 
+                            ? existingGrade.firstQuarterGrade 
+                            : (Number(form.firstQuarterGrade) || 0),
+                        secondQuarterGrade: existingGrade && existingGrade.secondQuarterGrade > 0 
+                            ? existingGrade.secondQuarterGrade 
+                            : (Number(form.secondQuarterGrade) || 0),
+                        finalGrade: existingGrade && existingGrade.finalGrade > 0
+                            ? existingGrade.finalGrade
+                            : (Number(form.finalGrade) || 0),
+                        rating: existingGrade && existingGrade.rating
+                            ? existingGrade.rating
+                            : form.rating,
+                        remarks: existingGrade && existingGrade.remarks !== ""
+                            ? existingGrade.remarks
+                            : form.remarks,
+                        subjectRecordId: subjectRecord.id,
+                        subjectName: subjectRecord.subjectName,
+                        gradeLevel: subjectRecord.gradeLevel,
+                        semester: subjectRecord.semester,
+                        schoolYear: subjectRecord.schoolYear,
+                        teacherId: subjectRecord.teacherId,
+                        teacherName: subjectRecord.teacherName,
+                        createdAt: existingGrade?.createdAt || new Date().toISOString(),
+                    };
+                });
 
-            // Update subject record with new grades
+            // Update subject record with merged grades
             await subjectRecordService.updateSubjectRecord(subjectRecord.id, {
                 studentGrades: updatedGrades
             });
 
-            // Log grade updates for each student
+            // Log grade updates for new grades only
             for (const grade of updatedGrades) {
-                if (grade.finalGrade > 0) {
+                const existingGrade = existingGrades.find(g => g.studentId === grade.studentId);
+                const isNewGrade = !existingGrade || existingGrade.finalGrade === 0;
+                
+                if (grade.finalGrade > 0 && isNewGrade) {
                     await logService.logGradeUpdated(
                         grade.studentId,
                         grade.studentName,
@@ -226,6 +297,21 @@ const StudentGradePage: React.FC = () => {
                 studentGrades: updatedGrades
             } : null);
             setExistingGrades(updatedGrades);
+
+            // Refresh grade forms to reflect read-only state
+            const refreshedGradeForms: GradeFormData[] = students.map(student => {
+                const updatedGrade = updatedGrades.find(g => g.studentId === student.studentId);
+                return {
+                    studentId: student.studentId,
+                    studentName: `${student.lastName || ""}, ${student.firstName || ""}`.trim(),
+                    firstQuarterGrade: updatedGrade?.firstQuarterGrade || "",
+                    secondQuarterGrade: updatedGrade?.secondQuarterGrade || "",
+                    finalGrade: updatedGrade?.finalGrade || "",
+                    rating: updatedGrade?.rating || "",
+                    remarks: updatedGrade?.remarks || "",
+                };
+            });
+            setGradeForms(refreshedGradeForms);
 
             successToast("Grades saved successfully!");
         } catch (error) {
@@ -325,7 +411,7 @@ const StudentGradePage: React.FC = () => {
                     <div className="card-body">
                         <div className="flex justify-between items-center mb-6">
                             <button
-                                onClick={handleSaveGrades}
+                                onClick={handleSaveClick}
                                 disabled={saving}
                                 className="btn btn-primary gap-2 text-white text-xs martian-mono font-medium rounded-none"
                             >
@@ -366,26 +452,38 @@ const StudentGradePage: React.FC = () => {
                                                 {form.studentId}
                                             </td>
                                             <td>
-                                                <input
-                                                    type="number"
-                                                    min="75"
-                                                    max="100"
-                                                    className={`input input-bordered rounded-none text-xs martian-mono input-sm w-20 ${getGradeColor(form.firstQuarterGrade)}`}
-                                                    value={form.firstQuarterGrade}
-                                                    onChange={(e) => handleGradeChange(form.studentId, 'firstQuarterGrade', e.target.value)}
-                                                    placeholder="Grade"
-                                                />
+                                                {isFieldSubmitted(form.studentId, 'firstQuarterGrade') ? (
+                                                    <span className={`font-bold ${getGradeColor(form.firstQuarterGrade)}`}>
+                                                        {form.firstQuarterGrade || "—"}
+                                                    </span>
+                                                ) : (
+                                                    <input
+                                                        type="number"
+                                                        min="75"
+                                                        max="100"
+                                                        className={`input input-bordered rounded-none text-xs martian-mono input-sm w-20 ${getGradeColor(form.firstQuarterGrade)}`}
+                                                        value={form.firstQuarterGrade}
+                                                        onChange={(e) => handleGradeChange(form.studentId, 'firstQuarterGrade', e.target.value)}
+                                                        placeholder="Grade"
+                                                    />
+                                                )}
                                             </td>
                                             <td>
-                                                <input
-                                                    type="number"
-                                                    min="75"
-                                                    max="100"
-                                                    className={`input input-bordered rounded-none text-xs martian-mono input-sm w-20 ${getGradeColor(form.secondQuarterGrade)}`}
-                                                    value={form.secondQuarterGrade}
-                                                    onChange={(e) => handleGradeChange(form.studentId, 'secondQuarterGrade', e.target.value)}
-                                                    placeholder="Grade"
-                                                />
+                                                {isFieldSubmitted(form.studentId, 'secondQuarterGrade') ? (
+                                                    <span className={`font-bold ${getGradeColor(form.secondQuarterGrade)}`}>
+                                                        {form.secondQuarterGrade || "—"}
+                                                    </span>
+                                                ) : (
+                                                    <input
+                                                        type="number"
+                                                        min="75"
+                                                        max="100"
+                                                        className={`input input-bordered rounded-none text-xs martian-mono input-sm w-20 ${getGradeColor(form.secondQuarterGrade)}`}
+                                                        value={form.secondQuarterGrade}
+                                                        onChange={(e) => handleGradeChange(form.studentId, 'secondQuarterGrade', e.target.value)}
+                                                        placeholder="Grade"
+                                                    />
+                                                )}
                                             </td>
                                             <td>
                                                 <span className={`font-bold ${getGradeColor(form.finalGrade)}`}>
@@ -398,13 +496,19 @@ const StudentGradePage: React.FC = () => {
                                                 </span>
                                             </td>
                                             <td>
-                                                <input
-                                                    type="text"
-                                                    className="input input-bordered rounded-none text-xs martian-mono input-sm w-32"
-                                                    value={form.remarks}
-                                                    onChange={(e) => handleGradeChange(form.studentId, 'remarks', e.target.value)}
-                                                    placeholder="Remarks"
-                                                />
+                                                {isFieldSubmitted(form.studentId, 'remarks') ? (
+                                                    <span className="text-xs text-base-content/80">
+                                                        {form.remarks || "—"}
+                                                    </span>
+                                                ) : (
+                                                    <input
+                                                        type="text"
+                                                        className="input input-bordered rounded-none text-xs martian-mono input-sm w-32"
+                                                        value={form.remarks}
+                                                        onChange={(e) => handleGradeChange(form.studentId, 'remarks', e.target.value)}
+                                                        placeholder="Remarks"
+                                                    />
+                                                )}
                                             </td>
                                         </tr>
                                     ))}
@@ -422,11 +526,59 @@ const StudentGradePage: React.FC = () => {
                                 <li className="ml-4">  - &quot;With High Honors&quot;: 95-97%</li>
                                 <li className="ml-4">  - &quot;With Honors&quot;: 90-94%</li>
                                 <li>• Leave fields empty if grades are not yet available</li>
-                                <li>• Click &quot;Save All Grades&quot; to update the grade records</li>
+                                <li>• <strong>Once submitted, grades cannot be edited</strong> - only empty fields can be filled</li>
+                                <li>• Click &quot;Save All Grades&quot; to submit the grade records</li>
                             </ul>
                         </div>
                     </div>
                 </div>
+            )}
+
+            {/* Confirmation Modal */}
+            {showConfirmModal && (
+                <>
+                    <div 
+                        className="fixed inset-0 bg-black bg-opacity-50 z-50"
+                        onClick={() => setShowConfirmModal(false)}
+                    />
+                    <div className="fixed inset-0 flex items-center justify-center z-50 p-4">
+                        <div className="modal-box max-w-md">
+                            <div className="flex items-center gap-3 mb-4">
+                                <HiExclamation className="w-6 h-6 text-warning" />
+                                <h3 className="font-bold text-lg text-primary martian-mono">
+                                    Confirm Grade Submission
+                                </h3>
+                            </div>
+                            <p className="text-sm text-base-content/80 mb-6">
+                                Are you sure you want to submit these grades? Once submitted, 
+                                grades with values cannot be edited. Only empty fields can be 
+                                filled in future submissions.
+                            </p>
+                            <div className="modal-action">
+                                <button
+                                    className="btn btn-outline btn-sm"
+                                    onClick={() => setShowConfirmModal(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    className="btn btn-primary btn-sm text-white"
+                                    onClick={handleSaveGrades}
+                                    disabled={saving}
+                                >
+                                    {saving ? (
+                                        <>
+                                            <span className="loading loading-spinner loading-sm"></span>
+                                            Submitting...
+                                        </>
+                                    ) : (
+                                        "Confirm & Submit"
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </>
             )}
         </div>
     );

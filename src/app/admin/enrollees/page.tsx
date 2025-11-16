@@ -9,11 +9,15 @@ import { MdPerson } from "react-icons/md";
 import ApproveEnrollmentModal from "@/components/admin/ApproveEnrollmentModal";
 import { doc, updateDoc } from "firebase/firestore";
 import { strandService } from "@/services/strandService";
-import type { Strand } from "@/interface/info";
+import { sectionService } from "@/services/sectionService";
+import type { Strand, Section } from "@/interface/info";
 import { ViewEnrollmentModal } from "@/components/admin/ViewEnrollmentModal";
 import { RejectEnrollmentModal } from "@/components/admin/RejectEnrollmentModal";
 import { useNotifyEnrollmentStatus } from "@/hooks/useNotifyEnrollmentStatus";
 import { logService } from "@/services/logService";
+import { getDefaultSchoolYear } from "@/config/school";
+import type { Student } from "@/interface/user";
+import { HiUserGroup } from "react-icons/hi";
 
 const PAGE_SIZE = 10;
 
@@ -28,6 +32,8 @@ const EnrolleeListPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedEnrollment, setSelectedEnrollment] = useState<Enrollment | null>(null);
   const [strands, setStrands] = useState<Strand[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
+  const [sectionEnrollmentCounts, setSectionEnrollmentCounts] = useState<Map<string, number>>(new Map());
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [viewEnrollment, setViewEnrollment] = useState<Enrollment | null>(null);
   const [rejectModalOpen, setRejectModalOpen] = useState(false);
@@ -47,6 +53,39 @@ const EnrolleeListPage = () => {
     fetchEnrollments();
     // Fetch strands
     strandService.getAllStrands().then(setStrands).catch(() => setStrands([]));
+    // Fetch sections
+    sectionService.getAllSections().then(setSections).catch(() => setSections([]));
+  }, []);
+
+  // Fetch section enrollment counts for current school year
+  useEffect(() => {
+    const fetchSectionEnrollmentCounts = async () => {
+      try {
+        const currentSchoolYear = getDefaultSchoolYear();
+        const studentsQuery = query(
+          collection(db, "students"),
+          where("enrolledForSchoolYear", "==", currentSchoolYear),
+          where("status", "==", "enrolled")
+        );
+        
+        const studentsSnapshot = await getDocs(studentsQuery);
+        const counts = new Map<string, number>();
+        
+        studentsSnapshot.forEach((doc) => {
+          const student = doc.data() as Student;
+          if (student.enrolledForSectionId) {
+            const currentCount = counts.get(student.enrolledForSectionId) || 0;
+            counts.set(student.enrolledForSectionId, currentCount + 1);
+          }
+        });
+        
+        setSectionEnrollmentCounts(counts);
+      } catch (error) {
+        console.error("Error fetching section enrollment counts:", error);
+      }
+    };
+
+    fetchSectionEnrollmentCounts();
   }, []);
 
 
@@ -111,6 +150,25 @@ const EnrolleeListPage = () => {
         status: "enrolled"
       });
     }
+    
+    // Refresh section enrollment counts
+    const currentSchoolYear = getDefaultSchoolYear();
+    const studentsQuery = query(
+      collection(db, "students"),
+      where("enrolledForSchoolYear", "==", currentSchoolYear),
+      where("status", "==", "enrolled")
+    );
+    const studentsSnapshot = await getDocs(studentsQuery);
+    const counts = new Map<string, number>();
+    studentsSnapshot.forEach((doc) => {
+      const student = doc.data() as Student;
+      if (student.enrolledForSectionId) {
+        const currentCount = counts.get(student.enrolledForSectionId) || 0;
+        counts.set(student.enrolledForSectionId, currentCount + 1);
+      }
+    });
+    setSectionEnrollmentCounts(counts);
+    
     setLoading(false);
   }
 
@@ -136,9 +194,53 @@ const EnrolleeListPage = () => {
     setLoading(false);
   }
 
+  // Get section enrollment summary for current school year
+  const sectionEnrollmentSummary = useMemo(() => {
+    return sections
+      .map((section) => ({
+        section,
+        count: sectionEnrollmentCounts.get(section.id) || 0,
+      }))
+      .filter((item) => item.count > 0)
+      .sort((a, b) => b.count - a.count);
+  }, [sections, sectionEnrollmentCounts]);
+
   return (
     <div className="max-w-6xl mx-auto p-4">
       <h1 className="text-lg font-extrabold mb-4 martian-mono text-primary">Enrollment Submissions</h1>
+      
+      {/* Section Enrollment Summary */}
+      {sectionEnrollmentSummary.length > 0 && (
+        <div className="mb-6 card bg-base-100 shadow-sm">
+          <div className="card-body p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <HiUserGroup className="w-5 h-5 text-primary" />
+              <h2 className="text-sm font-bold text-primary martian-mono">
+                Section Enrollment Summary ({getDefaultSchoolYear()})
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              {sectionEnrollmentSummary.map(({ section, count }) => (
+                <div
+                  key={section.id}
+                  className="p-3 bg-base-50 rounded-lg border border-base-200"
+                >
+                  <div className="text-xs font-semibold text-primary martian-mono mb-1">
+                    {section.sectionName}
+                  </div>
+                  <div className="text-lg font-bold text-secondary martian-mono">
+                    {count}
+                  </div>
+                  <div className="text-[10px] text-base-content/60">
+                    student{count !== 1 ? 's' : ''}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mb-4 flex flex-col md:flex-row md:items-center gap-2 md:gap-4">
         <div className="flex gap-2">
           <button className={`btn btn-sm martian-mono text-xs text-primary ${statusFilter === "pending" ? "btn-primary text-white" : "btn-outline"}`} onClick={() => { setStatusFilter("pending"); setCurrentPage(1); }}>Pending</button>

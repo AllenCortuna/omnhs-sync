@@ -42,6 +42,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const primaryNavItems: NavigationItemProps[] = [
     { href: '/admin/dashboard', icon: HiHome, label: 'Dashboard' },
     { href: '/admin/student-list', icon: HiAcademicCap, label: 'Student List' },
+    { href: '/admin/class-schedule', icon: HiCalendar, label: 'Class Schedule' },
     { href: '/admin/teacher-list', icon: HiUserGroup, label: 'Teacher List' },
     { href: '/admin/calendar', icon: HiCalendar, label: 'Calendar' },
     { href: '/admin/enrollees', icon: HiUserAdd, label: 'Enrollee', showNotification: true, notificationCount: pendingCount, loading: pendingLoading },
