@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState, useMemo } from "react";
 import { subjectRecordService } from "@/services/subjectRecordService";
-import { formatDate } from "@/config/format";
 import { getDefaultSchoolYear } from "@/config/school";
 import type { SubjectRecord } from "@/interface/info";
 import { HiAcademicCap, HiDocumentText, HiArchive } from "react-icons/hi";
@@ -95,6 +94,48 @@ const AdminRecordsPage = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  /**
+   * Checks if all student grades are complete for both 1st and 2nd quarter
+   * @param record - The subject record to check
+   * @returns Object with isComplete status and message
+   */
+  const checkGradesComplete = (record: SubjectRecord) => {
+    const studentList = record.studentList || [];
+    const studentGrades = record.studentGrades || [];
+
+    if (studentList.length === 0) {
+      return {
+        isComplete: false,
+        message: "No students enrolled",
+      };
+    }
+
+    // Check if all students have grades
+    const studentsWithGrades = studentList.filter((studentId) => {
+      const grade = studentGrades.find((g) => g.studentId === studentId);
+      return (
+        grade &&
+        grade.firstQuarterGrade > 0 &&
+        grade.secondQuarterGrade > 0
+      );
+    });
+
+    const allComplete = studentsWithGrades.length === studentList.length;
+
+    if (allComplete) {
+      return {
+        isComplete: true,
+        message: "Submitted - All grades complete",
+      };
+    } else {
+      const incompleteCount = studentList.length - studentsWithGrades.length;
+      return {
+        isComplete: false,
+        message: `Incomplete - ${incompleteCount} student(s) missing grades`,
+      };
+    }
+  };
+
   if (loading) {
     return (
       <div className="text-center py-12 text-zinc-400">
@@ -184,37 +225,31 @@ const AdminRecordsPage = () => {
               <table className="table table-zebra table-sm w-full">
                 <thead>
                   <tr>
+                    <th className="bg-base-200 text-xs">Grade Level-Section</th>
                     <th className="bg-base-200 text-xs">Subject</th>
-                    <th className="bg-base-200 text-xs">Section</th>
                     <th className="bg-base-200 text-xs">Teacher</th>
-                    <th className="bg-base-200 text-xs">Grade Level</th>
                     <th className="bg-base-200 text-xs">Semester</th>
                     <th className="bg-base-200 text-xs">School Year</th>
                     <th className="bg-base-200 text-xs">Students</th>
-                    <th className="bg-base-200 text-xs">Created</th>
+                    <th className="bg-base-200 text-xs">Remarks</th>
                   </tr>
                 </thead>
                 <tbody className="text-xs">
                   {paginated.map((record) => (
                     <tr key={record.id} className="hover">
                       <td>
+                        <div className="font-medium text-xs text-primary">
+                        {record.sectionName}
+                        </div>
+                      </td>
+                      <td>
                         <div className="font-bold w-32 text-primary text-xs">
                           {record.subjectName}
                         </div>
                       </td>
                       <td>
-                        <div className="font-medium text-xs text-primary">
-                          {record.sectionName}
-                        </div>
-                      </td>
-                      <td>
                         <div className="font-medium text-xs text-zinc-600">
                           {record.teacherName}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="font-medium text-xs text-zinc-600">
-                          {record.gradeLevel}
                         </div>
                       </td>
                       <td>
@@ -233,9 +268,20 @@ const AdminRecordsPage = () => {
                         </div>
                       </td>
                       <td>
-                        <div className="text-xs text-gray-500 italic">
-                          {formatDate(record.createdAt)}
-                        </div>
+                        {(() => {
+                          const gradeStatus = checkGradesComplete(record);
+                          return (
+                            <div
+                              className={`text-xs font-medium ${
+                                gradeStatus.isComplete
+                                  ? "text-success"
+                                  : "text-warning"
+                              }`}
+                            >
+                              {gradeStatus.message}
+                            </div>
+                          );
+                        })()}
                       </td>
                     </tr>
                   ))}
