@@ -35,6 +35,7 @@ interface LogsStore {
   addLog: (data: Omit<Log, 'id'>) => Promise<void>;
   fetchLogsByAdmin: (searchTerm?: string, startDate?: string, endDate?: string, resetPagination?: boolean) => Promise<void>;
   fetchLogsByUser: (userId: string, searchTerm?: string, startDate?: string, endDate?: string, resetPagination?: boolean) => Promise<void>;
+  fetchLogsByStudent: (studentId: string, searchTerm?: string, startDate?: string, endDate?: string, resetPagination?: boolean) => Promise<void>;
   deleteLog: (logId: string) => Promise<boolean>;
   resetPagination: () => void;
 }
@@ -258,6 +259,106 @@ export const useLogsStore = create<LogsStore>((set, get) => ({
       });
     } catch (error) {
       console.log("Error fetching logs by user:", error);
+    } finally {
+      set({ loadingLogs: false });
+    }
+  },
+
+  // Function to fetch logs by specific student
+  fetchLogsByStudent: async (studentId: string, searchTerm = '', startDate = '', endDate = '', resetPagination = false) => {
+    set({ loadingLogs: true });
+    try {
+      let logsQuery;
+      
+      // Build query based on filters with student filter
+      if (searchTerm.trim() && startDate && endDate) {
+        // Search + Date range filter + Student filter
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        endDateObj.setHours(23, 59, 59, 999); // End of day
+        
+        logsQuery = query(
+          collection(db, "logs"),
+          where("studentId", "==", studentId),
+          where("date", ">=", startDateObj.toISOString()),
+          where("date", "<=", endDateObj.toISOString()),
+          orderBy("date", "desc"),
+          limit(20)
+        );
+      } else if (searchTerm.trim()) {
+        // Search + Student filter - we'll filter client-side for description
+        logsQuery = query(
+          collection(db, "logs"),
+          where("studentId", "==", studentId),
+          orderBy("date", "desc"),
+          limit(20)
+        );
+      } else if (startDate && endDate) {
+        // Date range + Student filter
+        const startDateObj = new Date(startDate);
+        const endDateObj = new Date(endDate);
+        endDateObj.setHours(23, 59, 59, 999); // End of day
+        
+        logsQuery = query(
+          collection(db, "logs"),
+          where("studentId", "==", studentId),
+          where("date", ">=", startDateObj.toISOString()),
+          where("date", "<=", endDateObj.toISOString()),
+          orderBy("date", "desc"),
+          limit(20)
+        );
+      } else {
+        // Student filter only
+        logsQuery = query(
+          collection(db, "logs"),
+          where("studentId", "==", studentId),
+          orderBy("date", "desc"),
+          limit(20)
+        );
+      }
+      
+      // Apply pagination if not resetting
+      if (!resetPagination && get().lastDoc) {
+        logsQuery = query(logsQuery, startAfter(get().lastDoc));
+      }
+      
+      const logsDocSnap = await getDocs(logsQuery);
+      
+      // Map through logs and update state
+      let newLogs = logsDocSnap.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Omit<Log, "id">),
+      }));
+      
+      // Apply search filter client-side if needed
+      if (searchTerm.trim()) {
+        newLogs = newLogs.filter(log => 
+          log.description.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+      
+      const currentLogs = get().logs;
+      let updatedLogs;
+      
+      if (resetPagination) {
+        updatedLogs = newLogs;
+      } else if (currentLogs) {
+        // Merge logs and remove duplicates based on ID
+        const existingIds = new Set(currentLogs.map(log => log.id));
+        const uniqueNewLogs = newLogs.filter(log => !existingIds.has(log.id));
+        updatedLogs = [...currentLogs, ...uniqueNewLogs];
+      } else {
+        updatedLogs = newLogs;
+      }
+      
+      set({ 
+        logs: updatedLogs,
+        hasMore: logsDocSnap.docs.length === 20,
+        lastDoc: logsDocSnap.docs.length > 0 ? logsDocSnap.docs[logsDocSnap.docs.length - 1] : null,
+        totalLogs: updatedLogs.length
+      });
+    } catch (error) {
+      console.log("Error fetching logs by student:", error);
     } finally {
       set({ loadingLogs: false });
     }

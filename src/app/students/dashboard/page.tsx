@@ -130,7 +130,7 @@ const StudentDashboard: React.FC = () => {
                         </div>
                         <div>
                             <h1 className="text-xl martian-mono font-bold text-primary">Student Dashboard</h1>
-                            <p className="text-xs text-zinc-500 italic">
+                            <p className="text-md text-zinc-500 italic">
                                 Welcome back, {studentData.firstName} {studentData.lastName}
                             </p>
                         </div>
@@ -150,7 +150,7 @@ const StudentDashboard: React.FC = () => {
                                 <h2 className="text-xl font-bold text-primary martian-mono">
                                     {studentData.firstName} {studentData.lastName}
                                 </h2>
-                                <p className="text-xs text-zinc-500 italic">
+                                <p className="text-md text-zinc-500 italic">
                                     Student ID: {studentData.studentId} | {studentData.email}
                                 </p>
                                 {section && strand && (
@@ -158,12 +158,12 @@ const StudentDashboard: React.FC = () => {
                                         <div className="badge badge-primary badge-sm">
                                             {section.sectionName}
                                         </div>
-                                        <span className="text-xs text-zinc-500">•</span>
-                                        <span className="text-xs text-zinc-500">{strand.strandName}</span>
+                                        <span className="text-md text-zinc-500">•</span>
+                                        <span className="text-md text-zinc-500">{strand.strandName}</span>
                                         {section.adviserName && (
                                             <>
-                                                <span className="text-xs text-zinc-500">•</span>
-                                                <span className="text-xs text-zinc-500">Adviser: {section.adviserName}</span>
+                                                <span className="text-md text-zinc-500">•</span>
+                                                <span className="text-md text-zinc-500">Adviser: {section.adviserName}</span>
                                             </>
                                         )}
                                     </div>
@@ -187,11 +187,11 @@ const StudentDashboard: React.FC = () => {
                                     </h3>
                                     <div className="flex items-center gap-4 mt-2">
                                         <div className="flex items-center gap-2">
-                                            <span className="text-xs font-medium text-zinc-500">Section:</span>
+                                            <span className="text-md font-medium text-zinc-500">Section:</span>
                                             <span className="badge badge-primary badge-xs p-2 text-white">{section.sectionName}</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-xs font-medium text-zinc-500">Strand:</span>
+                                            <span className="text-md font-medium text-zinc-500">Strand:</span>
                                             <span className="text-sm text-primary font-bold">{strand.strandName}</span>
                                         </div>
                                         {section.adviserName && (
@@ -238,7 +238,7 @@ const StudentDashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-primary martian-mono">{enrolledSubjects}</h3>
-                                    <p className="text-xs text-zinc-500 italic">Enrolled Subjects</p>
+                                    <p className="text-md text-zinc-500 italic">Enrolled Subjects</p>
                                 </div>
                             </div>
                         </div>
@@ -252,7 +252,7 @@ const StudentDashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-primary martian-mono">{gpa}</h3>
-                                    <p className="text-xs text-zinc-500 italic">Current GPA</p>
+                                    <p className="text-md text-zinc-500 italic">Current GPA</p>
                                 </div>
                             </div>
                         </div>
@@ -266,7 +266,7 @@ const StudentDashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-primary martian-mono">{gradedSubjects}</h3>
-                                    <p className="text-xs text-zinc-500 italic">Graded Subjects</p>
+                                    <p className="text-md text-zinc-500 italic">Graded Subjects</p>
                                 </div>
                             </div>
                         </div>
@@ -282,7 +282,7 @@ const StudentDashboard: React.FC = () => {
                                     <h3 className="font-bold text-primary martian-mono">
                                         {formatDate(studentData.createdAt)}
                                     </h3>
-                                    <p className="text-xs text-zinc-500 italic">Member Since</p>
+                                    <p className="text-md text-zinc-500 italic">Member Since</p>
                                 </div>
                             </div>
                         </div>
@@ -303,7 +303,7 @@ const StudentDashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-primary martian-mono">View Profile</h3>
-                                    <p className="text-xs text-zinc-500 italic">View and edit your information</p>
+                                    <p className="text-md text-zinc-500 italic">View and edit your information</p>
                                 </div>
                             </div>
                         </div>
@@ -320,7 +320,7 @@ const StudentDashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-primary martian-mono">View Grades</h3>
-                                    <p className="text-xs text-zinc-500 italic">Check your academic performance</p>
+                                    <p className="text-md text-zinc-500 italic">Check your academic performance</p>
                                 </div>
                             </div>
                         </div>
@@ -337,7 +337,7 @@ const StudentDashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-primary martian-mono">Calendar</h3>
-                                    <p className="text-xs text-zinc-500 italic">View school events and schedule</p>
+                                    <p className="text-md text-zinc-500 italic">View school events and schedule</p>
                                 </div>
                             </div>
                         </div>
@@ -354,7 +354,7 @@ const StudentDashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-primary martian-mono">Enrollment</h3>
-                                    <p className="text-xs text-zinc-500 italic">Manage your enrollment status</p>
+                                    <p className="text-md text-zinc-500 italic">Manage your enrollment status</p>
                                 </div>
                             </div>
                         </div>
@@ -371,7 +371,7 @@ const StudentDashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-primary martian-mono">Assignments</h3>
-                                    <p className="text-xs text-zinc-500 italic">Check pending assignments (Coming Soon)</p>
+                                    <p className="text-md text-zinc-500 italic">Check pending assignments (Coming Soon)</p>
                                 </div>
                             </div>
                         </div>
@@ -388,7 +388,7 @@ const StudentDashboard: React.FC = () => {
                                 </div>
                                 <div>
                                     <h3 className="font-bold text-primary martian-mono">Messages</h3>
-                                    <p className="text-xs text-zinc-500 italic">View messages from teachers (Coming Soon)</p>
+                                    <p className="text-md text-zinc-500 italic">View messages from teachers (Coming Soon)</p>
                                 </div>
                             </div>
                         </div>

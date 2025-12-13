@@ -45,6 +45,15 @@ const StudentRouteGuard: React.FC<StudentRouteGuardProps> = ({ children }) => {
       const querySnapshot = await getDocs(q);
       
       if (!querySnapshot.empty) {
+        const studentData = querySnapshot.docs[0].data();
+        // Check if student is graduated (alumni)
+        if (studentData.status === "graduated") {
+          setIsStudent(false);
+          errorToast("Alumni students are not authorized to access this page.");
+          router.replace("/");
+          setIsLoading(false);
+          return;
+        }
         setIsStudent(true);
       } else {
         setIsStudent(false);

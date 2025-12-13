@@ -1,9 +1,9 @@
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
-import { Martian_Mono } from "next/font/google";
+import { Poppins } from "next/font/google";
 import { ToastContainer } from "react-toastify";
 
-const font = Martian_Mono({
+const font = Poppins({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
 });

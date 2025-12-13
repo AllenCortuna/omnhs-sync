@@ -8,6 +8,7 @@ import { successToast, errorToast } from "@/config/toast";
 import type { Student } from "@/interface/user";
 import { useStudentByEmail } from "@/hooks/useStudentByEmail";
 import { useRouter } from "next/navigation";
+import StudentSettingsComponent from "@/components/student/StudentSettings";
 import {
     HiUser,
     HiPhone,
@@ -18,7 +19,7 @@ import {
     HiLocationMarker
 } from "react-icons/hi";
 
-const StudentSettings: React.FC = () => {
+const StudentSettingsPage: React.FC = () => {
     const { userData, isLoading: userLoading } = useSaveUserData({
         role: "student",
     });
@@ -130,23 +131,30 @@ const StudentSettings: React.FC = () => {
     }
 
     return (
-        <div className="max-w-4xl mx-auto p-4">
-            <div className="mb-6">
-                <h1 className="text-2xl martian-mono font-bold text-primary mb-2">
-                    Student Settings
-                </h1>
-                <p className="text-gray-500 italic text-xs">
-                    Update your personal information and contact details
-                </p>
+        <div className="max-w-4xl mx-auto p-4 space-y-8">
+            {/* Account Settings Section */}
+            <div>
+                <StudentSettingsComponent studentId={fetchedStudent.id!} />
             </div>
 
-            <div className="mb-4 p-3 bg-blue-100 border border-blue-300 rounded text-blue-800 text-sm">
-                <strong>Note:</strong> Student ID, First Name, Last Name, Middle
-                Name, Suffix, Birth Date, and Sex cannot be changed. Contact the
-                administrator for these changes.
-            </div>
+            {/* Profile Information Section */}
+            <div>
+                <div className="mb-6">
+                    <h1 className="text-2xl martian-mono font-bold text-primary mb-2">
+                        Profile Information
+                    </h1>
+                    <p className="text-gray-500 italic text-xs">
+                        Update your personal information and contact details
+                    </p>
+                </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="mb-4 p-3 bg-blue-50 border border-blue-300 rounded text-blue-800 text-sm italic">
+                    <strong>Note:</strong> Student ID, First Name, Last Name, Middle
+                    Name, Suffix, Birth Date, and Sex cannot be changed. Contact the
+                    administrator for these changes.
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Personal Information Section */}
                 <div className="card bg-white shadow-md">
                     <div className="card-body">
@@ -459,9 +467,10 @@ const StudentSettings: React.FC = () => {
                     buttonText="Update Profile"
                     loadingText="Updating..."
                 />
-            </form>
+                </form>
+            </div>
         </div>
     );
 };
 
-export default StudentSettings;
+export default StudentSettingsPage;
