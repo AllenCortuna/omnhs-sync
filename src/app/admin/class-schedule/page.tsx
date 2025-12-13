@@ -38,6 +38,7 @@ const ClassSchedule: React.FC = () => {
         subjectName: "",
         gradeLevel: "",
         semester: "",
+        timeSlot: "",
         schoolYear: getDefaultSchoolYear(),
         teacherId: "",
         teacherName: "",
@@ -297,6 +298,7 @@ const ClassSchedule: React.FC = () => {
             subjectName: "",
             gradeLevel: "",
             semester: "",
+            timeSlot: "",
             schoolYear: getDefaultSchoolYear(),
             teacherId: "",
             teacherName: "",
@@ -706,6 +708,27 @@ const ClassSchedule: React.FC = () => {
                                             Automatically set to current school year
                                         </span>
                                     </label>
+                                </div>
+
+                                {/* Time Slot */}
+                                <div className="form-control">
+                                    <label className="label">
+                                        <span className="label-text">
+                                            Time Slot *
+                                        </span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        className="input input-bordered w-full"
+                                        value={formData.timeSlot || ""}
+                                        onChange={(e) =>
+                                            setFormData((prev) => ({
+                                                ...prev,
+                                                timeSlot: e.target.value,
+                                            }))
+                                        }
+                                        required
+                                    />
                                 </div>
                             </div>
 
