@@ -4,8 +4,9 @@ import { subjectRecordService } from "@/services/subjectRecordService";
 import { strandService } from "@/services/strandService";
 import { sectionService } from "@/services/sectionService";
 import { teacherService } from "@/services/teacherService";
+import { subjectService } from "@/services/subjectService";
 import { errorToast, successToast } from "@/config/toast";
-import type { SubjectRecord, Strand, Section } from "@/interface/info";
+import type { SubjectRecord, Strand, Section, Subject } from "@/interface/info";
 import type { Teacher } from "@/interface/user";
 import { LoadingOverlay } from "@/components/common";
 import { SectionClassScheduleModal } from "@/components/admin/SectionClassScheduleModal";
@@ -22,6 +23,7 @@ const ClassSchedule: React.FC = () => {
     const [strands, setStrands] = useState<Strand[]>([]);
     const [sections, setSections] = useState<Section[]>([]);
     const [teachers, setTeachers] = useState<Teacher[]>([]);
+    const [subjects, setSubjects] = useState<Subject[]>([]);
     const [loading, setLoading] = useState(true);
     const [showAddModal, setShowAddModal] = useState(false);
     const [selectedStrandId, setSelectedStrandId] = useState<string>("");
@@ -29,6 +31,8 @@ const ClassSchedule: React.FC = () => {
     const [selectedTeacherId, setSelectedTeacherId] = useState<string>("");
     const [selectedSectionName, setSelectedSectionName] = useState<string>("");
     const [showSectionModal, setShowSectionModal] = useState(false);
+    const [startTime, setStartTime] = useState<string>("");
+    const [endTime, setEndTime] = useState<string>("");
 
     // Form state
     const [formData, setFormData] = useState({
@@ -49,12 +53,14 @@ const ClassSchedule: React.FC = () => {
         const fetchInitialData = async () => {
             try {
                 setLoading(true);
-                const [strandsData, teachersData] = await Promise.all([
+                const [strandsData, teachersData, subjectsData] = await Promise.all([
                     strandService.getAllStrands(),
                     teacherService.getAllTeachers(),
+                    subjectService.getAllSubjects(),
                 ]);
                 setStrands(strandsData);
                 setTeachers(teachersData);
+                setSubjects(subjectsData);
             } catch (error) {
                 console.error("Error fetching initial data:", error);
                 errorToast("Failed to load initial data");
@@ -144,6 +150,32 @@ const ClassSchedule: React.FC = () => {
         fetchSections();
     }, [selectedStrandId]);
 
+    // Filter subjects by selected strand
+    const filteredSubjects = useMemo(() => {
+        if (!selectedStrandId) {
+            return [];
+        }
+        return subjects.filter(subject => {
+            // Handle both array and legacy string format
+            if (Array.isArray(subject.strandId)) {
+                return subject.strandId.includes(selectedStrandId);
+            }
+            // Legacy support: if strandId is a string, check for equality
+            return subject.strandId === selectedStrandId;
+        });
+    }, [subjects, selectedStrandId]);
+
+    // Clear subject selection when strand changes
+    useEffect(() => {
+        if (!selectedStrandId) {
+            setFormData((prev) => ({
+                ...prev,
+                subjectId: "",
+                subjectName: "",
+            }));
+        }
+    }, [selectedStrandId]);
+
     // Update form data when selections change
     useEffect(() => {
         if (selectedSectionId) {
@@ -178,9 +210,17 @@ const ClassSchedule: React.FC = () => {
             !formData.gradeLevel ||
             !formData.semester ||
             !formData.schoolYear ||
-            !formData.teacherId
+            !formData.teacherId ||
+            !startTime ||
+            !endTime
         ) {
             errorToast("Please fill in all required fields");
+            return;
+        }
+
+        // Validate time range
+        if (startTime >= endTime) {
+            errorToast("End time must be after start time");
             return;
         }
 
@@ -303,10 +343,44 @@ const ClassSchedule: React.FC = () => {
             teacherId: "",
             teacherName: "",
         });
+        setStartTime("");
+        setEndTime("");
         setSelectedStrandId("");
         setSelectedSectionId("");
         setSelectedTeacherId("");
     };
+
+    // Parse timeSlot into start and end times when modal opens or form data changes
+    useEffect(() => {
+        if (showAddModal && formData.timeSlot) {
+            const parts = formData.timeSlot.split(" - ");
+            if (parts.length === 2) {
+                setStartTime(parts[0].trim());
+                setEndTime(parts[1].trim());
+            } else {
+                setStartTime("");
+                setEndTime("");
+            }
+        } else if (showAddModal && !formData.timeSlot) {
+            setStartTime("");
+            setEndTime("");
+        }
+    }, [showAddModal, formData.timeSlot]);
+
+    // Update timeSlot when startTime or endTime changes
+    useEffect(() => {
+        if (startTime && endTime) {
+            setFormData((prev) => ({
+                ...prev,
+                timeSlot: `${startTime} - ${endTime}`,
+            }));
+        } else if (!startTime && !endTime) {
+            setFormData((prev) => ({
+                ...prev,
+                timeSlot: "",
+            }));
+        }
+    }, [startTime, endTime]);
 
     const handleDeleteClass = async (recordId: string) => {
         if (!confirm("Are you sure you want to delete this class?")) {
@@ -548,76 +622,35 @@ const ClassSchedule: React.FC = () => {
                                     </label>
                                     <select
                                         className="select select-bordered w-full"
-                                        value={formData.subjectName}
-                                        onChange={(e) =>
+                                        value={formData.subjectId}
+                                        onChange={(e) => {
+                                            const selectedSubject = filteredSubjects.find(
+                                                s => s.id === e.target.value
+                                            );
                                             setFormData((prev) => ({
                                                 ...prev,
-                                                subjectName: e.target.value,
                                                 subjectId: e.target.value,
-                                            }))
-                                        }
+                                                subjectName: selectedSubject?.subjectName || "",
+                                            }));
+                                        }}
                                         required
+                                        disabled={!selectedStrandId || filteredSubjects.length === 0}
                                     >
-                                        <option value="">Select Subject</option>
-                                        <option value="Oral Communication">
-                                            Oral Communication
+                                        <option value="">
+                                            {!selectedStrandId 
+                                                ? "Select Strand First" 
+                                                : filteredSubjects.length === 0
+                                                ? "No Subjects Available"
+                                                : "Select Subject"}
                                         </option>
-                                        <option value="Reading and Writing">
-                                            Reading and Writing
-                                        </option>
-                                        <option value="Komunikasyon at Pananaliksik sa Wika at Kulturang Pilipino">
-                                            Komunikasyon at Pananaliksik sa Wika
-                                            at Kulturang Pilipino
-                                        </option>
-                                        <option value="Pagbasa at Pagsusuri ng Ibat-Ibang Teksto Tungo sa Pananaliksik">
-                                            Pagbasa at Pagsusuri ng
-                                            Iba&apos;t-Ibang Teksto Tungo sa
-                                            Pananaliksik
-                                        </option>
-                                        <option value="21st Century Literature from the Philippines and the World">
-                                            21st Century Literature from the
-                                            Philippines and the World
-                                        </option>
-                                        <option value="Contemporary Philippine Arts from the Regions">
-                                            Contemporary Philippine Arts from
-                                            the Regions
-                                        </option>
-                                        <option value="Media and Information Literacy">
-                                            Media and Information Literacy
-                                        </option>
-                                        <option value="General Math">
-                                            General Math
-                                        </option>
-                                        <option value="Statistics and Probability">
-                                            Statistics and Probability
-                                        </option>
-                                        <option value="Earth and Life Science">
-                                            Earth and Life Science
-                                        </option>
-                                        <option value="Physical Science">
-                                            Physical Science
-                                        </option>
-                                        <option value="Introduction to the Philosophy of the Human Person">
-                                            Introduction to the Philosophy of
-                                            the Human Person
-                                        </option>
-                                        <option value="Physical Education and Health">
-                                            Physical Education and Health
-                                        </option>
-                                        <option value="Personal Development">
-                                            Personal Development
-                                        </option>
-                                        <option value="Understanding Culture, Society and Politics">
-                                            Understanding Culture, Society and
-                                            Politics
-                                        </option>
-                                        <option value="Earth Science">
-                                            Earth Science
-                                        </option>
-                                        <option value="Disaster Readiness and Risk Reduction">
-                                            Disaster Readiness and Risk
-                                            Reduction
-                                        </option>
+                                        {filteredSubjects.map((subject) => (
+                                            <option
+                                                key={subject.id}
+                                                value={subject.id}
+                                            >
+                                                {subject.subjectName}
+                                            </option>
+                                        ))}
                                     </select>
                                 </div>
 
@@ -711,24 +744,52 @@ const ClassSchedule: React.FC = () => {
                                 </div>
 
                                 {/* Time Slot */}
-                                <div className="form-control">
+                                <div className="form-control md:col-span-2">
                                     <label className="label">
                                         <span className="label-text">
-                                            Time Slot *
+                                            Time Slot * (Time Range)
                                         </span>
                                     </label>
-                                    <input
-                                        type="text"
-                                        className="input input-bordered w-full"
-                                        value={formData.timeSlot || ""}
-                                        onChange={(e) =>
-                                            setFormData((prev) => ({
-                                                ...prev,
-                                                timeSlot: e.target.value,
-                                            }))
-                                        }
-                                        required
-                                    />
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex-1">
+                                            <label className="label py-1">
+                                                <span className="label-text-alt text-base-content/60">
+                                                    Start Time
+                                                </span>
+                                            </label>
+                                            <input
+                                                type="time"
+                                                className="input input-bordered w-full"
+                                                value={startTime}
+                                                onChange={(e) => setStartTime(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                        <div className="flex items-center pt-6">
+                                            <span className="text-base-content/60 font-medium">-</span>
+                                        </div>
+                                        <div className="flex-1">
+                                            <label className="label py-1">
+                                                <span className="label-text-alt text-base-content/60">
+                                                    End Time
+                                                </span>
+                                            </label>
+                                            <input
+                                                type="time"
+                                                className="input input-bordered w-full"
+                                                value={endTime}
+                                                onChange={(e) => setEndTime(e.target.value)}
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+                                    {startTime && endTime && (
+                                        <label className="label">
+                                            <span className="label-text-alt text-primary">
+                                                {startTime} - {endTime}
+                                            </span>
+                                        </label>
+                                    )}
                                 </div>
                             </div>
 

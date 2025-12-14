@@ -4,6 +4,13 @@ export interface Strand {
     strandDescription: string;
 }
 
+export interface Subject {
+    id: string;
+    subjectName: string;
+    subjectDescription?: string;
+    strandId: string[]; // reference to the strands (multiple strands allowed)
+}
+
 export interface Section {
     id: string;
     sectionName: string;
@@ -13,14 +20,6 @@ export interface Section {
     adviserEmail?: string; // reference to the teacher email
     createdAt?: string;
     updatedAt?: string;
-}
-
-export interface Subject {
-    id: string;
-    subjectName: string;
-    subjectDescription: string;
-    strandId: string; // reference to the strand
-    quarter: string;
 }
 
 export interface StudentGrade {
@@ -51,6 +50,7 @@ export interface SubjectRecord{
     subjectName: string; // reference to the subject
     gradeLevel: string; // reference to the grade level
     semester: string;
+    timeSlot: string;
     schoolYear: string;
     teacherId: string; // reference to the teacher
     teacherName: string; // reference to the teacher

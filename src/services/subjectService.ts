@@ -18,16 +18,14 @@ const COLLECTION_NAME = 'subjects';
 
 export interface CreateSubjectData {
   subjectName: string;
-  subjectDescription: string;
-  strandId: string;
-  quarter: string;
+  subjectDescription?: string;
+  strandId: string[];
 }
 
 export interface UpdateSubjectData {
   subjectName?: string;
   subjectDescription?: string;
-  strandId?: string;
-  quarter?: string;
+  strandId?: string[];
 }
 
 export const subjectService = {
@@ -50,21 +48,25 @@ export const subjectService = {
   },
 
   /**
-   * Get subjects by strand ID
+   * Get subjects by strand ID (subjects that include this strand in their strandId array)
    */
   async getSubjectsByStrandId(strandId: string): Promise<Subject[]> {
     try {
+      // Since Firestore doesn't support array-contains with orderBy easily,
+      // we'll fetch all and filter in memory, or use array-contains
       const q = query(
         collection(db, COLLECTION_NAME), 
-        where('strandId', '==', strandId),
-        orderBy('subjectName')
+        where('strandId', 'array-contains', strandId)
       );
       const querySnapshot = await getDocs(q);
       
-      return querySnapshot.docs.map(doc => ({
+      const subjects = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as Subject[];
+      
+      // Sort by subject name in memory
+      return subjects.sort((a, b) => a.subjectName.localeCompare(b.subjectName));
     } catch (error) {
       console.error('Error fetching subjects by strand:', error);
       throw new Error('Failed to fetch subjects');

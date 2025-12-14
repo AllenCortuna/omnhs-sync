@@ -3,7 +3,7 @@ import React, { ReactNode, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
-import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX, HiCog, HiCalendar, HiArchive, HiUser } from 'react-icons/hi';
+import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX, HiCog, HiCalendar, HiArchive, HiUser, HiBookOpen } from 'react-icons/hi';
 import { auth } from '../../../firebase';
 import { usePendingEnrollmentCount } from "@/hooks/usePendingEnrollmentCount";
 import { useCurrentAdmin } from "@/hooks/useCurrentAdmin";
@@ -54,6 +54,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       { href: '/admin/records', icon: HiArchive, label: 'Class Records' },
       { href: '/admin/strands', icon: FaUserGroup, label: 'Strands' },
       { href: '/admin/sections', icon: FaClipboard, label: 'Sections' },
+      { href: '/admin/subjects', icon: HiBookOpen, label: 'Subjects' },
       { href: '/admin/account', icon: HiUser, label: 'Account' },
       { href: '/admin/settings', icon: HiCog, label: 'Settings' },
     ];

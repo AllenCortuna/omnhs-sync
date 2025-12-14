@@ -284,6 +284,46 @@ class LogService {
     });
   }
 
+  // Subject logs
+  async logSubjectCreated(
+    subjectName: string,
+    adminName: string
+  ): Promise<void> {
+    await this.createLog({
+      studentId: 'SYSTEM',
+      name: 'Subject Created',
+      description: `Subject "${subjectName}" was created`,
+      logsBy: adminName,
+      createdBy: adminName,
+    });
+  }
+
+  async logSubjectUpdated(
+    subjectName: string,
+    adminName: string
+  ): Promise<void> {
+    await this.createLog({
+      studentId: 'SYSTEM',
+      name: 'Subject Updated',
+      description: `Subject "${subjectName}" was updated`,
+      logsBy: adminName,
+      createdBy: adminName,
+    });
+  }
+
+  async logSubjectDeleted(
+    subjectName: string,
+    adminName: string
+  ): Promise<void> {
+    await this.createLog({
+      studentId: 'SYSTEM',
+      name: 'Subject Deleted',
+      description: `Subject "${subjectName}" was deleted`,
+      logsBy: adminName,
+      createdBy: adminName,
+    });
+  }
+
   // System logs
   async logSystemAction(
     action: string,
