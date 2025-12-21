@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { collection, getDocs, query, orderBy, where } from "firebase/firestore";
 import { db } from "../../../../firebase";
-import { Enrollment } from "@/interface/info";
+import { Enrollment, SubjectRecord } from "@/interface/info";
 import { formatDate } from "@/config/format";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 import { MdPerson } from "react-icons/md";
@@ -18,6 +18,7 @@ import { logService } from "@/services/logService";
 import { getDefaultSchoolYear } from "@/config/school";
 import type { Student } from "@/interface/user";
 import { HiUserGroup } from "react-icons/hi";
+import { subjectRecordService } from "@/services/subjectRecordService";
 
 const PAGE_SIZE = 10;
 
@@ -150,6 +151,31 @@ const EnrolleeListPage = () => {
         status: "enrolled"
       });
     }
+
+    // Get all subject records matching the section, semester, and school year
+    const subjectRecordsQuery = query(
+      collection(db, "subject-record"),
+      where("sectionId", "==", sectionId),
+      where("semester", "==", selectedEnrollment.semester),
+      where("schoolYear", "==", selectedEnrollment.schoolYear)
+    );
+    const subjectRecordsSnapshot = await getDocs(subjectRecordsQuery);
+    
+    // Enroll student into all matching subject records
+    const enrollmentPromises = subjectRecordsSnapshot.docs.map(async (doc) => {
+      const subjectRecord = { id: doc.id, ...doc.data() } as SubjectRecord;
+      const currentStudentList = subjectRecord.studentList || [];
+      
+      // Only add if student is not already in the list
+      if (!currentStudentList.includes(selectedEnrollment.studentId)) {
+        const updatedStudentList = [...currentStudentList, selectedEnrollment.studentId];
+        await subjectRecordService.updateSubjectRecord(subjectRecord.id, {
+          studentList: updatedStudentList
+        });
+      }
+    });
+    
+    await Promise.all(enrollmentPromises);
     
     // Refresh section enrollment counts
     const currentSchoolYear = getDefaultSchoolYear();

@@ -236,7 +236,8 @@ const ClassSchedule: React.FC = () => {
             (record) =>
                 record.sectionId === formDataWithSchoolYear.sectionId &&
                 record.schoolYear === currentSchoolYear &&
-                record.semester === formDataWithSchoolYear.semester
+                record.semester === formDataWithSchoolYear.semester &&
+                record.subjectId === formDataWithSchoolYear.subjectId
         );
 
         if (duplicateExists) {
