@@ -40,6 +40,7 @@ const CompleteInfo = () => {
     const [formData, setFormData] = useState({
         studentId: "",
         birthDate: "",
+        
     });
     const [loading, setLoading] = useState(false);
     const [confirmLoading, setConfirmLoading] = useState(false);

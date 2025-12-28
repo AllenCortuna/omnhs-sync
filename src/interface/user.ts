@@ -33,6 +33,7 @@ export interface Student {
     status?: "enrolled" | "transfer-in" | "transfer-out" | "incomplete" | "graduated";
     email?: string;
     createdAt: string;
+    approved?: boolean;
     lastLoginAt?: string;
     profileRef?: string; // reference to the student's profile in storage
     profileChangeDate?: string;

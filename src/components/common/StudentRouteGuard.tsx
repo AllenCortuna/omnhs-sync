@@ -54,6 +54,13 @@ const StudentRouteGuard: React.FC<StudentRouteGuardProps> = ({ children }) => {
           setIsLoading(false);
           return;
         }
+        if (!studentData.approved) {
+          setIsStudent(false);
+          errorToast("Your account is not approved. Please wait for the admin to approve your account.");
+          router.replace("/");
+          setIsLoading(false);
+          return;
+        }
         setIsStudent(true);
       } else {
         setIsStudent(false);

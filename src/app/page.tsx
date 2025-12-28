@@ -269,7 +269,7 @@ const LoginAdmin: React.FC = () => {
                                     <Link key={link.label} href={link.href}
                                         className="flex items-center gap-2 px-6 py-3 border border-accent text-accent hover:text-base-100 hover:bg-accent transition-colors duration-300 rounded-full text-sm font-medium shadow-md">
                                         <IconComponent className="w-4 h-4" />
-                                        <span>Sign Up as {link.label}</span>
+                                        <span>Register as {link.label}</span>
                                     </Link>
                                 );
                             })}

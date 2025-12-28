@@ -225,7 +225,7 @@ const CreateStudent: React.FC = () => {
                                     htmlFor="studentID-input"
                                 >
                                     <span className="text-xs text-zinc-700">
-                                        Student ID
+                                        LRN
                                     </span>
                                 </label>
                                 <FormInput
@@ -234,7 +234,7 @@ const CreateStudent: React.FC = () => {
                                     type="text"
                                     value={formData.studentId}
                                     onChange={handleChange}
-                                    placeholder="Enter student ID"
+                                    placeholder="Enter LRN"
                                     className="uppercase"
                                     required
                                     disabled={loading}

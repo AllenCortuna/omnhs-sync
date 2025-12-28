@@ -2,11 +2,12 @@
 // React and Firebase imports
 import React, { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../../firebase";
+import { collection, getDocs, query, addDoc, where } from "firebase/firestore";
+import { auth, db } from "../../../firebase";
 import { useRouter } from "next/navigation";
 
 // Component imports
-import { FormInput, CreateButton, BackButton } from "@/components/common";
+import { FormInput, FormSelect, CreateButton, BackButton } from "@/components/common";
 
 // Toast imports
 import { successToast, errorToast } from "@/config/toast";
@@ -44,6 +45,14 @@ interface StudentSignupFormData {
     email: string;
     password: string;
     confirmPassword: string;
+    studentId: string;
+    firstName: string;
+    lastName: string;
+    middleName: string;
+    suffix: string;
+    sex: string;
+    birthDate: string;
+    address: string;
 }
 
 /**
@@ -59,6 +68,14 @@ const StudentSignup: React.FC = () => {
         email: "",
         password: "",
         confirmPassword: "",
+        studentId: "",
+        firstName: "",
+        lastName: "",
+        middleName: "",
+        suffix: "",
+        sex: "",
+        birthDate: "",
+        address: "",
     });
 
     // Loading state for async operations
@@ -71,9 +88,11 @@ const StudentSignup: React.FC = () => {
 
     /**
      * Updates form data state when input fields change
-     * @param {React.ChangeEvent<HTMLInputElement>} e - Input change event
+     * @param {React.ChangeEvent<HTMLInputElement | HTMLSelectElement>} e - Input change event
      */
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const handleChange = (
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    ): void => {
         const { name, value } = e.target;
         setFormData((prev) => ({
             ...prev,
@@ -92,13 +111,26 @@ const StudentSignup: React.FC = () => {
             return false;
         }
 
-        // Check if all fields are filled
+        // Check if all required fields are filled
         if (
             !formData.email ||
             !formData.password ||
-            !formData.confirmPassword
+            !formData.confirmPassword ||
+            !formData.studentId ||
+            !formData.firstName ||
+            !formData.lastName ||
+            !formData.middleName ||
+            !formData.sex ||
+            !formData.birthDate ||
+            !formData.address
         ) {
-            errorToast("All fields are required");
+            errorToast("All required fields must be filled");
+            return false;
+        }
+
+        // Check if student ID contains spaces
+        if (formData.studentId.includes(" ")) {
+            errorToast("Student ID must not contain spaces");
             return false;
         }
 
@@ -134,6 +166,19 @@ const StudentSignup: React.FC = () => {
         }
 
         try {
+            // Check if studentId already exists (case insensitive)
+            const studentIdRef = query(
+                collection(db, "students"),
+                where("studentId", "==", formData.studentId.toUpperCase())
+            );
+            const studentIdDoc = await getDocs(studentIdRef);
+            
+            if (studentIdDoc.docs.length > 0) {
+                errorToast("Student ID already exists");
+                setLoading(false);
+                return;
+            }
+
             // Create Firebase auth account
             await createUserWithEmailAndPassword(
                 auth,
@@ -141,12 +186,28 @@ const StudentSignup: React.FC = () => {
                 formData.password
             );
 
+            // Store student profile in Firestore
+            await addDoc(collection(db, "students"), {
+                studentId: formData.studentId.toUpperCase(),
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                middleName: formData.middleName,
+                suffix: formData.suffix || "",
+                sex: formData.sex,
+                birthDate: formData.birthDate,
+                address: formData.address,
+                email: formData.email,
+                createdAt: new Date().toISOString(),
+                profileComplete: true,
+                approved: false,
+            });
+
             successToast(
-                "Account created successfully! Please complete your profile."
+                "Account created successfully! Redirecting to dashboard..."
             );
 
-            // Redirect to complete-info page
-            router.push("/student-complete-info");
+            // Redirect to student dashboard
+            router.push("/students/dashboard");
         } catch (error) {
             console.error("Error creating account:", error);
 
@@ -172,7 +233,7 @@ const StudentSignup: React.FC = () => {
 
     return (
         <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-primary/5 to-secondary/5">
-            <div className="card w-full max-w-md bg-base-100 shadow-xl">
+            <div className="card w-full max-w-2xl bg-base-100 shadow-xl">
                 <div className="fixed top-4 left-4">
                     <BackButton />
                 </div>
@@ -194,6 +255,13 @@ const StudentSignup: React.FC = () => {
 
                     {/* Signup Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
+                        {/* Account Credentials Section */}
+                        <div className="divider">
+                            <span className="text-xs text-base-content/60">
+                                Account Credentials
+                            </span>
+                        </div>
+
                         {/* Email Field */}
                         <div className="form-control">
                             <label className="label" htmlFor="email">
@@ -308,6 +376,185 @@ const StudentSignup: React.FC = () => {
                                     )}
                                 </button>
                             </div>
+                        </div>
+
+                        {/* Personal Information Section */}
+                        <div className="divider mt-6">
+                            <span className="text-xs text-base-content/60">
+                                Personal Information
+                            </span>
+                        </div>
+
+                        {/* Personal Information - 2 Columns */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* Student ID Input Field */}
+                            <div className="form-control">
+                                <label
+                                    className="label"
+                                    htmlFor="studentId-input"
+                                >
+                                    <span className="label-text font-medium">
+                                        LRN
+                                    </span>
+                                </label>
+                                <FormInput
+                                    id="studentId-input"
+                                    name="studentId"
+                                    type="text"
+                                    value={formData.studentId}
+                                    onChange={handleChange}
+                                    placeholder="Enter LRN"
+                                    className="uppercase"
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            {/* First Name Input Field */}
+                            <div className="form-control">
+                                <label
+                                    className="label"
+                                    htmlFor="firstName-input"
+                                >
+                                    <span className="label-text font-medium">
+                                        First Name
+                                    </span>
+                                </label>
+                                <FormInput
+                                    id="firstName-input"
+                                    name="firstName"
+                                    type="text"
+                                    value={formData.firstName}
+                                    onChange={handleChange}
+                                    placeholder="Enter first name"
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            {/* Last Name Input Field */}
+                            <div className="form-control">
+                                <label
+                                    className="label"
+                                    htmlFor="lastName-input"
+                                >
+                                    <span className="label-text font-medium">
+                                        Last Name
+                                    </span>
+                                </label>
+                                <FormInput
+                                    id="lastName-input"
+                                    name="lastName"
+                                    type="text"
+                                    value={formData.lastName}
+                                    onChange={handleChange}
+                                    placeholder="Enter last name"
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            {/* Middle Name Input Field */}
+                            <div className="form-control">
+                                <label
+                                    className="label"
+                                    htmlFor="middleName-input"
+                                >
+                                    <span className="label-text font-medium">
+                                        Middle Name
+                                    </span>
+                                </label>
+                                <FormInput
+                                    id="middleName-input"
+                                    name="middleName"
+                                    type="text"
+                                    value={formData.middleName}
+                                    onChange={handleChange}
+                                    placeholder="Enter middle name"
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            {/* Suffix Input Field */}
+                            <div className="form-control">
+                                <label className="label" htmlFor="suffix-input">
+                                    <span className="label-text font-medium">
+                                        Suffix
+                                    </span>
+                                </label>
+                                <FormInput
+                                    id="suffix-input"
+                                    name="suffix"
+                                    type="text"
+                                    value={formData.suffix}
+                                    onChange={handleChange}
+                                    placeholder="e.g., Jr., Sr., III"
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            {/* Gender Input Field */}
+                            <div className="form-control">
+                                <label className="label" htmlFor="gender-input">
+                                    <span className="label-text font-medium">
+                                        Gender
+                                    </span>
+                                </label>
+                                <FormSelect
+                                    id="gender-input"
+                                    name="sex"
+                                    value={formData.sex}
+                                    onChange={handleChange}
+                                    options={[
+                                        { value: "Male", label: "Male" },
+                                        { value: "Female", label: "Female" },
+                                    ]}
+                                    placeholder="Select Gender"
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+
+                            {/* Birth Date Input Field */}
+                            <div className="form-control">
+                                <label
+                                    className="label"
+                                    htmlFor="birthDate-input"
+                                >
+                                    <span className="label-text font-medium">
+                                        Birth Date
+                                    </span>
+                                </label>
+                                <FormInput
+                                    id="birthDate-input"
+                                    name="birthDate"
+                                    type="date"
+                                    value={formData.birthDate}
+                                    onChange={handleChange}
+                                    required
+                                    disabled={loading}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Address Input Field - Full Width */}
+                        <div className="form-control">
+                            <label className="label" htmlFor="address-input">
+                                <span className="label-text font-medium">
+                                    Address
+                                </span>
+                            </label>
+                            <FormInput
+                                id="address-input"
+                                name="address"
+                                type="text"
+                                value={formData.address}
+                                onChange={handleChange}
+                                placeholder="Enter complete address"
+                                required
+                                disabled={loading}
+                            />
                         </div>
 
                         {/* Submit Button */}

@@ -163,6 +163,20 @@ class LogService {
     });
   }
 
+  async logStudentApproved(
+    studentId: string,
+    studentName: string,
+    performedBy: string
+  ): Promise<void> {
+    await this.createLog({
+      studentId,
+      name: 'Student Approved',
+      description: `Student ${studentName} account was approved`,
+      logsBy: performedBy,
+      createdBy: performedBy,
+    });
+  }
+
   // Teacher management logs
   async logTeacherAdded(
     teacherName: string,
