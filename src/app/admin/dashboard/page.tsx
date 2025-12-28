@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { HiAcademicCap, HiUsers, HiClipboardList, HiPlus, HiPencil, HiArrowRight, HiUserGroup, HiArrowCircleDown, HiArrowCircleUp } from 'react-icons/hi';
+import { HiAcademicCap, HiUsers, HiClipboardList, HiPlus, HiPencil, HiArrowRight, HiUserGroup, HiArrowCircleDown, HiArrowCircleUp, HiExclamationCircle } from 'react-icons/hi';
 import { Strand, Section } from '../../../interface/info';
 import { strandService } from '../../../services/strandService';
 import { sectionService } from '../../../services/sectionService';
@@ -8,6 +8,7 @@ import { teacherService } from '../../../services/teacherService';
 import { studentService } from '../../../services/studentService';
 import EnrollmentChart from '../../../components/admin/EnrollmentChart';
 import Link from 'next/link';
+import { FaArrowCircleRight } from 'react-icons/fa';
 
 const AdminDashboard = () => {
   const [strands, setStrands] = useState<Strand[]>([]);
@@ -16,6 +17,7 @@ const AdminDashboard = () => {
   const [studentCount, setStudentCount] = useState<number>(0);
   const [transferInCount, setTransferInCount] = useState<number>(0);
   const [transferOutCount, setTransferOutCount] = useState<number>(0);
+  const [unapprovedStudentCount, setUnapprovedStudentCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,13 +30,14 @@ const AdminDashboard = () => {
       setLoading(true);
       setError(null);
       
-      const [fetchedStrands, fetchedSections, fetchedTeacherCount, fetchedStudentCount, fetchedTransferInCount, fetchedTransferOutCount] = await Promise.all([
+      const [fetchedStrands, fetchedSections, fetchedTeacherCount, fetchedStudentCount, fetchedTransferInCount, fetchedTransferOutCount, fetchedUnapprovedCount] = await Promise.all([
         strandService.getAllStrands(),
         sectionService.getAllSections(),
         teacherService.getTeacherCount(),
         studentService.getStudentCount(),
         studentService.getStudentCountByStatus('transfer-in'),
-        studentService.getStudentCountByStatus('transfer-out')
+        studentService.getStudentCountByStatus('transfer-out'),
+        studentService.getUnapprovedStudentCount()
       ]);
       
       setStrands(fetchedStrands);
@@ -43,6 +46,7 @@ const AdminDashboard = () => {
       setStudentCount(fetchedStudentCount);
       setTransferInCount(fetchedTransferInCount);
       setTransferOutCount(fetchedTransferOutCount);
+      setUnapprovedStudentCount(fetchedUnapprovedCount);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError('Failed to load dashboard data. Please try again.');
@@ -87,6 +91,22 @@ const AdminDashboard = () => {
           <p className="text-zinc-500 italic text-sm">Overview of academic structure and statistics</p>
         </div>
       </div>
+
+      {/* Unapproved Students Card */}
+      {unapprovedStudentCount > 0 && (
+        <Link href="/admin/approved-student" className="block">
+          <div className="alert bg-primary shadow-lg cursor-pointer hover:shadow-xl transition-shadow w-fit flex gap-5">
+            <HiExclamationCircle className="w-6 h-6 text-white" />
+            <div className="flex-1">
+              <h3 className="font-bold text-white drop-shadow text-sm martian-mono">
+                {unapprovedStudentCount} Student{unapprovedStudentCount !== 1 ? 's' : ''} Pending Approval
+              </h3>
+              <div className="text-xs font-light text-zinc-300">Click to review and approve student accounts</div>
+            </div>
+            <FaArrowCircleRight className="w-5 h-5 -rotate-45 text-white margin-left-5" />
+          </div>
+        </Link>
+      )}
 
       {/* Summary Cards */}
       <div className="stats stats-vertical lg:stats-horizontal shadow w-full">
@@ -163,6 +183,17 @@ const AdminDashboard = () => {
           <div className="stat-title text-xs italic text-zinc-500">Transferred Out</div>
           <div className="stat-value text-warning text-2xl martian-mono">{transferOutCount}</div>
         </div>
+
+        <Link href="/admin/approved-student" className="stat hover:bg-base-200 transition-colors cursor-pointer">
+          <div className="stat-figure text-error">
+            <div className="w-10 h-10 bg-error/20 rounded-xl flex items-center justify-center">
+              <HiExclamationCircle className="w-6 h-6 text-error" />
+            </div>
+          </div>
+          <div className="stat-title text-xs italic text-zinc-500">Unapproved Students</div>
+          <div className="stat-value text-error text-2xl martian-mono">{unapprovedStudentCount}</div>
+          <div className="stat-desc text-xs text-error/60">Click to review</div>
+        </Link>
       </div>
 
       

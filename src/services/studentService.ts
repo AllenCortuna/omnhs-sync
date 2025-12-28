@@ -52,6 +52,28 @@ export const studentService = {
   },
 
   /**
+   * Get count of unapproved students (approved is false or undefined)
+   */
+  async getUnapprovedStudentCount(): Promise<number> {
+    try {
+      const q = query(collection(db, COLLECTION_NAME), orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      let count = 0;
+      querySnapshot.forEach((doc) => {
+        const student = doc.data() as Student;
+        // Count students where approved is false or undefined
+        if (student.approved === false || student.approved === undefined) {
+          count++;
+        }
+      });
+      return count;
+    } catch (error) {
+      console.error('Error fetching unapproved student count:', error);
+      throw new Error('Failed to fetch unapproved student count');
+    }
+  },
+
+  /**
    * Update student status
    */
   async updateStudentStatus(studentId: string, status: string): Promise<void> {

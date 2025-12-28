@@ -3,7 +3,7 @@ import React, { ReactNode, useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
-import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX, HiCog, HiCalendar, HiArchive, HiUser, HiBookOpen } from 'react-icons/hi';
+import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX, HiCog, HiCalendar, HiArchive, HiUser, HiBookOpen, HiCheckCircle } from 'react-icons/hi';
 import { auth } from '../../../firebase';
 import { usePendingEnrollmentCount } from "@/hooks/usePendingEnrollmentCount";
 import { useCurrentAdmin } from "@/hooks/useCurrentAdmin";
@@ -47,6 +47,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     const primaryNavItems: NavigationItemProps[] = [
       { href: '/admin/dashboard', icon: HiHome, label: 'Dashboard' },
       { href: '/admin/student-list', icon: HiAcademicCap, label: 'Student List' },
+      { href: '/admin/approved-student', icon: HiCheckCircle, label: 'Approved Student' },
       { href: '/admin/class-schedule', icon: HiCalendar, label: 'Class Schedule' },
       { href: '/admin/teacher-list', icon: HiUserGroup, label: 'Teacher List' },
       { href: '/admin/calendar', icon: HiCalendar, label: 'Calendar' },
