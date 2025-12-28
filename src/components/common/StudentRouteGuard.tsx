@@ -46,6 +46,14 @@ const StudentRouteGuard: React.FC<StudentRouteGuardProps> = ({ children }) => {
       
       if (!querySnapshot.empty) {
         const studentData = querySnapshot.docs[0].data();
+
+        if (!studentData && auth.currentUser) {
+          setIsStudent(false);
+          errorToast("Student not found. Please sign up again or contact the admin.");
+          router.replace("/student-re-signup");
+          setIsLoading(false);
+          return;
+        }
         // Check if student is graduated (alumni)
         if (studentData.status === "graduated") {
           setIsStudent(false);

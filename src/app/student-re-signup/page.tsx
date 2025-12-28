@@ -1,10 +1,11 @@
 "use client";
 // React and Firebase imports
-import React, { useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { collection, getDocs, query, addDoc, where } from "firebase/firestore";
+import React, { useState, useEffect } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { collection, getDocs, query, addDoc, where, doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../../../firebase";
 import { useRouter } from "next/navigation";
+import { onAuthStateChanged } from "firebase/auth";
 
 // Component imports
 import { FormInput, FormSelect, CreateButton, BackButton } from "@/components/common";
@@ -22,17 +23,15 @@ import {
 } from "react-icons/md";
 
 /**
- * @file StudentSignup.tsx - Student account creation page
- * @module StudentSignup
+ * @file StudentReSignup.tsx - Student account completion page for existing auth users
+ * @module StudentReSignup
  *
  * @description
- * This component provides a form for students to create their accounts.
- * It handles:
- * 1. Email and password validation
- * 2. Firebase Authentication account creation
- * 3. Basic user data storage in Firestore
- * 4. Redirect to complete-info page after success
- * 5. Password visibility toggle
+ * This component allows students with existing Firebase Auth accounts to complete
+ * their student profile. It handles:
+ * 1. Sign in for existing auth users
+ * 2. Student data submission to Firestore
+ * 3. Update existing student record or create new one
  *
  * @requires react
  * @requires firebase/auth
@@ -41,10 +40,9 @@ import {
  * @requires ../../firebase
  */
 
-interface StudentSignupFormData {
+interface StudentReSignupFormData {
     email: string;
     password: string;
-    confirmPassword: string;
     studentId: string;
     firstName: string;
     lastName: string;
@@ -56,18 +54,19 @@ interface StudentSignupFormData {
 }
 
 /**
- * StudentSignup Component
- * Renders a form for students to create their accounts
- * @returns {JSX.Element} The rendered StudentSignup component
+ * StudentReSignup Component
+ * Renders a form for students to complete their profile after sign in
+ * @returns {JSX.Element} The rendered StudentReSignup component
  */
-const StudentSignup: React.FC = () => {
+const StudentReSignup: React.FC = () => {
     const router = useRouter();
+    const [isSignedIn, setIsSignedIn] = useState<boolean>(false);
+    const [userEmail, setUserEmail] = useState<string>("");
 
     // Form data state
-    const [formData, setFormData] = useState<StudentSignupFormData>({
+    const [formData, setFormData] = useState<StudentReSignupFormData>({
         email: "",
         password: "",
-        confirmPassword: "",
         studentId: "",
         firstName: "",
         lastName: "",
@@ -80,11 +79,28 @@ const StudentSignup: React.FC = () => {
 
     // Loading state for async operations
     const [loading, setLoading] = useState<boolean>(false);
+    const [signingIn, setSigningIn] = useState<boolean>(false);
 
-    // Password visibility toggle states
+    // Password visibility toggle state
     const [showPassword, setShowPassword] = useState<boolean>(false);
-    const [showConfirmPassword, setShowConfirmPassword] =
-        useState<boolean>(false);
+
+    // Check if user is already signed in
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setIsSignedIn(true);
+                setUserEmail(user.email || "");
+                setFormData((prev) => ({
+                    ...prev,
+                    email: user.email || "",
+                }));
+            } else {
+                setIsSignedIn(false);
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     /**
      * Updates form data state when input fields change
@@ -105,17 +121,21 @@ const StudentSignup: React.FC = () => {
      * @returns {boolean} True if validation passes, false otherwise
      */
     const validateForm = (): boolean => {
-        // Validate email format
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-            errorToast("Please enter a valid email address");
-            return false;
+        if (!isSignedIn) {
+            // Validate sign in fields
+            if (!formData.email || !formData.password) {
+                errorToast("Please enter your email and password to sign in");
+                return false;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+                errorToast("Please enter a valid email address");
+                return false;
+            }
+            return false; // Will trigger sign in first
         }
 
-        // Check if all required fields are filled
+        // Validate student data fields
         if (
-            !formData.email ||
-            !formData.password ||
-            !formData.confirmPassword ||
             !formData.studentId ||
             !formData.firstName ||
             !formData.lastName ||
@@ -134,29 +154,63 @@ const StudentSignup: React.FC = () => {
             return false;
         }
 
-        // Check if passwords match
-        if (formData.password !== formData.confirmPassword) {
-            errorToast("Passwords do not match");
-            return false;
-        }
-
-        // Check password length
-        if (formData.password.length < 8) {
-            errorToast("Password must be at least 8 characters long");
-            return false;
-        }
-
         return true;
     };
 
     /**
-     * Handles form submission to create student account
+     * Handles sign in for existing auth users
+     */
+    const handleSignIn = async (): Promise<void> => {
+        if (!formData.email || !formData.password) {
+            errorToast("Please enter your email and password");
+            return;
+        }
+
+        try {
+            setSigningIn(true);
+            await signInWithEmailAndPassword(
+                auth,
+                formData.email,
+                formData.password
+            );
+            successToast("Signed in successfully! Please complete your profile.");
+        } catch (error) {
+            console.error("Error signing in:", error);
+            let errorMessage = "Failed to sign in. Please try again.";
+            switch ((error as { code: string }).code) {
+                case "auth/user-not-found":
+                    errorMessage = "No account found with this email.";
+                    break;
+                case "auth/wrong-password":
+                    errorMessage = "Incorrect password.";
+                    break;
+                case "auth/invalid-email":
+                    errorMessage = "The email address is not valid.";
+                    break;
+                case "auth/invalid-credential":
+                    errorMessage = "Invalid email or password.";
+                    break;
+            }
+            errorToast(errorMessage);
+        } finally {
+            setSigningIn(false);
+        }
+    };
+
+    /**
+     * Handles form submission to save student data
      * @param {React.FormEvent<HTMLFormElement>} e - Form submission event
      */
     const handleSubmit = async (
         e: React.FormEvent<HTMLFormElement>
     ): Promise<void> => {
         e.preventDefault();
+
+        if (!isSignedIn) {
+            await handleSignIn();
+            return;
+        }
+
         setLoading(true);
 
         // Validate form data
@@ -166,83 +220,80 @@ const StudentSignup: React.FC = () => {
         }
 
         try {
+            const email = userEmail || formData.email;
+
             // Check if studentId already exists (case insensitive)
             const studentIdRef = query(
                 collection(db, "students"),
                 where("studentId", "==", formData.studentId.toUpperCase())
             );
             const studentIdDoc = await getDocs(studentIdRef);
-            
+
             if (studentIdDoc.docs.length > 0) {
-                errorToast("This LRN is already registered");
-                setLoading(false);
-                return;
+                const existingStudent = studentIdDoc.docs[0].data();
+                // If the existing student has a different email, show error
+                if (existingStudent.email && existingStudent.email !== email.toLowerCase()) {
+                    errorToast("This LRN is already registered with a different email");
+                    setLoading(false);
+                    return;
+                }
             }
 
             // Check if email already exists in students collection
             const emailRef = query(
                 collection(db, "students"),
-                where("email", "==", formData.email.toLowerCase())
+                where("email", "==", email.toLowerCase())
             );
             const emailDoc = await getDocs(emailRef);
-            
+
             if (emailDoc.docs.length > 0) {
-                errorToast("This email is already registered");
-                setLoading(false);
-                return;
+                // Update existing student record
+                const studentDoc = emailDoc.docs[0];
+                await updateDoc(doc(db, "students", studentDoc.id), {
+                    studentId: formData.studentId.toUpperCase(),
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    middleName: formData.middleName,
+                    suffix: formData.suffix || "",
+                    sex: formData.sex,
+                    birthDate: formData.birthDate,
+                    address: formData.address,
+                    email: email.toLowerCase(),
+                    profileComplete: true,
+                    approved: false,
+                    updatedAt: new Date().toISOString(),
+                });
+
+                successToast(
+                    "Profile updated successfully! Redirecting to dashboard..."
+                );
+            } else {
+                // Create new student record
+                await addDoc(collection(db, "students"), {
+                    studentId: formData.studentId.toUpperCase(),
+                    firstName: formData.firstName,
+                    lastName: formData.lastName,
+                    middleName: formData.middleName,
+                    suffix: formData.suffix || "",
+                    sex: formData.sex,
+                    birthDate: formData.birthDate,
+                    address: formData.address,
+                    email: email.toLowerCase(),
+                    createdAt: new Date().toISOString(),
+                    profileComplete: true,
+                    approved: false,
+                });
+
+                successToast(
+                    "Profile created successfully! Redirecting to dashboard..."
+                );
             }
-
-            // Create Firebase auth account
-            await createUserWithEmailAndPassword(
-                auth,
-                formData.email,
-                formData.password
-            );
-
-            // Store student profile in Firestore
-            await addDoc(collection(db, "students"), {
-                studentId: formData.studentId.toUpperCase(),
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                middleName: formData.middleName,
-                suffix: formData.suffix || "",
-                sex: formData.sex,
-                birthDate: formData.birthDate,
-                address: formData.address,
-                email: formData.email,
-                createdAt: new Date().toISOString(),
-                profileComplete: true,
-                approved: false,
-            });
-
-            successToast(
-                "Account created successfully! Redirecting to dashboard..."
-            );
 
             // Redirect to student dashboard
             router.push("/students/dashboard");
         } catch (error) {
-            console.error("Error creating account:", error);
-
-            // Handle specific Firebase auth errors
-            let errorMessage = "Failed to create account. Please try again.";
-            switch ((error as { code: string }).code) {
-                case "auth/email-already-in-use":
-                    // Redirect to re-signup page for existing auth users
-                    errorToast("This email is already registered. Redirecting...");
-                    setTimeout(() => {
-                        router.push("/student-re-signup");
-                    }, 1500);
-                    return;
-                case "auth/invalid-email":
-                    errorMessage = "The email address is not valid.";
-                    break;
-                case "auth/weak-password":
-                    errorMessage =
-                        "The password is too weak. Please choose a stronger password.";
-                    break;
-            }
-            errorToast(errorMessage);
+            console.error("Error saving student data:", error);
+            errorToast("Failed to save student data. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -263,142 +314,98 @@ const StudentSignup: React.FC = () => {
                             </div>
                         </div>
                         <h1 className="text-2xl font-bold text-primary">
-                            Student Signup
+                            {isSignedIn
+                                ? "Complete Your Profile"
+                                : "Sign In & Complete Profile"}
                         </h1>
                         <p className="text-primary/60 text-xs mt-2">
-                            Create your student account to get started
+                            {isSignedIn
+                                ? "Please provide your student information"
+                                : "Sign in with your existing account to complete your profile"}
                         </p>
                     </div>
 
                     {/* Signup Form */}
                     <form onSubmit={handleSubmit} className="space-y-4">
-                        {/* Account Credentials Section */}
-                        <div className="divider">
-                            <span className="text-xs text-base-content/60">
-                                Account Credentials
-                            </span>
-                        </div>
-
-                        {/* Email Field */}
-                        <div className="form-control">
-                            <label className="label" htmlFor="email">
-                                <span className="label-text font-medium">
-                                    Email Address
-                                </span>
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <MdEmail className="text-base-content/40" />
+                        {/* Sign In Section - Only show if not signed in */}
+                        {!isSignedIn && (
+                            <>
+                                <div className="divider">
+                                    <span className="text-xs text-base-content/60">
+                                        Sign In
+                                    </span>
                                 </div>
-                                <FormInput
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    value={formData.email}
-                                    onChange={handleChange}
-                                    placeholder="Enter your email address"
-                                    className="pl-10"
-                                    required
-                                    disabled={loading}
-                                />
-                            </div>
-                        </div>
 
-                        {/* Password Field */}
-                        <div className="form-control">
-                            <label className="label" htmlFor="password">
-                                <span className="label-text font-medium">
-                                    Password
-                                </span>
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <MdLock className="text-base-content/40" />
+                                {/* Email Field */}
+                                <div className="form-control">
+                                    <label className="label" htmlFor="email">
+                                        <span className="label-text font-medium">
+                                            Email Address
+                                        </span>
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <MdEmail className="text-base-content/40" />
+                                        </div>
+                                        <FormInput
+                                            id="email"
+                                            name="email"
+                                            type="email"
+                                            value={formData.email}
+                                            onChange={handleChange}
+                                            placeholder="Enter your email address"
+                                            className="pl-10"
+                                            required
+                                            disabled={signingIn || loading}
+                                        />
+                                    </div>
                                 </div>
-                                <FormInput
-                                    id="password"
-                                    name="password"
-                                    type={showPassword ? "text" : "password"}
-                                    value={formData.password}
-                                    onChange={handleChange}
-                                    placeholder="Enter your password"
-                                    className="pl-10 pr-12"
-                                    required
-                                    disabled={loading}
-                                    minLength={8}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setShowPassword(!showPassword)
-                                    }
-                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/40 hover:text-base-content/60"
-                                    disabled={loading}
-                                >
-                                    {showPassword ? (
-                                        <MdVisibilityOff className="text-lg" />
-                                    ) : (
-                                        <MdVisibility className="text-lg" />
-                                    )}
-                                </button>
-                            </div>
-                            <label className="label">
-                                <span className="label-text-alt text-xs text-base-content/60">
-                                    Minimum 8 characters
-                                </span>
-                            </label>
-                        </div>
 
-                        {/* Confirm Password Field */}
-                        <div className="form-control">
-                            <label className="label" htmlFor="confirmPassword">
-                                <span className="label-text font-medium">
-                                    Confirm Password
-                                </span>
-                            </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <MdLock className="text-base-content/40" />
+                                {/* Password Field */}
+                                <div className="form-control">
+                                    <label className="label" htmlFor="password">
+                                        <span className="label-text font-medium">
+                                            Password
+                                        </span>
+                                    </label>
+                                    <div className="relative">
+                                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <MdLock className="text-base-content/40" />
+                                        </div>
+                                        <FormInput
+                                            id="password"
+                                            name="password"
+                                            type={showPassword ? "text" : "password"}
+                                            value={formData.password}
+                                            onChange={handleChange}
+                                            placeholder="Enter your password"
+                                            className="pl-10 pr-12"
+                                            required
+                                            disabled={signingIn || loading}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setShowPassword(!showPassword)
+                                            }
+                                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/40 hover:text-base-content/60"
+                                            disabled={signingIn || loading}
+                                        >
+                                            {showPassword ? (
+                                                <MdVisibilityOff className="text-lg" />
+                                            ) : (
+                                                <MdVisibility className="text-lg" />
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
-                                <FormInput
-                                    id="confirmPassword"
-                                    name="confirmPassword"
-                                    type={
-                                        showConfirmPassword
-                                            ? "text"
-                                            : "password"
-                                    }
-                                    value={formData.confirmPassword}
-                                    onChange={handleChange}
-                                    placeholder="Confirm your password"
-                                    className="pl-10 pr-12"
-                                    required
-                                    disabled={loading}
-                                    minLength={8}
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() =>
-                                        setShowConfirmPassword(
-                                            !showConfirmPassword
-                                        )
-                                    }
-                                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/40 hover:text-base-content/60"
-                                    disabled={loading}
-                                >
-                                    {showConfirmPassword ? (
-                                        <MdVisibilityOff className="text-lg" />
-                                    ) : (
-                                        <MdVisibility className="text-lg" />
-                                    )}
-                                </button>
-                            </div>
-                        </div>
+                            </>
+                        )}
 
-                        {/* Personal Information Section */}
+                        {/* Student Information Section */}
                         <div className="divider mt-6">
                             <span className="text-xs text-base-content/60">
-                                Personal Information
+                                Student Information
                             </span>
                         </div>
 
@@ -423,7 +430,7 @@ const StudentSignup: React.FC = () => {
                                     placeholder="Enter LRN"
                                     className="uppercase"
                                     required
-                                    disabled={loading}
+                                    disabled={loading || !isSignedIn}
                                 />
                             </div>
 
@@ -445,7 +452,7 @@ const StudentSignup: React.FC = () => {
                                     onChange={handleChange}
                                     placeholder="Enter first name"
                                     required
-                                    disabled={loading}
+                                    disabled={loading || !isSignedIn}
                                 />
                             </div>
 
@@ -467,7 +474,7 @@ const StudentSignup: React.FC = () => {
                                     onChange={handleChange}
                                     placeholder="Enter last name"
                                     required
-                                    disabled={loading}
+                                    disabled={loading || !isSignedIn}
                                 />
                             </div>
 
@@ -489,7 +496,7 @@ const StudentSignup: React.FC = () => {
                                     onChange={handleChange}
                                     placeholder="Enter middle name"
                                     required
-                                    disabled={loading}
+                                    disabled={loading || !isSignedIn}
                                 />
                             </div>
 
@@ -507,7 +514,7 @@ const StudentSignup: React.FC = () => {
                                     value={formData.suffix}
                                     onChange={handleChange}
                                     placeholder="e.g., Jr., Sr., III"
-                                    disabled={loading}
+                                    disabled={loading || !isSignedIn}
                                 />
                             </div>
 
@@ -529,7 +536,7 @@ const StudentSignup: React.FC = () => {
                                     ]}
                                     placeholder="Select Gender"
                                     required
-                                    disabled={loading}
+                                    disabled={loading || !isSignedIn}
                                 />
                             </div>
 
@@ -550,7 +557,7 @@ const StudentSignup: React.FC = () => {
                                     value={formData.birthDate}
                                     onChange={handleChange}
                                     required
-                                    disabled={loading}
+                                    disabled={loading || !isSignedIn}
                                 />
                             </div>
                         </div>
@@ -570,13 +577,20 @@ const StudentSignup: React.FC = () => {
                                 onChange={handleChange}
                                 placeholder="Enter complete address"
                                 required
-                                disabled={loading}
+                                disabled={loading || !isSignedIn}
                             />
                         </div>
 
                         {/* Submit Button */}
                         <div className="form-control mt-6">
-                            <CreateButton loading={loading} />
+                            <CreateButton
+                                loading={loading || signingIn}
+                                buttonText={
+                                    !isSignedIn
+                                        ? "Sign In"
+                                        : "Complete Profile"
+                                }
+                            />
                         </div>
                     </form>
 
@@ -584,13 +598,24 @@ const StudentSignup: React.FC = () => {
                     <div className="divider mt-6 mb-2"></div>
                     <div className="text-center">
                         <p className="text-xs text-base-content/60">
-                            Already have an account?{" "}
-                            <a
-                                href="/login"
-                                className="text-primary hover:underline"
-                            >
-                                Sign in here
-                            </a>
+                            {isSignedIn ? (
+                                <>
+                                    Signed in as:{" "}
+                                    <span className="text-primary font-medium">
+                                        {userEmail}
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    Don&apos;t have an account?{" "}
+                                    <a
+                                        href="/student-signup"
+                                        className="text-primary hover:underline"
+                                    >
+                                        Sign up here
+                                    </a>
+                                </>
+                            )}
                         </p>
                     </div>
                 </div>
@@ -599,4 +624,5 @@ const StudentSignup: React.FC = () => {
     );
 };
 
-export default StudentSignup;
+export default StudentReSignup;
+

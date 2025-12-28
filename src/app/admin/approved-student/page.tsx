@@ -8,6 +8,7 @@ import {
     orderBy,
     doc,
     updateDoc,
+    deleteDoc,
 } from "firebase/firestore";
 import { db } from "../../../../firebase";
 import { Student } from "@/interface/user";
@@ -15,8 +16,9 @@ import { formatDate } from "@/config/format";
 import { successToast, errorToast } from "@/config/toast";
 import { logService } from "@/services/logService";
 import { useCurrentAdmin } from "@/hooks";
-import { MdPerson, MdCheckCircle, MdRefresh } from "react-icons/md";
+import { MdPerson, MdCheckCircle, MdRefresh, MdCancel } from "react-icons/md";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
+import { MdWarning } from "react-icons/md";
 
 const PAGE_SIZE = 10;
 
@@ -50,6 +52,11 @@ const ApprovedStudent: React.FC = () => {
     const [search, setSearch] = useState<string>("");
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [approvingId, setApprovingId] = useState<string | null>(null);
+    const [confirmModalOpen, setConfirmModalOpen] = useState<boolean>(false);
+    const [studentToApprove, setStudentToApprove] = useState<Student | null>(null);
+    const [rejectModalOpen, setRejectModalOpen] = useState<boolean>(false);
+    const [studentToReject, setStudentToReject] = useState<Student | null>(null);
+    const [rejectingId, setRejectingId] = useState<string | null>(null);
 
     /**
      * Fetches unapproved students from Firestore
@@ -80,32 +87,46 @@ const ApprovedStudent: React.FC = () => {
     };
 
     /**
-     * Handles approving a student account
+     * Opens the confirmation modal for approving a student
      * @param {Student} student - The student to approve
      */
-    const handleApprove = async (student: Student): Promise<void> => {
-        if (!student.id) {
+    const handleApproveClick = (student: Student): void => {
+        setStudentToApprove(student);
+        setConfirmModalOpen(true);
+    };
+
+    /**
+     * Handles approving a student account after confirmation
+     */
+    const handleApproveConfirm = async (): Promise<void> => {
+        if (!studentToApprove || !studentToApprove.id) {
             errorToast("Student ID is missing");
+            setConfirmModalOpen(false);
+            setStudentToApprove(null);
             return;
         }
 
         try {
-            setApprovingId(student.id);
-            const studentRef = doc(db, "students", student.id);
+            setApprovingId(studentToApprove.id);
+            const studentRef = doc(db, "students", studentToApprove.id);
             await updateDoc(studentRef, {
                 approved: true,
             });
 
             // Log the student approval
             await logService.logStudentApproved(
-                student.studentId,
-                `${student.firstName} ${student.lastName}`,
+                studentToApprove.studentId,
+                `${studentToApprove.firstName} ${studentToApprove.lastName}`,
                 admin?.name || "Admin"
             );
 
             successToast(
-                `Student ${student.firstName} ${student.lastName} has been approved`
+                `Student ${studentToApprove.firstName} ${studentToApprove.lastName} has been approved`
             );
+
+            // Close modal and reset state
+            setConfirmModalOpen(false);
+            setStudentToApprove(null);
 
             // Refresh the list
             await fetchStudents();
@@ -115,6 +136,75 @@ const ApprovedStudent: React.FC = () => {
         } finally {
             setApprovingId(null);
         }
+    };
+
+    /**
+     * Closes the confirmation modal
+     */
+    const handleCancelApprove = (): void => {
+        setConfirmModalOpen(false);
+        setStudentToApprove(null);
+    };
+
+    /**
+     * Opens the rejection confirmation modal
+     * @param {Student} student - The student to reject
+     */
+    const handleRejectClick = (student: Student): void => {
+        setStudentToReject(student);
+        setRejectModalOpen(true);
+    };
+
+    /**
+     * Handles rejecting and deleting a student account after confirmation
+     */
+    const handleRejectConfirm = async (): Promise<void> => {
+        if (!studentToReject || !studentToReject.id) {
+            errorToast("Student ID is missing");
+            setRejectModalOpen(false);
+            setStudentToReject(null);
+            return;
+        }
+
+        try {
+            setRejectingId(studentToReject.id);
+
+            // Delete from Firestore
+            const studentRef = doc(db, "students", studentToReject.id);
+            await deleteDoc(studentRef);
+
+            // Log the student rejection/deletion
+            await logService.logStudentDeleted(
+                studentToReject.studentId,
+                `${studentToReject.firstName} ${studentToReject.lastName}`,
+                admin?.name || "Admin",
+                admin?.name || "Admin"
+            );
+
+            successToast(
+                `Student ${studentToReject.firstName} ${studentToReject.lastName} has been rejected and removed`
+            );
+
+            // Close modal and reset state
+            setRejectModalOpen(false);
+            setStudentToReject(null);
+
+            // Refresh the list
+            await fetchStudents();
+        } catch (error) {
+            console.error("Error rejecting student:", error);
+            errorToast("Failed to reject student. Please try again.");
+        } finally {
+            setRejectingId(null);
+        }
+    };
+
+    /**
+     * Closes the rejection confirmation modal
+     */
+    const handleCancelReject = (): void => {
+        setRejectModalOpen(false);
+        setStudentToReject(null);
     };
 
     /**
@@ -309,31 +399,62 @@ const ApprovedStudent: React.FC = () => {
                                                         </span>
                                                     </td>
                                                     <td>
-                                                        <button
-                                                            className="btn btn-success btn-xs text-white martian-mono text-xs"
-                                                            onClick={() =>
-                                                                handleApprove(
-                                                                    student
-                                                                )
-                                                            }
-                                                            disabled={
-                                                                approvingId ===
-                                                                student.id
-                                                            }
-                                                        >
-                                                            {approvingId ===
-                                                            student.id ? (
-                                                                <>
-                                                                    <span className="loading loading-spinner loading-xs"></span>
-                                                                    Approving...
-                                                                </>
-                                                            ) : (
-                                                                <>
-                                                                    <MdCheckCircle className="text-sm" />
-                                                                    Approve
-                                                                </>
-                                                            )}
-                                                        </button>
+                                                        <div className="flex gap-2">
+                                                            <button
+                                                                className="btn btn-success btn-xs text-white martian-mono text-xs"
+                                                                onClick={() =>
+                                                                    handleApproveClick(
+                                                                        student
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    approvingId ===
+                                                                        student.id ||
+                                                                    rejectingId ===
+                                                                        student.id
+                                                                }
+                                                            >
+                                                                {approvingId ===
+                                                                student.id ? (
+                                                                    <>
+                                                                        <span className="loading loading-spinner loading-xs"></span>
+                                                                        Approving...
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <MdCheckCircle className="text-sm" />
+                                                                        Approve
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                            <button
+                                                                className="btn btn-error btn-xs text-white martian-mono text-xs"
+                                                                onClick={() =>
+                                                                    handleRejectClick(
+                                                                        student
+                                                                    )
+                                                                }
+                                                                disabled={
+                                                                    approvingId ===
+                                                                        student.id ||
+                                                                    rejectingId ===
+                                                                        student.id
+                                                                }
+                                                            >
+                                                                {rejectingId ===
+                                                                student.id ? (
+                                                                    <>
+                                                                        <span className="loading loading-spinner loading-xs"></span>
+                                                                        Rejecting...
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <MdCancel className="text-sm" />
+                                                                        Reject
+                                                                    </>
+                                                                )}
+                                                            </button>
+                                                        </div>
                                                     </td>
                                                 </tr>
                                             ))}
@@ -366,6 +487,167 @@ const ApprovedStudent: React.FC = () => {
                     >
                         Next <HiChevronRight className="w-4 h-4" />
                     </button>
+                </div>
+            )}
+
+            {/* Confirm Approve Modal */}
+            {confirmModalOpen && studentToApprove && (
+                <div className="modal modal-open">
+                    <div className="modal-box max-w-md">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="avatar placeholder">
+                                <div className="bg-success rounded-lg w-8 h-8 flex items-center justify-center text-white">
+                                    <MdWarning className="text-lg" />
+                                </div>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-lg">
+                                    Approve Student
+                                </h3>
+                                <p className="text-sm text-base-content/60">
+                                    Confirm approval of this student account
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mb-6">
+                            <p className="text-sm text-base-content/80 mb-2">
+                                Are you sure you want to approve this student?
+                            </p>
+                            <div className="bg-base-200 rounded-lg p-3">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium text-primary">
+                                            {getFullName(studentToApprove)}
+                                        </span>
+                                    </div>
+                                    <div className="text-xs text-base-content/60">
+                                        LRN: {studentToApprove.studentId}
+                                    </div>
+                                    {studentToApprove.email && (
+                                        <div className="text-xs text-base-content/60">
+                                            Email: {studentToApprove.email}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="modal-action">
+                            <button
+                                className="btn btn-outline btn-sm"
+                                onClick={handleCancelApprove}
+                                disabled={approvingId === studentToApprove.id}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="btn btn-success btn-sm text-white"
+                                onClick={handleApproveConfirm}
+                                disabled={approvingId === studentToApprove.id}
+                            >
+                                {approvingId === studentToApprove.id ? (
+                                    <>
+                                        <span className="loading loading-spinner loading-xs"></span>
+                                        Approving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <MdCheckCircle className="text-sm" />
+                                        Approve
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                    <div
+                        className="modal-backdrop"
+                        onClick={handleCancelApprove}
+                    ></div>
+                </div>
+            )}
+
+            {/* Confirm Reject Modal */}
+            {rejectModalOpen && studentToReject && (
+                <div className="modal modal-open">
+                    <div className="modal-box max-w-md">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="avatar placeholder">
+                                <div className="bg-error rounded-lg w-8 h-8 flex items-center justify-center text-white">
+                                    <MdWarning className="text-lg" />
+                                </div>
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-lg text-error">
+                                    Reject Student
+                                </h3>
+                                <p className="text-sm text-base-content/60">
+                                    This will permanently delete the account
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="mb-6">
+                            <p className="text-sm text-base-content/80 mb-2">
+                                Are you sure you want to reject and delete this
+                                student account? This action cannot be undone.
+                            </p>
+                            <div className="bg-base-200 rounded-lg p-3">
+                                <div className="space-y-1">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm font-medium text-primary">
+                                            {getFullName(studentToReject)}
+                                        </span>
+                                    </div>
+                                    <div className="text-xs text-base-content/60">
+                                        LRN: {studentToReject.studentId}
+                                    </div>
+                                    {studentToReject.email && (
+                                        <div className="text-xs text-base-content/60">
+                                            Email: {studentToReject.email}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="mt-3 p-2 bg-error/10 rounded-lg border border-error/20">
+                                <p className="text-xs text-error">
+                                    ⚠️ This will permanently delete the student
+                                    from the database.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="modal-action">
+                            <button
+                                className="btn btn-outline btn-sm"
+                                onClick={handleCancelReject}
+                                disabled={rejectingId === studentToReject.id}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="btn btn-error btn-sm text-white"
+                                onClick={handleRejectConfirm}
+                                disabled={rejectingId === studentToReject.id}
+                            >
+                                {rejectingId === studentToReject.id ? (
+                                    <>
+                                        <span className="loading loading-spinner loading-xs"></span>
+                                        Rejecting...
+                                    </>
+                                ) : (
+                                    <>
+                                        <MdCancel className="text-sm" />
+                                        Reject & Delete
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                    <div
+                        className="modal-backdrop"
+                        onClick={handleCancelReject}
+                    ></div>
                 </div>
             )}
         </div>
