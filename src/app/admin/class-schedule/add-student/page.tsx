@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { collection, getDocs, query, where, orderBy } from "firebase/firestore";
 import { db } from "../../../../../firebase";
@@ -11,7 +11,6 @@ import { LoadingOverlay, BackButton } from "@/components/common";
 import {
     HiCalendar,
     HiDocumentText,
-    HiPlus,
     HiUser,
     HiUserGroup,
     HiX,
@@ -23,10 +22,8 @@ const AddStudentToClass: React.FC = () => {
     const subjectRecordId = searchParams.get("subjectRecordId");
 
     const [subjectRecord, setSubjectRecord] = useState<SubjectRecord | null>(null);
-    const [availableStudents, setAvailableStudents] = useState<Student[]>([]);
     const [addedStudents, setAddedStudents] = useState<Student[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState("");
     const [isUpdating, setIsUpdating] = useState(false);
     const [showRemoveModal, setShowRemoveModal] = useState(false);
     const [studentToRemove, setStudentToRemove] = useState<Student | null>(null);
@@ -52,7 +49,7 @@ const AddStudentToClass: React.FC = () => {
                 }
                 setSubjectRecord(record);
 
-                // Fetch all students enrolled for the same school year and semester
+                // Fetch all students enrolled in this class
                 const studentsQuery = query(
                     collection(db, "students"),
                     where("enrolledForSchoolYear", "==", record.schoolYear),
@@ -61,26 +58,18 @@ const AddStudentToClass: React.FC = () => {
                 );
                 
                 const studentsSnapshot = await getDocs(studentsQuery);
-                const students: Student[] = [];
-                const alreadyAdded: Student[] = [];
+                const enrolledStudents: Student[] = [];
 
                 studentsSnapshot.forEach((doc) => {
                     const student = { id: doc.id, ...doc.data() } as Student;
                     
-                    // Check if student is already in the class
+                    // Only include students that are in the class
                     if (record.studentList.includes(student.studentId)) {
-                        alreadyAdded.push(student);
-                    } else {
-                        students.push(student);
+                        enrolledStudents.push(student);
                     }
                 });
 
-                console.log("students", students);
-                console.log("alreadyAdded", alreadyAdded);
-                console.log("record.studentList", record.studentList);
-
-                setAvailableStudents(students);
-                setAddedStudents(alreadyAdded);
+                setAddedStudents(enrolledStudents);
             } catch (error) {
                 console.error("Error fetching data:", error);
                 errorToast("Failed to load data");
@@ -91,49 +80,6 @@ const AddStudentToClass: React.FC = () => {
 
         fetchData();
     }, [subjectRecordId, router]);
-
-    // Filter students based on search term
-    const filteredAvailableStudents = useMemo(() => {
-        if (!searchTerm.trim()) return availableStudents;
-        
-        const searchLower = searchTerm.toLowerCase();
-        return availableStudents.filter(student => {
-            const fullName = `${student.firstName || ""} ${student.lastName || ""}`.toLowerCase();
-            const studentId = student.studentId.toLowerCase();
-            return fullName.includes(searchLower) || studentId.includes(searchLower);
-        });
-    }, [availableStudents, searchTerm]);
-
-    const handleAddStudent = async (student: Student) => {
-        if (!subjectRecord) return;
-
-        try {
-            setIsUpdating(true);
-            
-            // Update the subject record with the new student
-            const updatedStudentList = [...subjectRecord.studentList, student.studentId];
-            
-            await subjectRecordService.updateSubjectRecord(subjectRecord.id, {
-                studentList: updatedStudentList
-            });
-
-            // Update local state
-            setSubjectRecord(prev => prev ? {
-                ...prev,
-                studentList: updatedStudentList
-            } : null);
-            
-            setAvailableStudents(prev => prev.filter(s => s.studentId !== student.studentId));
-            setAddedStudents(prev => [...prev, student]);
-            
-            successToast(`${student.firstName} ${student.lastName} added to class`);
-        } catch (error) {
-            console.error("Error adding student:", error);
-            errorToast("Failed to add student");
-        } finally {
-            setIsUpdating(false);
-        }
-    };
 
     const handleRemoveStudentClick = (student: Student) => {
         setStudentToRemove(student);
@@ -160,9 +106,6 @@ const AddStudentToClass: React.FC = () => {
             } : null);
             
             setAddedStudents(prev => prev.filter(s => s.studentId !== studentToRemove.studentId));
-            setAvailableStudents(prev => [...prev, studentToRemove].sort((a, b) => 
-                (a.lastName || "").localeCompare(b.lastName || "")
-            ));
             
             successToast(`${studentToRemove.firstName} ${studentToRemove.lastName} removed from class`);
             setShowRemoveModal(false);
@@ -245,66 +188,7 @@ const AddStudentToClass: React.FC = () => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2">
-                {/* Available Students */}
-                <div className="card bg-white shadow rounded-none">
-                    <div className="card-body">
-                        <div className="flex items-center justify-between mb-4">
-                            <h3 className="card-title text-sm font-bold martian-mono text-primary">
-                                Available Students
-                            </h3> 
-                        </div>
-
-                        {/* Search */}
-                        <div className="form-control mb-4">
-                            <div className="input-group">
-                                <input
-                                    type="text"
-                                    placeholder="Search students..."
-                                    className="input input-bordered w-full text-xs rounded-none text-gray-700"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Student List */}
-                        <div className="max-h-96 overflow-y-auto space-y-2">
-                            {filteredAvailableStudents.length === 0 ? (
-                                <div className="text-center py-8 text-gray-500 text-xs italic">
-                                    <p>
-                                        {searchTerm ? "No students found matching search" : "No available students"}
-                                    </p>
-                                </div>
-                            ) : (
-                                filteredAvailableStudents.map((student) => (
-                                    <div
-                                        key={student.studentId}
-                                        className="flex items-center justify-between p-3 border rounded hover:bg-gray-50"
-                                    >
-                                        <div>
-                                            <div className="font-medium text-sm">
-                                                {getStudentDisplayName(student)}
-                                            </div>
-                                            <div className="text-xs text-gray-500">
-                                                ID: {student.studentId}
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => handleAddStudent(student)}
-                                            disabled={isUpdating}
-                                            className="btn btn-sm btn-primary"
-                                        >
-                                            <HiPlus className="w-4 h-4" />
-                                            Add
-                                        </button>
-                                    </div>
-                                ))
-                            )}
-                        </div>
-                    </div>
-                </div>
-
+            <div className="grid grid-cols-1">
                 {/* Enrolled Students */}
                 <div className="card bg-white shadow rounded-none">
                     <div className="card-body">

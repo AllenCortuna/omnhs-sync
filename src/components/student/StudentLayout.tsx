@@ -40,7 +40,7 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
   const primaryNavItems: NavigationItemProps[] = [
     { href: '/students/dashboard', icon: HiHome, label: 'Dashboard' },
     { href: '/students/enrollment', icon: HiAcademicCap, label: 'Enrollment' },
-    { href: '/students/grades', icon: HiDocumentText, label: 'Grades' },
+    { href: '/students/grades', icon: HiDocumentText, label: 'Subjects' },
     { href: '/students/calendar', icon: HiCalendar, label: 'Calendar' },
     { href: '/students/settings', icon: HiCog, label: 'Settings' },
   ];

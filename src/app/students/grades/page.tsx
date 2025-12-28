@@ -233,97 +233,109 @@ const StudentGrades = () => {
                     </p>
                 </div>
             ) : (
-                <div className="grid gap-4">
-                    {grades.map((gradeData) => (
-                        <div key={gradeData.subjectRecord.id} className="card bg-white shadow-md">
-                            <div className="card-body">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="flex-1">
-                                        <div className="flex items-center gap-8 mb-2">
-                                            <h3 className="text-sm font-bold text-primary martian-mono">
-                                                {gradeData.subjectRecord.subjectName} --
-                                            </h3>
-                                            <p className="text-primary text-xs font-bold martian-mono">
-                                                {gradeData.subjectRecord.teacherName}
-                                            </p>
-                                        </div>
-                                        
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
-                                            <div>
-                                                <span className="text-gray-600 font-medium italic">Section:</span>
-                                                <div className="text-primary text-xs font-semibold martian-mono">{gradeData.subjectRecord.sectionName}</div>
-                                            </div>
-                                            <div>
-                                                <span className="text-gray-600 font-medium italic">Grade Level:</span>
-                                                <div className="text-primary text-xs font-semibold martian-mono">{gradeData.subjectRecord.gradeLevel}</div>
-                                            </div>
-                                            <div>
-                                                <span className="text-gray-600 font-medium italic">Semester:</span>
-                                                <div className="text-primary text-xs font-semibold martian-mono">{gradeData.subjectRecord.semester}</div>
-                                            </div>
-                                            <div>
-                                                <span className="text-gray-600 font-medium italic">School Year:</span>
-                                                <div className="text-primary text-xs font-semibold martian-mono">{gradeData.subjectRecord.schoolYear}</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {gradeData.studentGrade ? (
-                                    <div className="mt-4">
-                                        <h4 className="font-semibold text-gray-700 mb-3 italic">Grade Details</h4>
-                                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                            <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                                <div className="text-sm text-gray-600 mb-1 italic">1st Quarter</div>
-                                                <div className={`text-xl font-bold martian-mono ${gradeData.studentGrade.firstQuarterGrade > 0 ? 'text-primary' : 'text-gray-400'}`}>
-                                                    {gradeData.studentGrade.firstQuarterGrade > 0 ? gradeData.studentGrade.firstQuarterGrade : '—'}
+                <div className="card bg-white shadow-md">
+                    <div className="card-body p-0">
+                        <div className="overflow-x-auto">
+                            <table className="table table-zebra w-full">
+                                <thead>
+                                    <tr className="bg-base-200">
+                                        <th className="text-xs font-bold martian-mono text-primary">Subject</th>
+                                        <th className="text-xs font-bold martian-mono text-primary">Teacher</th>
+                                        <th className="text-xs font-bold martian-mono text-primary">Section</th>
+                                        <th className="text-xs font-bold martian-mono text-primary">Grade Level</th>
+                                        <th className="text-xs font-bold martian-mono text-primary">Semester</th>
+                                        <th className="text-xs font-bold martian-mono text-primary">School Year</th>
+                                        <th className="text-xs font-bold martian-mono text-primary text-center">1st Quarter</th>
+                                        <th className="text-xs font-bold martian-mono text-primary text-center">2nd Quarter</th>
+                                        <th className="text-xs font-bold martian-mono text-primary text-center">Final Grade</th>
+                                        <th className="text-xs font-bold martian-mono text-primary text-center">Rating</th>
+                                        <th className="text-xs font-bold martian-mono text-primary">Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {grades.map((gradeData) => (
+                                        <tr key={gradeData.subjectRecord.id} className="hover">
+                                            <td>
+                                                <div className="font-semibold text-xs martian-mono text-primary">
+                                                    {gradeData.subjectRecord.subjectName}
                                                 </div>
-                                            </div>
-                                            
-                                            <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                                <div className="text-sm text-gray-600 mb-1 italic">2nd Quarter</div>
-                                                <div className={`text-xl font-bold martian-mono ${gradeData.studentGrade.secondQuarterGrade > 0 ? 'text-primary' : 'text-gray-400'}`}>
-                                                    {gradeData.studentGrade.secondQuarterGrade > 0 ? gradeData.studentGrade.secondQuarterGrade : '—'}
+                                            </td>
+                                            <td>
+                                                <div className="text-xs martian-mono text-primary">
+                                                    {gradeData.subjectRecord.teacherName}
                                                 </div>
-                                            </div>
-                                            
-                                            <div className="text-center p-3 bg-primary bg-opacity-10 rounded-lg">
-                                                <div className="text-sm text-gray-600 mb-1 italic">Final Grade</div>
-                                                <div className={`text-xl font-bold martian-mono ${gradeData.studentGrade.finalGrade > 0 ? 'text-primary' : 'text-gray-400'}`}>
-                                                    {gradeData.studentGrade.finalGrade > 0 ? gradeData.studentGrade.finalGrade : '—'}
+                                            </td>
+                                            <td>
+                                                <div className="text-xs martian-mono text-primary">
+                                                    {gradeData.subjectRecord.sectionName}
                                                 </div>
-                                            </div>
-                                            
-                                            <div className="text-center p-3 bg-gray-50 rounded-lg">
-                                                <div className="text-sm text-gray-600 mb-1 italic">Rating</div>
-                                                {gradeData.studentGrade.finalGrade > 0 ? (
-                                                    <div className="text-sm font-semibold martian-mono text-primary">
+                                            </td>
+                                            <td>
+                                                <div className="text-xs martian-mono text-primary">
+                                                    {gradeData.subjectRecord.gradeLevel}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="text-xs martian-mono text-primary">
+                                                    {gradeData.subjectRecord.semester}
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div className="text-xs martian-mono text-primary">
+                                                    {gradeData.subjectRecord.schoolYear}
+                                                </div>
+                                            </td>
+                                            <td className="text-center">
+                                                {gradeData.studentGrade?.firstQuarterGrade && gradeData.studentGrade.firstQuarterGrade > 0 ? (
+                                                    <div className="text-sm font-bold martian-mono text-primary">
+                                                        {gradeData.studentGrade.firstQuarterGrade}
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-sm text-gray-400">—</div>
+                                                )}
+                                            </td>
+                                            <td className="text-center">
+                                                {gradeData.studentGrade?.secondQuarterGrade && gradeData.studentGrade.secondQuarterGrade > 0 ? (
+                                                    <div className="text-sm font-bold martian-mono text-primary">
+                                                        {gradeData.studentGrade.secondQuarterGrade}
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-sm text-gray-400">—</div>
+                                                )}
+                                            </td>
+                                            <td className="text-center">
+                                                {gradeData.studentGrade?.finalGrade && gradeData.studentGrade.finalGrade > 0 ? (
+                                                    <div className="text-sm font-bold martian-mono text-primary">
+                                                        {gradeData.studentGrade.finalGrade}
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-sm text-gray-400">—</div>
+                                                )}
+                                            </td>
+                                            <td className="text-center">
+                                                {gradeData.studentGrade?.finalGrade && gradeData.studentGrade.finalGrade > 0 ? (
+                                                    <div className="text-xs font-semibold martian-mono text-primary">
                                                         {gradeData.studentGrade.rating || "—"}
                                                     </div>
                                                 ) : (
-                                                    <div className="text-sm text-gray-400">Not Graded</div>
+                                                    <div className="text-xs text-gray-400 italic">Not Graded</div>
                                                 )}
-                                            </div>
-                                        </div>
-                                        
-                                        {gradeData.studentGrade.remarks && (
-                                            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                                                <div className="text-sm text-gray-600 mb-1 italic">Remarks</div>
-                                                <div className="text-primary text-xs font-semibold martian-mono">{gradeData.studentGrade.remarks}</div>
-                                            </div>
-                                        )}
-                                    </div>
-                                ) : (
-                                    <div className="mt-4 text-center py-6">
-                                        <HiDocumentText className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                                        <p className="text-gray-500 text-sm">
-                                            Grades have not been posted for this subject yet.
-                                        </p>
-                                    </div>
-                                )}
-                            </div>
+                                            </td>
+                                            <td>
+                                                {gradeData.studentGrade?.remarks ? (
+                                                    <div className="text-xs martian-mono text-primary max-w-xs truncate" title={gradeData.studentGrade.remarks}>
+                                                        {gradeData.studentGrade.remarks}
+                                                    </div>
+                                                ) : (
+                                                    <div className="text-xs text-gray-400">—</div>
+                                                )}
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
-                    ))}
+                    </div>
                 </div>
             )}
         </div>

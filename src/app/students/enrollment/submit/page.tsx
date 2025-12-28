@@ -94,6 +94,8 @@ const initialForm: Partial<Enrollment> = {
     lastSchoolYear: "",
 };
 
+const STORAGE_KEY = "student_enrollment_form";
+
 
 
 
@@ -124,12 +126,35 @@ const StudentEnrollment: React.FC = () => {
                 setStrands([]);
             });
         
-        // Auto-select school year based on current date
-        const defaultSchoolYear = getDefaultSchoolYear();
-        setForm((prev) => ({
-            ...prev,
-            schoolYear: defaultSchoolYear,
-        }));
+        // Load saved form data from localStorage
+        try {
+            const savedFormData = localStorage.getItem(STORAGE_KEY);
+            if (savedFormData) {
+                const parsed = JSON.parse(savedFormData);
+                // Auto-select school year based on current date if not in saved data
+                const defaultSchoolYear = getDefaultSchoolYear();
+                setForm({
+                    ...initialForm,
+                    ...parsed,
+                    schoolYear: parsed.schoolYear || defaultSchoolYear,
+                });
+            } else {
+                // Auto-select school year based on current date
+                const defaultSchoolYear = getDefaultSchoolYear();
+                setForm((prev) => ({
+                    ...prev,
+                    schoolYear: defaultSchoolYear,
+                }));
+            }
+        } catch (error) {
+            console.error('Error loading form data from localStorage:', error);
+            // Fallback to default school year
+            const defaultSchoolYear = getDefaultSchoolYear();
+            setForm((prev) => ({
+                ...prev,
+                schoolYear: defaultSchoolYear,
+            }));
+        }
     }, []);
 
     function handleChange(
@@ -137,15 +162,46 @@ const StudentEnrollment: React.FC = () => {
     ) {
         const { name, value, type } = e.target;
         if (type === "checkbox" && isInputElement(e.target)) {
-            setForm((prev) => ({
-                ...prev,
-                [name]: (e.target as HTMLInputElement).checked,
-            }));
+            setForm((prev) => {
+                const updated = {
+                    ...prev,
+                    [name]: (e.target as HTMLInputElement).checked,
+                };
+                // Save to localStorage
+                saveFormToStorage(updated);
+                return updated;
+            });
         } else {
-            setForm((prev) => ({
-                ...prev,
-                [name]: value,
-            }));
+            setForm((prev) => {
+                const updated = {
+                    ...prev,
+                    [name]: value,
+                };
+                // Save to localStorage
+                saveFormToStorage(updated);
+                return updated;
+            });
+        }
+    }
+
+    // Save form data to localStorage
+    function saveFormToStorage(formData: Partial<Enrollment>) {
+        try {
+            // Don't save file objects, only form fields
+            const dataToSave = {
+                gradeLevel: formData.gradeLevel || "",
+                strandId: formData.strandId || "",
+                schoolYear: formData.schoolYear || "",
+                semester: formData.semester || "",
+                isPWD: formData.isPWD || false,
+                returningStudent: formData.returningStudent || false,
+                lastGradeLevel: formData.lastGradeLevel || "",
+                lastSchoolAttended: formData.lastSchoolAttended || "",
+                lastSchoolYear: formData.lastSchoolYear || "",
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        } catch (error) {
+            console.error('Error saving form data to localStorage:', error);
         }
     }
 
@@ -205,6 +261,13 @@ const StudentEnrollment: React.FC = () => {
         const gradesInput = document.querySelector('input[name="copyOfGrades"]') as HTMLInputElement;
         if (clearanceInput) clearanceInput.value = '';
         if (gradesInput) gradesInput.value = '';
+        
+        // Clear localStorage
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch (error) {
+            console.error('Error clearing localStorage:', error);
+        }
     }
 
     async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -291,6 +354,13 @@ const StudentEnrollment: React.FC = () => {
             console.log('Saving enrollment to Firestore:', enrollment);
             await addDoc(collection(db, "enrollment"), enrollment);
             console.log('Enrollment saved successfully');
+            
+            // Clear localStorage after successful submission
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (error) {
+                console.error('Error clearing localStorage:', error);
+            }
             
             successToast("Enrollment submitted successfully!");
             router.push("/students/enrollment");

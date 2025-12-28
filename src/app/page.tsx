@@ -180,25 +180,22 @@ const LoginAdmin: React.FC = () => {
             role: "admin",
             label: "Admin",
             icon: FaUserCog,
-            // Use Accent for Admin (most privileged)
             color: "text-accent border-accent", 
-            hoverBg: "hover:bg-accent",
+            hoverBg: "hover:bg-primary",
         },
         {
             role: "teachers",
             label: "Teacher",
             icon: FaUserTie,
-            // Use Primary for Teachers
-            color: "text-primary border-primary",
+            color: "text-accent border-accent", 
             hoverBg: "hover:bg-primary",
         },
         {
             role: "students",
             label: "Student",
             icon: FaUserGraduate,
-            // Use Secondary for Students
-            color: "text-secondary border-secondary", 
-            hoverBg: "hover:bg-secondary",
+            color: "text-accent border-accent", 
+            hoverBg: "hover:bg-primary",
         },
     ];
 
@@ -217,22 +214,30 @@ const LoginAdmin: React.FC = () => {
 
     if (role === "") {
         return (
-            <div className="min-h-screen bg-neutral text-base-100 flex items-center justify-center p-6">
-                <div className="w-full max-w-xl space-y-10 animate-fade-in">
-                    
+            <div
+                className="min-h-screen text-base-100 flex items-center justify-center p-6 relative"
+                style={{
+                    backgroundImage: "url('/img/bg.jpg')",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                    backgroundRepeat: "no-repeat",
+                }}
+            >
+                <div className="absolute inset-0 bg-neutral bg-opacity-60 pointer-events-none" aria-hidden="true" />
+                <div className="relative w-full max-w-xl space-y-10 animate-fade-in">
                     {/* Header: Title and Slogan */}
                     <div className="text-center space-y-2">
-                        <h1 className="text-5xl font-extrabold text-base-100 tracking-wider martian-mono animate-pulse-slow">
+                        <h1 className="text-5xl font-extrabold text-base-50 tracking-wider martian-mono animate-pulse-slow drop-shadow">
                             OMNHSYNC
                         </h1>
-                        <p className="text-sm font-medium italic text-gray-400">
+                        <p className="text-xs font-light italic text-gray-50 drop-shadow">
                             Occidental Mindoro National High School
                         </p>
                     </div>
 
                     {/* Role Selection Cards */}
                     <div className="space-y-4">
-                        <p className="text-lg font-semibold text-gray-300 border-b border-neutral/50 pb-2 mb-4">
+                        <p className="text-lg font-semibold text-gray-50 border-b border-neutral/50 pb-2 mb-4">
                             Select your Sign-In Role:
                         </p>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -241,7 +246,7 @@ const LoginAdmin: React.FC = () => {
                                 return (
                                     <button
                                         key={option.role}
-                                        className={`flex flex-col p-6 items-center justify-center gap-2 border-2 ${option.color} w-full normal-case text-sm font-semibold shadow-2xl transition-all duration-300 rounded-xl ${option.hoverBg} hover:text-base-100 transform hover:scale-[1.03] bg-neutral/50 backdrop-blur-sm`}
+                                        className={`flex flex-row p-5 items-center justify-center gap-2 border ${option.color} w-full normal-case text-xs font-semibold shadow-2xl transition-all duration-300 rounded-xl ${option.hoverBg} hover:text-base-100 transform hover:scale-[1.03] bg-neutral/30 backdrop-blur-sm hover:border-none`}
                                         onClick={() => setRole(option.role)}
                                     >
                                         <IconComponent className="w-8 h-8" />
@@ -254,7 +259,7 @@ const LoginAdmin: React.FC = () => {
 
                     {/* Sign Up Links */}
                     <div className="text-center pt-8">
-                        <p className="text-base font-semibold text-gray-400 mb-4">
+                        <p className="text-base font-semibold text-gray-200 mb-4">
                             New User? Register Here:
                         </p>
                         <div className="flex justify-center gap-4">
