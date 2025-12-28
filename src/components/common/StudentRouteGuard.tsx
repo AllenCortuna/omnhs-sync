@@ -74,7 +74,7 @@ const StudentRouteGuard: React.FC<StudentRouteGuardProps> = ({ children }) => {
         setIsStudent(false);
         errorToast("You are not authorized to access this page. Please complete your profile to continue.");
         // If not student, redirect to home
-        router.replace("/student-complete-info");
+        router.replace("/student-re-signup");
       }
       setIsLoading(false);
     });
