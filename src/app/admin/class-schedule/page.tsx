@@ -42,6 +42,7 @@ const ClassSchedule: React.FC = () => {
         subjectName: "",
         gradeLevel: "",
         semester: "",
+        days: [] as string[],
         timeSlot: "",
         schoolYear: getDefaultSchoolYear(),
         teacherId: "",
@@ -212,9 +213,10 @@ const ClassSchedule: React.FC = () => {
             !formData.schoolYear ||
             !formData.teacherId ||
             !startTime ||
-            !endTime
+            !endTime ||
+            formData.days.length === 0
         ) {
-            errorToast("Please fill in all required fields");
+            errorToast("Please fill in all required fields including at least one day");
             return;
         }
 
@@ -339,6 +341,7 @@ const ClassSchedule: React.FC = () => {
             subjectName: "",
             gradeLevel: "",
             semester: "",
+            days: [],
             timeSlot: "",
             schoolYear: getDefaultSchoolYear(),
             teacherId: "",
@@ -742,6 +745,62 @@ const ClassSchedule: React.FC = () => {
                                             Automatically set to current school year
                                         </span>
                                     </label>
+                                </div>
+
+                                {/* Days Selection */}
+                                <div className="form-control md:col-span-2">
+                                    <label className="label">
+                                        <span className="label-text">
+                                            Days * (Select at least one day)
+                                        </span>
+                                    </label>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-2">
+                                        {[
+                                            "Monday",
+                                            "Tuesday",
+                                            "Wednesday",
+                                            "Thursday",
+                                            "Friday",
+                                            "Saturday",
+                                            "Sunday",
+                                        ].map((day) => (
+                                            <label
+                                                key={day}
+                                                className="label cursor-pointer justify-start gap-2 p-3 border border-base-300 rounded-lg hover:bg-base-200 transition-colors"
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    className="checkbox checkbox-primary checkbox-sm"
+                                                    checked={formData.days.includes(day)}
+                                                    onChange={(e) => {
+                                                        if (e.target.checked) {
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                days: [...prev.days, day],
+                                                            }));
+                                                        } else {
+                                                            setFormData((prev) => ({
+                                                                ...prev,
+                                                                days: prev.days.filter(
+                                                                    (d) => d !== day
+                                                                ),
+                                                            }));
+                                                        }
+                                                    }}
+                                                />
+                                                <span className="label-text text-sm">
+                                                    {day.substring(0, 3)}
+                                                </span>
+                                            </label>
+                                        ))}
+                                    </div>
+                                    {formData.days.length > 0 && (
+                                        <label className="label">
+                                            <span className="label-text-alt text-primary">
+                                                Selected: {formData.days.join(", ")}
+                                            </span>
+                                        </label>
+                                    )}
                                 </div>
 
                                 {/* Time Slot */}

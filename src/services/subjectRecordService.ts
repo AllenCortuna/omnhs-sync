@@ -23,6 +23,7 @@ export interface CreateSubjectRecordData {
   subjectName: string;
   gradeLevel: string;
   semester: string;
+  days: string[];
   timeSlot: string;
   schoolYear: string;
   teacherId: string;
@@ -38,6 +39,7 @@ export interface UpdateSubjectRecordData {
   subjectName?: string;
   gradeLevel?: string;
   semester?: string;
+  days?: string[];
   schoolYear?: string;
   teacherId?: string;
   teacherName?: string;

@@ -50,6 +50,7 @@ export interface SubjectRecord{
     subjectName: string; // reference to the subject
     gradeLevel: string; // reference to the grade level
     semester: string;
+    days: string[]; //Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
     timeSlot: string;
     schoolYear: string;
     teacherId: string; // reference to the teacher

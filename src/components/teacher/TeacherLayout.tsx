@@ -3,7 +3,7 @@ import React, { ReactNode, useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
-import { HiHome, HiAcademicCap, HiUserGroup, HiLogout, HiMenu, HiX, HiCalendar, HiCog, HiClipboardList } from 'react-icons/hi';
+import { HiHome, HiAcademicCap, HiUserGroup, HiLogout, HiMenu, HiX, HiCalendar, HiCog, HiClipboardList, HiBookOpen } from 'react-icons/hi';
 import { auth } from '../../../firebase';
 
 // Types and Interfaces
@@ -39,6 +39,7 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
     { href: '/teachers/dashboard', icon: HiHome, label: 'Dashboard' },
     { href: '/teachers/sections', icon: HiClipboardList, label: 'My Section' },
     { href: '/teachers/class-schedule', icon: HiCalendar, label: 'Class Schedule' },
+    { href: '/teachers/subjects', icon: HiBookOpen, label: 'Subjects' },
     { href: '/teachers/students', icon: HiUserGroup, label: 'Students' },
     { href: '/teachers/calendar', icon: HiCalendar, label: 'Calendar' },
     { href: '/teachers/my-calendar', icon: HiCalendar, label: 'My Calendar' },
