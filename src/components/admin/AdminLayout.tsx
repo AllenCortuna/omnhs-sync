@@ -7,7 +7,7 @@ import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout,
 import { auth } from '../../../firebase';
 import { usePendingEnrollmentCount } from "@/hooks/usePendingEnrollmentCount";
 import { useCurrentAdmin } from "@/hooks/useCurrentAdmin";
-import { FaClipboard, FaUserGroup } from "react-icons/fa6";
+import { FaClipboard, FaUserGroup, FaTrophy } from "react-icons/fa6";
 import { clearSessionToken } from "@/services/sessionService";
 
 
@@ -53,7 +53,8 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       { href: '/admin/teacher-list', icon: HiUserGroup, label: 'Teacher List' },
       { href: '/admin/calendar', icon: HiCalendar, label: 'Calendar' },
       { href: '/admin/enrollees', icon: HiUserAdd, label: 'Enrollee', showNotification: true, notificationCount: pendingCount, loading: pendingLoading },
-      { href: '/admin/records', icon: HiArchive, label: 'Class Records' },
+      { href: '/admin/records', icon: HiArchive, label: 'Archived Classes' },
+      { href: '/admin/honor', icon: FaTrophy, label: 'Honor Students' },
       { href: '/admin/strands', icon: FaUserGroup, label: 'Strands' },
       { href: '/admin/sections', icon: FaClipboard, label: 'Sections' },
       { href: '/admin/subjects', icon: HiBookOpen, label: 'Subjects' },
