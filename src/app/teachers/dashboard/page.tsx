@@ -13,7 +13,6 @@ import {
     HiUserGroup,
     HiUsers,
     HiPencil,
-    HiChartBar
 } from 'react-icons/hi';
 import { formatDate } from '@/config/format';
 import Link from 'next/link';
@@ -158,18 +157,6 @@ const TeacherDashboard = () => {
                         </div>
                         <div className="stat-title text-xs">Total Students</div>
                         <div className="stat-value text-primary">{totalStudents}</div>
-                    </div>
-                </div>
-
-                <div className="stats shadow">
-                    <div className="stat">
-                        <div className="stat-figure text-primary">
-                            <HiChartBar className="w-8 h-8" />
-                        </div>
-                        <div className="stat-title text-xs">Avg Students/Class</div>
-                        <div className="stat-value text-primary">
-                            {totalClasses > 0 ? Math.round((totalStudents / totalClasses) * 10) / 10 : 0}
-                        </div>
                     </div>
                 </div>
             </div>

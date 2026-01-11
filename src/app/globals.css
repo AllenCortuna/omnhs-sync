@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Martian+Mono:wght@200;400;500;600;700&display=swap");
-/* @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap&display=swap');
-@font-face {
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap&display=swap');
+/* @font-face {
   font-family: 'Bernard MT';
   src: url('/font/bernardMT.ttf') format('truetype');
   font-weight: normal;
@@ -19,7 +19,9 @@
 }
 
 .martian-mono {
-    font-family: "Martian Mono", monospace;
+    /* font-family: "Martian Mono", monospace;
+    font-family: "Courier Prime", monospace; */
+    font-family: "Roboto Mono", monospace;
 }
 
 .roboto-mono {

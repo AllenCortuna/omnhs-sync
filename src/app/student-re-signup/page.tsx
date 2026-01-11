@@ -6,6 +6,7 @@ import { collection, getDocs, query, addDoc, where, doc, updateDoc } from "fireb
 import { auth, db } from "../../../firebase";
 import { useRouter } from "next/navigation";
 import { onAuthStateChanged } from "firebase/auth";
+import { createUserSession } from "@/services/sessionService";
 
 // Component imports
 import { FormInput, FormSelect, CreateButton, BackButton } from "@/components/common";
@@ -168,11 +169,25 @@ const StudentReSignup: React.FC = () => {
 
         try {
             setSigningIn(true);
-            await signInWithEmailAndPassword(
+            const userCredential = await signInWithEmailAndPassword(
                 auth,
                 formData.email,
                 formData.password
             );
+            
+            const user = userCredential.user;
+            
+            // Check if student document already exists and create session if it does
+            const studentsRef = collection(db, "students");
+            const studentQuery = query(studentsRef, where("email", "==", user.email));
+            const studentSnapshot = await getDocs(studentQuery);
+            
+            if (!studentSnapshot.empty) {
+                const studentDocId = studentSnapshot.docs[0].id;
+                await createUserSession(studentDocId, "student");
+            }
+            // If no student document exists yet, session will be created when they complete their profile
+            
             successToast("Signed in successfully! Please complete your profile.");
         } catch (error) {
             console.error("Error signing in:", error);
@@ -246,10 +261,13 @@ const StudentReSignup: React.FC = () => {
             );
             const emailDoc = await getDocs(emailRef);
 
+            let studentDocId: string;
+            
             if (emailDoc.docs.length > 0) {
                 // Update existing student record
                 const studentDoc = emailDoc.docs[0];
-                await updateDoc(doc(db, "students", studentDoc.id), {
+                studentDocId = studentDoc.id;
+                await updateDoc(doc(db, "students", studentDocId), {
                     studentId: formData.studentId.toUpperCase(),
                     firstName: formData.firstName,
                     lastName: formData.lastName,
@@ -269,7 +287,7 @@ const StudentReSignup: React.FC = () => {
                 );
             } else {
                 // Create new student record
-                await addDoc(collection(db, "students"), {
+                const newStudentRef = await addDoc(collection(db, "students"), {
                     studentId: formData.studentId.toUpperCase(),
                     firstName: formData.firstName,
                     lastName: formData.lastName,
@@ -283,10 +301,16 @@ const StudentReSignup: React.FC = () => {
                     profileComplete: true,
                     approved: false,
                 });
+                studentDocId = newStudentRef.id;
 
                 successToast(
                     "Profile created successfully! Redirecting to dashboard..."
                 );
+            }
+
+            // Create session token for the student
+            if (auth.currentUser && studentDocId) {
+                await createUserSession(studentDocId, "student");
             }
 
             // Redirect to student dashboard

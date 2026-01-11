@@ -6,6 +6,7 @@ import { collection, query, where, getDocs } from "firebase/firestore";
 import LoadingOverlay from "../common/LoadingOverlay";
 import { auth, db } from "@/../firebase";
 import { errorToast } from "@/config/toast";
+import { validateSession, invalidateSession } from "@/services/sessionService";
 
 interface StudentRouteGuardProps {
   children: React.ReactNode;
@@ -46,6 +47,7 @@ const StudentRouteGuard: React.FC<StudentRouteGuardProps> = ({ children }) => {
       
       if (!querySnapshot.empty) {
         const studentData = querySnapshot.docs[0].data();
+        const studentDocId = querySnapshot.docs[0].id;
 
         if (!studentData && auth.currentUser) {
           setIsStudent(false);
@@ -69,6 +71,18 @@ const StudentRouteGuard: React.FC<StudentRouteGuardProps> = ({ children }) => {
           setIsLoading(false);
           return;
         }
+        
+        // Validate session token
+        const isSessionValid = await validateSession(studentDocId, "student");
+        if (!isSessionValid) {
+          setIsStudent(false);
+          setIsLoading(false);
+          errorToast("Your session has expired. You have been logged out because you logged in on another device.");
+          await invalidateSession();
+          router.replace("/");
+          return;
+        }
+        
         setIsStudent(true);
       } else {
         setIsStudent(false);

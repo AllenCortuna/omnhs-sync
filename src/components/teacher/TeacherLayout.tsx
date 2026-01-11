@@ -5,6 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { HiHome, HiAcademicCap, HiUserGroup, HiLogout, HiMenu, HiX, HiCalendar, HiCog, HiClipboardList, HiBookOpen } from 'react-icons/hi';
 import { auth } from '../../../firebase';
+import { clearSessionToken } from "@/services/sessionService";
 
 // Types and Interfaces
 interface TeacherLayoutProps {
@@ -69,6 +70,7 @@ const TeacherLayout: React.FC<TeacherLayoutProps> = ({ children }) => {
    */
   const handleLogout = async (): Promise<void> => {
     try {
+      clearSessionToken();
       await signOut(auth);
       router.push('/');
     } catch (error) {

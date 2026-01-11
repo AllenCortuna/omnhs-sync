@@ -11,8 +11,10 @@ import {
     HiChevronLeft,
 } from "react-icons/hi";
 import { FaUserCog, FaUserGraduate, FaUserTie, FaSignInAlt, FaLockOpen } from "react-icons/fa";
-import { auth } from "../../firebase";
+import { auth, db } from "../../firebase";
 import { successToast, errorToast } from "../config/toast"; // Assuming these are defined elsewhere
+import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
+import { createUserSession } from "../services/sessionService";
 import Link from "next/link";
 
 
@@ -79,13 +81,66 @@ const LoginAdmin: React.FC = () => {
         setLoading(true);
 
         try {
-            await signInWithEmailAndPassword(
+            const userCredential = await signInWithEmailAndPassword(
                 auth,
                 formData.email,
                 formData.password
             );
 
-            // ... (Commented out firestore logic retained as is)
+            const user = userCredential.user;
+            let actualUserType: "admin" | "teacher" | "student" | null = null;
+
+            // Determine user type by checking Firestore collections
+            if (role === "admin") {
+                const adminDoc = await getDoc(doc(db, "admin", user.uid));
+                if (adminDoc.exists()) {
+                    actualUserType = "admin";
+                }
+            } else if (role === "teachers") {
+                const teachersRef = collection(db, "teachers");
+                const teacherQuery = query(teachersRef, where("email", "==", user.email));
+                const teacherSnapshot = await getDocs(teacherQuery);
+                if (!teacherSnapshot.empty) {
+                    actualUserType = "teacher";
+                }
+            } else if (role === "students") {
+                const studentsRef = collection(db, "students");
+                const studentQuery = query(studentsRef, where("email", "==", user.email));
+                const studentSnapshot = await getDocs(studentQuery);
+                if (!studentSnapshot.empty) {
+                    actualUserType = "student";
+                }
+            }
+
+            if (!actualUserType) {
+                await auth.signOut();
+                errorToast("User not found in the selected role. Please try again.");
+                setLoading(false);
+                return;
+            }
+
+            // Create session token
+            if (actualUserType === "admin") {
+                await createUserSession(user.uid, "admin");
+            } else if (actualUserType === "teacher") {
+                // Get teacher document ID
+                const teachersRef = collection(db, "teachers");
+                const teacherQuery = query(teachersRef, where("email", "==", user.email));
+                const teacherSnapshot = await getDocs(teacherQuery);
+                if (!teacherSnapshot.empty) {
+                    const teacherDocId = teacherSnapshot.docs[0].id;
+                    await createUserSession(teacherDocId, "teacher");
+                }
+            } else if (actualUserType === "student") {
+                // Get student document ID
+                const studentsRef = collection(db, "students");
+                const studentQuery = query(studentsRef, where("email", "==", user.email));
+                const studentSnapshot = await getDocs(studentQuery);
+                if (!studentSnapshot.empty) {
+                    const studentDocId = studentSnapshot.docs[0].id;
+                    await createUserSession(studentDocId, "student");
+                }
+            }
 
             successToast("Login successful! Redirecting...");
             router.push(`/${role}/dashboard`);

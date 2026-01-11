@@ -6,6 +6,7 @@ import { signOut } from 'firebase/auth';
 import { HiHome, HiAcademicCap, HiDocumentText, HiLogout, HiMenu, HiX, HiCalendar, HiCog, HiBell } from 'react-icons/hi';
 import { auth } from '../../../firebase';
 import { StudentNotification } from './StudentNotification';
+import { clearSessionToken } from "@/services/sessionService";
 
 // Types and Interfaces
 interface StudentLayoutProps {
@@ -68,6 +69,7 @@ const StudentLayout: React.FC<StudentLayoutProps> = ({ children }) => {
    */
   const handleLogout = async (): Promise<void> => {
     try {
+      clearSessionToken();
       await signOut(auth);
       router.push('/');
     } catch (error) {

@@ -8,6 +8,7 @@ import { auth } from '../../../firebase';
 import { usePendingEnrollmentCount } from "@/hooks/usePendingEnrollmentCount";
 import { useCurrentAdmin } from "@/hooks/useCurrentAdmin";
 import { FaClipboard, FaUserGroup } from "react-icons/fa6";
+import { clearSessionToken } from "@/services/sessionService";
 
 
 // Types and Interfaces
@@ -92,6 +93,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
    */
   const handleLogout = async (): Promise<void> => {
     try {
+      clearSessionToken();
       await signOut(auth);
       router.push('/');
     } catch (error) {

@@ -6,6 +6,7 @@ import { doc, getDoc } from "firebase/firestore";
 import LoadingOverlay from "./LoadingOverlay";
 import { auth, db } from "@/../firebase";
 import { errorToast } from "@/config/toast";
+import { validateSession, invalidateSession } from "@/services/sessionService";
 
 interface AdminRouteGuardProps {
   children: React.ReactNode;
@@ -27,10 +28,21 @@ const AdminRouteGuard: React.FC<AdminRouteGuardProps> = ({ children }) => {
         if (pathname !== "/") router.replace("/");
         return;
       }
+      
       // Fetch admin data from Firestore
       const adminDocRef = doc(db, "admin", user.uid);
       const adminDoc = await getDoc(adminDocRef);
       if (adminDoc.exists()) {
+        // Validate session token
+        const isSessionValid = await validateSession(user.uid, "admin");
+        if (!isSessionValid) {
+          setIsAdmin(false);
+          setIsLoading(false);
+          errorToast("Your session has expired. You have been logged out because you logged in on another device.");
+          await invalidateSession();
+          router.replace("/");
+          return;
+        }
         setIsAdmin(true);
       } else {
         setIsAdmin(false);
