@@ -6,6 +6,7 @@ import { signOut } from 'firebase/auth';
 import { HiHome, HiAcademicCap, HiUserGroup, HiUserAdd, HiShieldCheck, HiLogout, HiMenu, HiX, HiCog, HiCalendar, HiArchive, HiUser, HiBookOpen, HiCheckCircle } from 'react-icons/hi';
 import { auth } from '../../../firebase';
 import { usePendingEnrollmentCount } from "@/hooks/usePendingEnrollmentCount";
+import { useUnapprovedStudentCount } from "@/hooks/useUnapprovedStudentCount";
 import { useCurrentAdmin } from "@/hooks/useCurrentAdmin";
 import { FaClipboard, FaUserGroup, FaTrophy } from "react-icons/fa6";
 import { clearSessionToken } from "@/services/sessionService";
@@ -41,6 +42,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { count: pendingCount, loading: pendingLoading } = usePendingEnrollmentCount();
+  const { count: unapprovedCount, loading: unapprovedLoading } = useUnapprovedStudentCount();
   const { admin, loading: adminLoading } = useCurrentAdmin();
   
   // Filter navigation items based on admin role
@@ -48,7 +50,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     const primaryNavItems: NavigationItemProps[] = [
       { href: '/admin/dashboard', icon: HiHome, label: 'Dashboard' },
       { href: '/admin/student-list', icon: HiAcademicCap, label: 'Student List' },
-      { href: '/admin/approved-student', icon: HiCheckCircle, label: 'Approved Student' },
+      { href: '/admin/approved-student', icon: HiCheckCircle, label: 'Approved Student', showNotification: true, notificationCount: unapprovedCount, loading: unapprovedLoading },
       { href: '/admin/class-schedule', icon: HiCalendar, label: 'Class Schedule' },
       { href: '/admin/teacher-list', icon: HiUserGroup, label: 'Teacher List' },
       { href: '/admin/calendar', icon: HiCalendar, label: 'Calendar' },
@@ -69,7 +71,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       }
       return true;
     });
-  }, [admin?.role, pendingCount, pendingLoading]);
+  }, [admin?.role, pendingCount, pendingLoading, unapprovedCount, unapprovedLoading]);
 
   // Close mobile menu when screen size changes to desktop
   useEffect(() => {

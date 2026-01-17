@@ -201,6 +201,45 @@ const ClassSchedule: React.FC = () => {
         }
     }, [selectedTeacherId, teachers]);
 
+    // Helper function to convert time string (HH:MM) to minutes
+    const timeToMinutes = (time: string): number => {
+        const [hours, minutes] = time.split(':').map(Number);
+        return hours * 60 + minutes;
+    };
+
+    // Helper function to check if two time ranges overlap
+    const timeRangesOverlap = (
+        start1: string,
+        end1: string,
+        start2: string,
+        end2: string
+    ): boolean => {
+        const start1Min = timeToMinutes(start1);
+        const end1Min = timeToMinutes(end1);
+        const start2Min = timeToMinutes(start2);
+        const end2Min = timeToMinutes(end2);
+
+        // Check if ranges overlap (touching is considered overlap)
+        return start1Min < end2Min && start2Min < end1Min;
+    };
+
+    // Helper function to check if two day arrays have common days
+    const hasCommonDays = (days1: string[], days2: string[]): boolean => {
+        return days1.some(day => days2.includes(day));
+    };
+
+    // Helper function to parse timeSlot string to start and end times
+    const parseTimeSlot = (timeSlot: string): { start: string; end: string } | null => {
+        const parts = timeSlot.split(" - ");
+        if (parts.length === 2) {
+            return {
+                start: parts[0].trim(),
+                end: parts[1].trim()
+            };
+        }
+        return null;
+    };
+
     const handleAddClass = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -245,6 +284,61 @@ const ClassSchedule: React.FC = () => {
         if (duplicateExists) {
             errorToast(
                 `A class schedule already exists for this section in ${currentSchoolYear} ${formDataWithSchoolYear.semester} semester.`
+            );
+            return;
+        }
+
+        // Validate teacher scheduling conflicts
+        const teacherConflicts = subjectRecords.filter(
+            (record) =>
+                record.teacherId === formDataWithSchoolYear.teacherId &&
+                record.schoolYear === currentSchoolYear &&
+                record.semester === formDataWithSchoolYear.semester
+        );
+
+        // Check for same timeSlot (exact match)
+        const sameTimeSlotConflict = teacherConflicts.find((record) => {
+            if (!record.timeSlot) return false;
+            const parsed = parseTimeSlot(record.timeSlot);
+            if (!parsed) return false;
+            return parsed.start === startTime && parsed.end === endTime;
+        });
+
+        if (sameTimeSlotConflict) {
+            errorToast(
+                `Teacher ${formDataWithSchoolYear.teacherName} already has a class scheduled at ${startTime} - ${endTime} in section ${sameTimeSlotConflict.sectionName}. Please choose a different time slot.`
+            );
+            return;
+        }
+
+        // Check for same day + overlapping time
+        const overlappingConflict = teacherConflicts.find((record) => {
+            if (!record.timeSlot || !record.days || record.days.length === 0) return false;
+            
+            // Check if there are common days
+            if (!hasCommonDays(formDataWithSchoolYear.days, record.days)) {
+                return false;
+            }
+
+            // Check if time ranges overlap
+            const parsed = parseTimeSlot(record.timeSlot);
+            if (!parsed) return false;
+
+            return timeRangesOverlap(
+                startTime,
+                endTime,
+                parsed.start,
+                parsed.end
+            );
+        });
+
+        if (overlappingConflict) {
+            const parsed = parseTimeSlot(overlappingConflict.timeSlot);
+            const commonDays = formDataWithSchoolYear.days.filter(day => 
+                overlappingConflict.days?.includes(day)
+            );
+            errorToast(
+                `Teacher ${formDataWithSchoolYear.teacherName} already has a class scheduled on ${commonDays.join(', ')} at ${parsed?.start} - ${parsed?.end} in section ${overlappingConflict.sectionName}. The time slot overlaps with the requested time. Please choose a different time or day.`
             );
             return;
         }

@@ -1,18 +1,30 @@
 "use client"
 import React, { useState } from 'react';
-import { HiCog, HiArrowLeft, HiKey } from 'react-icons/hi';
+import { HiCog, HiArrowLeft, HiKey, HiDocumentReport } from 'react-icons/hi';
 import ChangePassword from './ChangePassword';
 import Logs from './Logs';
+import EnrollmentReport from './EnrollmentReport';
 
 const AdminSettings: React.FC = () => {
   const [showChangePassword, setShowChangePassword] = useState(false);
+  const [showEnrollmentReport, setShowEnrollmentReport] = useState(false);
 
   const handleToggleChangePassword = () => {
     setShowChangePassword(!showChangePassword);
+    setShowEnrollmentReport(false);
   };
 
   const handleCancelChangePassword = () => {
     setShowChangePassword(false);
+  };
+
+  const handleToggleEnrollmentReport = () => {
+    setShowEnrollmentReport(!showEnrollmentReport);
+    setShowChangePassword(false);
+  };
+
+  const handleBackFromReport = () => {
+    setShowEnrollmentReport(false);
   };
 
   return (
@@ -37,7 +49,7 @@ const AdminSettings: React.FC = () => {
             className="btn btn-ghost btn-sm gap-2"
           >
             <HiArrowLeft className="w-4 h-4" />
-            Back to Logs
+            Back to Settings
           </button>
 
           {/* Change Password Form */}
@@ -46,10 +58,31 @@ const AdminSettings: React.FC = () => {
             loading={false}
           />
         </div>
+      ) : showEnrollmentReport ? (
+        <div className="space-y-4">
+          {/* Back Button */}
+          <button
+            onClick={handleBackFromReport}
+            className="btn btn-ghost btn-sm gap-2"
+          >
+            <HiArrowLeft className="w-4 h-4" />
+            Back to Settings
+          </button>
+
+          {/* Enrollment Report Component */}
+          <EnrollmentReport />
+        </div>
       ) : (
         <div className="space-y-6">
           {/* Action Buttons */}
           <div className="flex justify-end gap-2">
+            <button
+              onClick={handleToggleEnrollmentReport}
+              className="btn btn-primary text-white martian-mono btn-sm gap-2"
+            >
+              <HiDocumentReport className="w-4 h-4" />
+              Enrollment Report
+            </button>
             <button
               onClick={handleToggleChangePassword}
               className="btn btn-primary text-white martian-mono btn-sm gap-2"

@@ -2,10 +2,13 @@
 import React, { useState, useEffect } from 'react'
 import { useSaveUserData } from '@/hooks'
 import { subjectRecordService } from '@/services/subjectRecordService'
+import { subjectService } from '@/services/subjectService'
+import { sectionService } from '@/services/sectionService'
+import { strandService } from '@/services/strandService'
 import { errorToast } from '@/config/toast'
-import type { SubjectRecord, StudentGrade } from '@/interface/info'
+import type { SubjectRecord, StudentGrade, Subject, Strand } from '@/interface/info'
 import { LoadingOverlay } from '@/components/common'
-import { HiDocumentText, HiUser } from 'react-icons/hi'
+import { HiDocumentText, HiUser, HiAcademicCap } from 'react-icons/hi'
 
 interface StudentGradeDisplay {
   subjectRecord: SubjectRecord;
@@ -19,8 +22,10 @@ const StudentGrades = () => {
     const [loading, setLoading] = useState(true);
     const [selectedSemester, setSelectedSemester] = useState<string>('all');
     const [selectedSchoolYear, setSelectedSchoolYear] = useState<string>('all');
+    const [strandSubjects, setStrandSubjects] = useState<Subject[]>([]);
+    const [strand, setStrand] = useState<Strand | null>(null);
 
-    // Fetch student grades for all enrolled subjects
+    // Fetch student grades for all enrolled subjects and strand subjects
     useEffect(() => {
         const fetchGrades = async () => {
             if (!userData || userLoading) return;
@@ -50,6 +55,21 @@ const StudentGrades = () => {
 
                 setAllGrades(gradesData);
                 setGrades(gradesData);
+
+                // Fetch subjects based on student's strand
+                if (userData.enrolledForSectionId) {
+                    const sectionData = await sectionService.getSectionById(userData.enrolledForSectionId);
+                    if (sectionData) {
+                        // Get strand information
+                        const strandData = await strandService.getStrandById(sectionData.strandId);
+                        if (strandData) {
+                            setStrand(strandData);
+                            // Get subjects for this strand
+                            const subjects = await subjectService.getSubjectsByStrandId(sectionData.strandId);
+                            setStrandSubjects(subjects);
+                        }
+                    }
+                }
             } catch (error) {
                 console.error('Error fetching grades:', error);
                 errorToast('Failed to load grades');
@@ -221,6 +241,60 @@ const StudentGrades = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Strand Subjects List */}
+            {strand && strandSubjects.length > 0 && (
+                <div className="card bg-white shadow-md mb-6">
+                    <div className="card-body">
+                        <div className="flex items-center gap-2 mb-4">
+                            <HiAcademicCap className="w-5 h-5 text-primary" />
+                            <h2 className="martian-mono font-bold text-primary">
+                                Available Subjects - {strand.strandName}
+                            </h2>
+                        </div>
+                        <p className="text-xs text-gray-500 italic mb-4">
+                            {strand.strandDescription || 'Subjects available for your strand'}
+                        </p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                            {strandSubjects.map((subject) => {
+                                const isEnrolled = allGrades.some(
+                                    grade => grade.subjectRecord.subjectId === subject.id
+                                );
+                                return (
+                                    <div
+                                        key={subject.id}
+                                        className={`p-3 rounded border ${
+                                            isEnrolled
+                                                ? 'bg-success/10 border-success'
+                                                : 'bg-base-100 border-base-300'
+                                        }`}
+                                    >
+                                        <div className="flex items-start justify-between">
+                                            <div className="flex-1">
+                                                <div className={`font-semibold text-sm martian-mono ${
+                                                    isEnrolled ? 'text-success' : 'text-primary'
+                                                }`}>
+                                                    {subject.subjectName}
+                                                </div>
+                                                {subject.subjectDescription && (
+                                                    <div className="text-xs text-gray-500 mt-1 italic">
+                                                        {subject.subjectDescription}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {isEnrolled && (
+                                                <span className="badge badge-success badge-sm text-xs">
+                                                    Enrolled
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {grades.length === 0 ? (
                 <div className="text-center py-12">
